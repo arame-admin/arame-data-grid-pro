@@ -1,0 +1,822 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Data Table Component Gallery &amp; Navigation Hub</title>
+    <style>
+      :root {
+        --bg: #0f172a;
+        --card-bg: #1e293b;
+        --card-hover-bg: #27354a;
+        --border: #334155;
+        --border-hover: #475569;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --primary: #3b82f6;
+        --primary-hover: #2563eb;
+        --accent: #10b981;
+        --tag-bg: rgba(59, 130, 246, 0.15);
+        --tag-text: #93c5fd;
+        --tag-border: rgba(59, 130, 246, 0.3);
+        --font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+          Arial, sans-serif;
+        --transition: 0.18s ease;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: var(--font-family);
+        background-color: var(--bg);
+        color: var(--text);
+        line-height: 1.5;
+        padding: 2.5rem 1.5rem;
+        min-height: 100vh;
+      }
+
+      .container {
+        max-width: 1280px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 2.5rem;
+      }
+
+      /* Accessibility Skip Link */
+      .skip-link {
+        position: absolute;
+        top: -40px;
+        left: 0;
+        background: var(--primary);
+        color: #ffffff;
+        padding: 0.5rem 1rem;
+        z-index: 100;
+        text-decoration: none;
+        font-weight: 600;
+        border-radius: 0 0 0.375rem 0;
+        transition: top var(--transition);
+      }
+      .skip-link:focus {
+        top: 0;
+      }
+
+      /* Page Header */
+      header.gallery-header {
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 2rem;
+      }
+
+      .badge-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        background: var(--tag-bg);
+        color: var(--tag-text);
+        border: 1px solid var(--tag-border);
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 1rem;
+      }
+
+      h1 {
+        font-size: 2.25rem;
+        font-weight: 800;
+        letter-spacing: -0.025em;
+        color: #ffffff;
+        margin-bottom: 0.75rem;
+      }
+
+      p.intro-text {
+        color: var(--text-muted);
+        font-size: 1.05rem;
+        max-width: 820px;
+        line-height: 1.6;
+      }
+
+      /* Navigation Grid */
+      nav[aria-label="Component Demo Navigation"] {
+        display: block;
+      }
+
+      .gallery-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+        gap: 1.5rem;
+      }
+
+      @media (max-width: 640px) {
+        .gallery-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* Card Component */
+      .card {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        transition:
+          transform var(--transition),
+          border-color var(--transition),
+          background-color var(--transition),
+          box-shadow var(--transition);
+        position: relative;
+      }
+
+      .card:hover {
+        background-color: var(--card-hover-bg);
+        border-color: var(--border-hover);
+        transform: translateY(-2px);
+        box-shadow:
+          0 10px 15px -3px rgba(0, 0, 0, 0.25),
+          0 4px 6px -4px rgba(0, 0, 0, 0.25);
+      }
+
+      .card:focus-within {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.35);
+      }
+
+      .card-top {
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .card-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+      }
+
+      .tag {
+        background: #334155;
+        color: #cbd5e1;
+        padding: 0.15rem 0.5rem;
+        border-radius: 0.25rem;
+        font-size: 0.7rem;
+        font-weight: 500;
+      }
+
+      h2.card-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      p.card-desc {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        line-height: 1.5;
+      }
+
+      /* Card Link Button */
+      .card-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        padding: 0.65rem 1rem;
+        background: #334155;
+        color: #ffffff;
+        text-decoration: none;
+        font-size: 0.875rem;
+        font-weight: 600;
+        border-radius: 0.375rem;
+        border: 1px solid var(--border);
+        transition:
+          background-color var(--transition),
+          border-color var(--transition),
+          color var(--transition);
+        outline: none;
+      }
+
+      .card-link:hover,
+      .card-link:focus-visible {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: #ffffff;
+      }
+
+      .card-link svg {
+        width: 1rem;
+        height: 1rem;
+        transition: transform var(--transition);
+      }
+
+      .card:hover .card-link svg {
+        transform: translateX(3px);
+      }
+
+      /* Footer Info */
+      footer.gallery-footer {
+        border-top: 1px solid var(--border);
+        padding-top: 1.5rem;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        color: var(--text-muted);
+        font-size: 0.85rem;
+      }
+
+      /* Motion preferences */
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+          transform: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <a href="#main-content" class="skip-link">Skip to main gallery</a>
+
+    <div class="container">
+      <header class="gallery-header" role="banner">
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+          "
+        >
+          <div class="badge-pill">Enterprise Data Table Suite</div>
+          <div style="display: flex; gap: 0.75rem; align-items: center">
+            <a
+              href="docs.html"
+              style="
+                color: var(--primary);
+                font-weight: 600;
+                text-decoration: none;
+                font-size: 0.875rem;
+                border: 1px solid var(--primary);
+                padding: 0.35rem 0.75rem;
+                border-radius: 0.375rem;
+                transition: background 0.15s ease;
+              "
+            >
+              📖 Beginner Guide &amp; Docs
+            </a>
+            <a
+              href="configurable-table-demo.html"
+              style="
+                background: var(--primary);
+                color: #ffffff;
+                font-weight: 600;
+                text-decoration: none;
+                font-size: 0.875rem;
+                padding: 0.35rem 0.75rem;
+                border-radius: 0.375rem;
+                transition: background 0.15s ease;
+              "
+            >
+              ⚙️ Configurable Studio
+            </a>
+          </div>
+        </div>
+        <h1>Data Table Component Gallery</h1>
+        <p class="intro-text">
+          Explore interactive, framework-agnostic Web Component data tables
+          built with pure TypeScript. Every table includes default pagination,
+          sorting, and global search, with zero React, JSX, or Tailwind runtime
+          dependencies.
+        </p>
+      </header>
+
+      <main id="main-content" role="main">
+        <nav aria-label="Component Demo Navigation">
+          <div class="gallery-grid">
+            <!-- 1. Core Grid -->
+            <article class="card">
+              <div class="card-top">
+                <div class="card-tags">
+                  <span class="tag">Foundation</span>
+                  <span class="tag">Pagination</span>
+                  <span class="tag">Search</span>
+                </div>
+                <h2 class="card-title">Core Grid</h2>
+                <p class="card-desc">
+                  High-performance foundational data grid with client and server
+                  data loading, debounced search, multi-column sorting, row and
+                  column reordering, and inline deletion.
+                </p>
+              </div>
+              <a
+                href="core-grid-demo.html"
+                class="card-link"
+                aria-label="Open Core Grid standalone demo"
+              >
+                <span>View Core Grid Demo</span>
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M14 5l7 7m0 0l-7 7m7-7H3"
+                  ></path>
+                </svg>
+              </a>
+            </article>
+
+            <!-- 2. Sticky Column Table -->
+            <article class="card">
+              <div class="card-top">
+                <div class="card-tags">
+                  <span class="tag">Sticky Pinned</span>
+                  <span class="tag">Horizontal Scroll</span>
+                </div>
+                <h2 class="card-title">Sticky Column Table</h2>
+                <p class="card-desc">
+                  Pins the first column securely to the left or right edge with
+                  opaque styling, layering, and dynamic edge divider shadows
+                  during wide horizontal table scrolling.
+                </p>
+              </div>
+              <a
+                href="sticky-table-demo.html"
+                class="card-link"
+                aria-label="Open Sticky Column Table standalone demo"
+              >
+                <span>View Sticky Column Demo</span>
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M14 5l7 7m0 0l-7 7m7-7H3"
+                  ></path>
+                </svg>
+              </a>
+            </article>
+
+            <!-- 3. Expandable Row Table -->
+            <article class="card">
+              <div class="card-top">
+                <div class="card-tags">
+                  <span class="tag">Master-Detail</span>
+                  <span class="tag">Sub-views</span>
+                </div>
+                <h2 class="card-title">Expandable Row Table</h2>
+                <p class="card-desc">
+                  Clickable expandable rows that expose custom nested
+                  sub-details, supporting single-row expansion, multi-row
+                  expansion, and animated accordions.
+                </p>
+              </div>
+              <a
+                href="expandable-table-demo.html"
+                class="card-link"
+                aria-label="Open Expandable Row Table standalone demo"
+              >
+                <span>View Expandable Row Demo</span>
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M14 5l7 7m0 0l-7 7m7-7H3"
+                  ></path>
+                </svg>
+              </a>
+            </article>
+
+            <!-- 4. Column Visibility Table -->
+            <article class="card">
+              <div class="card-top">
+                <div class="card-tags">
+                  <span class="tag">Column Toggles</span>
+                  <span class="tag">Local Persistence</span>
+                </div>
+                <h2 class="card-title">Column Visibility Table</h2>
+                <p class="card-desc">
+                  Interactive dropdown menu for toggling column visibility with
+                  checkboxes, "Show all", "Hide optional", locked required
+                  columns, and local persistence.
+                </p>
+              </div>
+              <a
+                href="column-visibility-demo.html"
+                class="card-link"
+                aria-label="Open Column Visibility Table standalone demo"
+              >
+                <span>View Column Visibility Demo</span>
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M14 5l7 7m0 0l-7 7m7-7H3"
+                  ></path>
+                </svg>
+              </a>
+            </article>
+
+            <!-- 5. Filtering Table -->
+            <article class="card">
+              <div class="card-top">
+                <div class="card-tags">
+                  <span class="tag">Multi-Filter</span>
+                  <span class="tag">Ranges</span>
+                </div>
+                <h2 class="card-title">Filtering Table</h2>
+                <p class="card-desc">
+                  Comprehensive panel supporting per-column text matching,
+                  single &amp; multi-select dropdowns, number ranges, and date
+                  ranges with active filter count badges.
+                </p>
+              </div>
+              <a
+                href="filterable-table-demo.html"
+                class="card-link"
+                aria-label="Open Filtering Table standalone demo"
+              >
+                <span>View Filtering Table Demo</span>
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M14 5l7 7m0 0l-7 7m7-7H3"
+                  ></path>
+                </svg>
+              </a>
+            </article>
+
+            <!-- 6. Editable Table -->
+            <article class="card">
+              <div class="card-top">
+                <div class="card-tags">
+                  <span class="tag">Inline Edit</span>
+                  <span class="tag">Validation</span>
+                </div>
+                <h2 class="card-title">Editable Table</h2>
+                <p class="card-desc">
+                  Inline cell editing with text, number, date, select, and
+                  checkbox editors. Features field validation, accessible error
+                  notifications, Enter/Escape keyboard controls, and save
+                  handlers.
+                </p>
+              </div>
+              <a
+                href="editable-table-demo.html"
+                class="card-link"
+                aria-label="Open Editable Table standalone demo"
+              >
+                <span>View Editable Table Demo</span>
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M14 5l7 7m0 0l-7 7m7-7H3"
+                  ></path>
+                </svg>
+              </a>
+            </article>
+
+            <!-- 7. Row-Grouped Table -->
+            <article class="card">
+              <div class="card-top">
+                <div class="card-tags">
+                  <span class="tag">Grouping</span>
+                  <span class="tag">Aggregations</span>
+                </div>
+                <h2 class="card-title">Row-Grouped Table</h2>
+                <p class="card-desc">
+                  Groups rows by one or more columns with expandable group
+                  headers, aggregate calculations (sum, average, count,
+                  min/max), and group-level sorting.
+                </p>
+              </div>
+              <a
+                href="grouped-table-demo.html"
+                class="card-link"
+                aria-label="Open Row-Grouped Table standalone demo"
+              >
+                <span>View Row-Grouped Demo</span>
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M14 5l7 7m0 0l-7 7m7-7H3"
+                  ></path>
+                </svg>
+              </a>
+            </article>
+
+            <!-- 8. Menu-Enhanced Table -->
+            <article class="card">
+              <div class="card-top">
+                <div class="card-tags">
+                  <span class="tag">Header Menus</span>
+                  <span class="tag">Context Menus</span>
+                </div>
+                <h2 class="card-title">Menu-Enhanced Table</h2>
+                <p class="card-desc">
+                  Column header dropdowns (sorting, pinning, hiding) and
+                  right-click row context menus with keyboard accessibility and
+                  smart viewport positioning.
+                </p>
+              </div>
+              <a
+                href="context-menu-table-demo.html"
+                class="card-link"
+                aria-label="Open Menu-Enhanced Table standalone demo"
+              >
+                <span>View Menu-Enhanced Demo</span>
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M14 5l7 7m0 0l-7 7m7-7H3"
+                  ></path>
+                </svg>
+              </a>
+            </article>
+
+            <!-- 9. Infinite Scrolling Table -->
+            <article class="card">
+              <div class="card-top">
+                <div class="card-tags">
+                  <span class="tag">Infinite Scroll</span>
+                  <span class="tag">Virtualization</span>
+                  <span class="tag">Search &amp; Sort</span>
+                </div>
+                <h2 class="card-title">Infinite Scrolling Table</h2>
+                <p class="card-desc">
+                  Proximity prefetching near bottom threshold, global search,
+                  multi-column sorting, live total data counters, AbortSignal
+                  cancellation, and optional DOM row virtualization.
+                </p>
+              </div>
+              <a
+                href="infinite-table-demo.html"
+                class="card-link"
+                aria-label="Open Infinite Scrolling Table standalone demo"
+              >
+                <span>View Infinite Scrolling Demo</span>
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M14 5l7 7m0 0l-7 7m7-7H3"
+                  ></path>
+                </svg>
+              </a>
+            </article>
+
+            <!-- 10. Calculated Data Table -->
+            <article class="card">
+              <div class="card-top">
+                <div class="card-tags">
+                  <span class="tag">Payroll &amp; Compensation</span>
+                  <span class="tag">Calculated Columns</span>
+                  <span class="tag">Dual Sticky</span>
+                </div>
+                <h2 class="card-title">Calculated Payroll Table</h2>
+                <p class="card-desc">
+                  Enterprise compensation and payroll engine. Editable
+                  professional inputs for Base Salary, Bonus %, OT Hours, and
+                  401(k) automatically recalculate taxes and Net Take-Home Pay.
+                </p>
+              </div>
+              <a
+                href="calculated-table-demo.html"
+                class="card-link"
+                aria-label="Open Calculated Data Table standalone demo"
+              >
+                <span>View Calculated Table Demo</span>
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M14 5l7 7m0 0l-7 7m7-7H3"
+                  ></path>
+                </svg>
+              </a>
+            </article>
+
+            <!-- 11. Header Filter Table -->
+            <article class="card">
+              <div class="card-top">
+                <div class="card-tags">
+                  <span class="tag">In-Header Filters</span>
+                  <span class="tag">Debounced Text</span>
+                </div>
+                <h2 class="card-title">Header Filter Table</h2>
+                <p class="card-desc">
+                  Dedicated filter controls embedded directly inside column
+                  headers (text, select, multi-select, number range, date range)
+                  combined with sorting and column resizing.
+                </p>
+              </div>
+              <a
+                href="header-filter-table-demo.html"
+                class="card-link"
+                aria-label="Open Header Filter Table standalone demo"
+              >
+                <span>View Header Filter Demo</span>
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M14 5l7 7m0 0l-7 7m7-7H3"
+                  ></path>
+                </svg>
+              </a>
+            </article>
+
+            <!-- 12. Tree Data Table -->
+            <article class="card">
+              <div class="card-top">
+                <div class="card-tags">
+                  <span class="tag">Tree Hierarchy</span>
+                  <span class="tag">Drag &amp; Drop</span>
+                </div>
+                <h2 class="card-title">Tree Data Table</h2>
+                <p class="card-desc">
+                  Multi-level hierarchical parent-child rows with sticky parent
+                  headers during scroll, drag &amp; drop reordering, cascading
+                  selection, and hierarchy CSV export.
+                </p>
+              </div>
+              <a
+                href="tree-table-demo.html"
+                class="card-link"
+                aria-label="Open Tree Data Table standalone demo"
+              >
+                <span>View Tree Data Table Demo</span>
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M14 5l7 7m0 0l-7 7m7-7H3"
+                  ></path>
+                </svg>
+              </a>
+            </article>
+
+            <!-- 13. Advanced Filtering Table -->
+            <article class="card">
+              <div class="card-top">
+                <div class="card-tags">
+                  <span class="tag">Sticky Pinned</span>
+                  <span class="tag">Expandable Rows</span>
+                  <span class="tag">Column Visibility</span>
+                  <span class="tag">Multi-Column Filters</span>
+                  <span class="tag">Inline Edit</span>
+                  <span class="tag">Multi-Level Grouping</span>
+                </div>
+                <h2 class="card-title">
+                  Advanced Filtering, Sticky &amp; Grouping
+                </h2>
+                <p class="card-desc">
+                  Pinned sticky first column with edge scroll drop-shadow,
+                  expandable master-detail rows with animated chevrons and live
+                  simulated telemetry dossier loading, Column Visibility menu
+                  with persistence, in-column filter controls, Boolean
+                  expression builder with AND/OR logic trees, presets, in-place
+                  cell editing with validation, and multi-level row grouping
+                  with aggregate summaries.
+                </p>
+              </div>
+              <a
+                href="advanced-filter-table-demo.html"
+                class="card-link"
+                aria-label="Open Advanced Filtering Table standalone demo"
+              >
+                <span>View Advanced Filter Demo</span>
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M14 5l7 7m0 0l-7 7m7-7H3"
+                  ></path>
+                </svg>
+              </a>
+            </article>
+
+            <!-- 14. Configurable Data Table -->
+            <article class="card">
+              <div class="card-top">
+                <div class="card-tags">
+                  <span class="tag">Settings Studio</span>
+                  <span class="tag">Core Grid Fleet</span>
+                  <span class="tag">Sticky First Column</span>
+                  <span class="tag">Calculated Payroll</span>
+                  <span class="tag">Multi-Column Sort</span>
+                  <span class="tag">Advanced Filter</span>
+                  <span class="tag">Drag &amp; Drop</span>
+                </div>
+                <h2 class="card-title">Configurable Data Table</h2>
+                <p class="card-desc">
+                  Interactive settings studio enabling real-time toggling of
+                  Core Grid dataset models (Fleet Telemetry, SaaS Accounts, and
+                  Calculated Payroll with reactive formulas), multi-column
+                  sorting with priority badges, windowed first/last pagination,
+                  custom cell DOM renderers, sticky first column with edge
+                  scroll drop-shadow, column header menus, row context menus,
+                  advanced filtering with rule builder &amp; presets, density,
+                  selection, inline editing, row expansion, drag and drop, and
+                  server simulation.
+                </p>
+              </div>
+              <a
+                href="configurable-table-demo.html"
+                class="card-link"
+                aria-label="Open Configurable Data Table standalone demo"
+              >
+                <span>View Configurable Table Demo</span>
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M14 5l7 7m0 0l-7 7m7-7H3"
+                  ></path>
+                </svg>
+              </a>
+            </article>
+
+            <!-- 15. Server-Side Data Loading Table -->
+            <article class="card">
+              <div class="card-top">
+                <div class="card-tags">
+                  <span class="tag">Server Operations</span>
+                  <span class="tag">AbortSignal</span>
+                  <span class="tag">Debounced Search</span>
+                </div>
+                <h2 class="card-title">Server-Side Data Grid</h2>
+                <p class="card-desc">
+                  Real-time server query simulation featuring async pagination,
+                  debounced server search, multi-column sorting, request
+                  cancellation via AbortSignal, and live request logging.
+                </p>
+              </div>
+              <a
+                href="server-demo.html"
+                class="card-link"
+                aria-label="Open Server-Side Data Grid standalone demo"
+              >
+                <span>View Server-Side Grid Demo</span>
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M14 5l7 7m0 0l-7 7m7-7H3"
+                  ></path>
+                </svg>
+              </a>
+            </article>
+          </div>
+        </nav>
+      </main>
+
+      <footer class="gallery-footer" role="contentinfo">
+        <div>
+          Framework-agnostic Web Components &bull; Vanilla JS &bull; Next.js App
+          Router Compatible
+        </div>
+        <div>
+          15 Standalone Data Table Demos &bull; Zero External Runtime
+          Dependencies &bull; Direct file:// Compatible
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>

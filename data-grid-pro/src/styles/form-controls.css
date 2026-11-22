@@ -1,0 +1,316 @@
+/**
+ * Unified Design System & Accessible Form Control Stylesheet
+ * Enterprise standard for textboxes, search inputs, select dropdowns, checkboxes,
+ * buttons, pagination controls, and editable cell editors across all table variants.
+ */
+
+:root {
+  /* Slate & Brand Colors */
+  --ctrl-bg: #ffffff;
+  --ctrl-bg-subtle: #f8fafc;
+  --ctrl-bg-hover: #f1f5f9;
+  --ctrl-border: #cbd5e1;
+  --ctrl-border-focus: #2563eb;
+  --ctrl-text-main: #0f172a;
+  --ctrl-text-muted: #64748b;
+  --ctrl-text-placeholder: #94a3b8;
+  --ctrl-focus-ring: rgba(37, 99, 235, 0.25);
+  --ctrl-danger: #ef4444;
+  --ctrl-danger-bg: #fef2f2;
+  --ctrl-danger-border: #fca5a5;
+  --ctrl-radius: 0.375rem;
+  --ctrl-radius-sm: 0.25rem;
+  --ctrl-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --ctrl-shadow-focus: 0 0 0 3px rgba(37, 99, 235, 0.25);
+  --ctrl-transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --ctrl-font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+[data-theme="dark"], :host([theme="dark"]), .theme-dark {
+  --ctrl-bg: #1e293b;
+  --ctrl-bg-subtle: #0f172a;
+  --ctrl-bg-hover: #334155;
+  --ctrl-border: #334155;
+  --ctrl-border-focus: #3b82f6;
+  --ctrl-text-main: #f8fafc;
+  --ctrl-text-muted: #94a3b8;
+  --ctrl-text-placeholder: #64748b;
+  --ctrl-focus-ring: rgba(59, 130, 246, 0.35);
+  --ctrl-danger: #f87171;
+  --ctrl-danger-bg: rgba(239, 68, 68, 0.15);
+  --ctrl-danger-border: #ef4444;
+}
+
+/* ==========================================================================
+   Base Form Controls (Inputs, Textarea, Select)
+   ========================================================================== */
+.form-input,
+.form-select,
+input[type="text"]:not([class]),
+input[type="search"]:not([class]),
+input[type="number"]:not([class]),
+input[type="date"]:not([class]),
+select:not([class]) {
+  font-family: var(--ctrl-font-sans);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  height: 2.25rem;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid var(--ctrl-border);
+  border-radius: var(--ctrl-radius);
+  background-color: var(--ctrl-bg);
+  color: var(--ctrl-text-main);
+  box-shadow: var(--ctrl-shadow-sm);
+  transition: var(--ctrl-transition);
+  box-sizing: border-box;
+  outline: none;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Compact / In-Table Variant */
+.form-input-sm,
+.form-select-sm {
+  height: 1.875rem;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8125rem;
+  line-height: 1.125rem;
+}
+
+/* Hover State */
+.form-input:hover:not(:disabled):not([readonly]),
+.form-select:hover:not(:disabled):not([readonly]),
+input[type="text"]:not([class]):hover:not(:disabled),
+input[type="search"]:not([class]):hover:not(:disabled),
+input[type="number"]:not([class]):hover:not(:disabled),
+select:not([class]):hover:not(:disabled) {
+  border-color: #94a3b8;
+}
+
+/* Focus State */
+.form-input:focus,
+.form-select:focus,
+input[type="text"]:not([class]):focus,
+input[type="search"]:not([class]):focus,
+input[type="number"]:not([class]):focus,
+input[type="date"]:not([class]):focus,
+select:not([class]):focus {
+  border-color: var(--ctrl-border-focus);
+  box-shadow: var(--ctrl-shadow-focus);
+  background-color: var(--ctrl-bg);
+}
+
+/* Disabled State */
+.form-input:disabled,
+.form-select:disabled,
+input:disabled,
+select:disabled,
+button:disabled {
+  background-color: var(--ctrl-bg-subtle);
+  color: var(--ctrl-text-muted);
+  border-color: var(--ctrl-border);
+  cursor: not-allowed;
+  opacity: 0.65;
+  box-shadow: none;
+}
+
+/* Readonly State */
+.form-input[readonly],
+input[readonly] {
+  background-color: var(--ctrl-bg-subtle);
+  border-color: var(--ctrl-border);
+  cursor: default;
+}
+
+/* Invalid / Error State */
+.form-input.is-invalid,
+.form-input:invalid:not(:placeholder-shown),
+.is-invalid input,
+.is-invalid select {
+  border-color: var(--ctrl-danger) !important;
+  background-color: var(--ctrl-danger-bg) !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2) !important;
+}
+
+/* Placeholder */
+::placeholder {
+  color: var(--ctrl-text-placeholder);
+  opacity: 1;
+}
+
+/* Select Chevron Indicator */
+.form-select, select:not([class]) {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.6rem center;
+  background-repeat: no-repeat;
+  background-size: 1.25em 1.25em;
+  padding-right: 2rem;
+  cursor: pointer;
+}
+
+/* ==========================================================================
+   Accessible Checkboxes
+   ========================================================================== */
+input[type="checkbox"] {
+  appearance: none;
+  width: 1.125rem;
+  height: 1.125rem;
+  border: 1px solid var(--ctrl-border);
+  border-radius: var(--ctrl-radius-sm);
+  background-color: var(--ctrl-bg);
+  cursor: pointer;
+  display: inline-grid;
+  place-content: center;
+  transition: var(--ctrl-transition);
+  margin: 0;
+  vertical-align: middle;
+}
+
+input[type="checkbox"]:hover:not(:disabled) {
+  border-color: var(--ctrl-border-focus);
+}
+
+input[type="checkbox"]:focus-visible {
+  outline: 2px solid var(--ctrl-border-focus);
+  outline-offset: 2px;
+  box-shadow: var(--ctrl-shadow-focus);
+}
+
+input[type="checkbox"]:checked {
+  background-color: var(--ctrl-border-focus);
+  border-color: var(--ctrl-border-focus);
+}
+
+input[type="checkbox"]:checked::before {
+  content: "";
+  width: 0.65rem;
+  height: 0.65rem;
+  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+  transform: scale(1);
+  background-color: #ffffff;
+}
+
+input[type="checkbox"]:indeterminate {
+  background-color: var(--ctrl-border-focus);
+  border-color: var(--ctrl-border-focus);
+}
+
+input[type="checkbox"]:indeterminate::before {
+  content: "";
+  width: 0.6rem;
+  height: 2px;
+  background-color: #ffffff;
+}
+
+/* ==========================================================================
+   Buttons & Action Pills
+   ========================================================================== */
+.btn-action,
+.page-btn {
+  font-family: var(--ctrl-font-sans);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  height: 2rem;
+  padding: 0.35rem 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--ctrl-border);
+  border-radius: var(--ctrl-radius);
+  background-color: var(--ctrl-bg);
+  color: var(--ctrl-text-main);
+  cursor: pointer;
+  transition: var(--ctrl-transition);
+  box-shadow: var(--ctrl-shadow-sm);
+}
+
+.btn-action:hover:not(:disabled),
+.page-btn:hover:not(:disabled) {
+  background-color: var(--ctrl-bg-hover);
+  border-color: #94a3b8;
+}
+
+.btn-action:focus-visible,
+.page-btn:focus-visible {
+  outline: none;
+  border-color: var(--ctrl-border-focus);
+  box-shadow: var(--ctrl-shadow-focus);
+}
+
+.page-btn.active {
+  background-color: var(--ctrl-border-focus);
+  border-color: var(--ctrl-border-focus);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   Input Affixes (Currency, Units, % Suffixes)
+   ========================================================================== */
+.input-group-affix {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 100%;
+}
+
+.input-affix-prefix {
+  position: absolute;
+  left: 0.6rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ctrl-text-muted);
+  pointer-events: none;
+}
+
+.input-affix-suffix {
+  position: absolute;
+  right: 0.6rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ctrl-text-muted);
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   Dropdown Menus & Popovers
+   ========================================================================== */
+.menu-popover {
+  background-color: var(--ctrl-bg);
+  border: 1px solid var(--ctrl-border);
+  border-radius: var(--ctrl-radius);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  padding: 0.35rem;
+  z-index: 1000;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  border-radius: var(--ctrl-radius-sm);
+  color: var(--ctrl-text-main);
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  transition: var(--ctrl-transition);
+}
+
+.menu-item:hover,
+.menu-item:focus-visible {
+  background-color: var(--ctrl-bg-hover);
+  outline: none;
+}
+
+/* Reduced Motion Respect */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

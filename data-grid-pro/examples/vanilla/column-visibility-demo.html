@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Column Visibility Filter Table Demo</title>
+  <style>
+    :root, [data-theme="light"] {
+      --cvt-primary: #2563eb;
+      --cvt-primary-hover: #1d4ed8;
+      --cvt-bg-surface: #ffffff;
+      --cvt-bg-header: #f8fafc;
+      --cvt-bg-hover: #f1f5f9;
+      --cvt-text-main: #0f172a;
+      --cvt-text-muted: #64748b;
+      --cvt-border-color: #e2e8f0;
+      --cvt-focus-ring: rgba(37, 99, 235, 0.35);
+      --cvt-radius: 0.5rem;
+      --cvt-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+      --cvt-menu-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+      --cvt-cell-py: 0.75rem;
+      --cvt-cell-px: 1rem;
+    }
+
+    body {
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      padding: 2rem;
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 1.5rem;
+      border-radius: 0.75rem;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    }
+
+    column-visibility-table {
+      display: block;
+      color: var(--cvt-text-main);
+      background-color: var(--cvt-bg-surface);
+      border: 1px solid var(--cvt-border-color);
+      border-radius: var(--cvt-radius);
+      box-shadow: var(--cvt-shadow);
+      position: relative;
+    }
+    column-visibility-table * { box-sizing: border-box; }
+
+    .cvt-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      background-color: var(--cvt-bg-header);
+      border-bottom: 1px solid var(--cvt-border-color);
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .cvt-search-input {
+      padding: 0.4rem 0.75rem;
+      border: 1px solid var(--cvt-border-color);
+      border-radius: 0.375rem;
+      background: var(--cvt-bg-surface);
+      color: var(--cvt-text-main);
+      font-size: 0.875rem;
+      min-width: 260px;
+      outline: none;
+    }
+    .cvt-search-input:focus {
+      border-color: var(--cvt-primary);
+      box-shadow: 0 0 0 3px var(--cvt-focus-ring);
+    }
+    .cvt-pagination-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.75rem 1rem;
+      background: var(--cvt-bg-header);
+      border-top: 1px solid var(--cvt-border-color);
+      font-size: 0.8125rem;
+      color: var(--cvt-text-muted);
+      flex-wrap: wrap;
+    }
+    .cvt-pagination-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .cvt-page-btn {
+      padding: 0.25rem 0.6rem;
+      border: 1px solid var(--cvt-border-color);
+      background: var(--cvt-bg-surface);
+      color: var(--cvt-text-main);
+      border-radius: 0.375rem;
+      font-size: 0.8125rem;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .cvt-page-btn:hover:not(:disabled) { background: var(--cvt-bg-hover); }
+    .cvt-page-btn.active {
+      background: var(--cvt-primary);
+      color: #ffffff;
+      border-color: var(--cvt-primary);
+    }
+    .cvt-page-btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+    .cvt-page-select {
+      padding: 0.25rem 0.5rem;
+      border: 1px solid var(--cvt-border-color);
+      border-radius: 0.375rem;
+      background: var(--cvt-bg-surface);
+      color: var(--cvt-text-main);
+      font-size: 0.8125rem;
+      outline: none;
+    }
+    .cvt-menu-wrapper { position: relative; display: inline-block; }
+    .cvt-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-weight: 500;
+      border-radius: 0.375rem;
+      padding: 0.4rem 0.75rem;
+      font-size: 0.875rem;
+      cursor: pointer;
+      background-color: var(--cvt-bg-surface);
+      border: 1px solid var(--cvt-border-color);
+      color: var(--cvt-text-main);
+    }
+    .cvt-btn:hover { background-color: var(--cvt-bg-hover); }
+
+    .cvt-dropdown-menu {
+      position: absolute;
+      right: 0;
+      top: calc(100% + 0.35rem);
+      width: 250px;
+      background-color: var(--cvt-bg-surface);
+      border: 1px solid var(--cvt-border-color);
+      border-radius: var(--cvt-radius);
+      box-shadow: var(--cvt-menu-shadow);
+      padding: 0.5rem;
+      z-index: 50;
+      display: none;
+    }
+    .cvt-dropdown-menu.cvt-open { display: block; }
+    .cvt-menu-actions {
+      display: flex;
+      justify-content: space-between;
+      padding-bottom: 0.5rem;
+      margin-bottom: 0.5rem;
+      border-bottom: 1px solid var(--cvt-border-color);
+    }
+    .cvt-action-btn {
+      background: transparent;
+      border: none;
+      color: var(--cvt-primary);
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+    }
+    .cvt-action-btn:hover { background-color: var(--cvt-bg-hover); }
+
+    .cvt-menu-list { max-height: 240px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.25rem; }
+    .cvt-menu-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 0.5rem;
+      border-radius: 0.25rem;
+      font-size: 0.8125rem;
+      cursor: pointer;
+    }
+    .cvt-menu-item:hover { background-color: var(--cvt-bg-hover); }
+    .cvt-badge-required {
+      margin-left: auto;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      background: #f1f5f9;
+      color: #64748b;
+      padding: 0.1rem 0.35rem;
+      border-radius: 0.2rem;
+    }
+
+    .cvt-table-container { width: 100%; overflow-x: auto; }
+    .cvt-table { width: 100%; border-collapse: collapse; text-align: left; }
+    .cvt-thead { background-color: var(--cvt-bg-header); border-bottom: 2px solid var(--cvt-border-color); }
+    .cvt-th {
+      padding: var(--cvt-cell-py) var(--cvt-cell-px);
+      font-weight: 600;
+      color: var(--cvt-text-muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+    }
+    .cvt-tbody .cvt-row { border-bottom: 1px solid var(--cvt-border-color); transition: background-color 0.15s ease; }
+    .cvt-tbody .cvt-row:hover { background-color: var(--cvt-bg-hover); }
+    .cvt-td { padding: var(--cvt-cell-py) var(--cvt-cell-px); color: var(--cvt-text-main); vertical-align: middle; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Column Visibility Filter Table Demo</h2>
+    <p style="color: #64748b; font-size: 0.875rem; margin-bottom: 1rem;">
+      Click the <strong>Columns</strong> button to customize which columns are displayed. Unchecking columns hides them, checking reveals them. 
+      The <strong>Employee Name</strong> column is configured as <code>required: true</code>, preventing it from being accidentally hidden. Preferences are stored in <code>localStorage</code>.
+    </p>
+
+    <column-visibility-table id="staff-table"></column-visibility-table>
+
+    <!-- Usage Guide Section -->
+    <section style="margin-top: 2rem; background: #f8fafc; border: 1px solid var(--cvt-border-color); border-radius: 0.5rem; padding: 1.25rem;" aria-label="Column Visibility Usage Guide">
+      <h3 style="margin: 0 0 0.5rem 0; font-size: 1.1rem; font-weight: 700; color: var(--cvt-text-main); display: flex; align-items: center; gap: 0.5rem;">
+        <span>💡 How to Use Column Visibility</span>
+      </h3>
+      <p style="color: var(--cvt-text-muted); font-size: 0.85rem; margin-bottom: 1rem; line-height: 1.5;">
+        Give users full control over table density by letting them customize visible columns with automatic localStorage persistence.
+      </p>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem;">
+        <div style="background: #ffffff; border: 1px solid var(--cvt-border-color); border-radius: 0.375rem; padding: 0.85rem;">
+          <h4 style="margin: 0 0 0.35rem 0; font-size: 0.85rem; font-weight: 700; color: var(--cvt-primary);">1. Define Columns with Locked Keys</h4>
+          <p style="margin: 0; font-size: 0.8rem; color: var(--cvt-text-muted); line-height: 1.4;">
+            Mark critical identifier columns as <code>required: true</code> to prevent users from accidentally hiding primary identification keys.
+          </p>
+          <pre style="background: #0f172a; color: #38bdf8; padding: 0.5rem; border-radius: 0.25rem; font-size: 0.725rem; margin-top: 0.4rem; overflow-x: auto;"><code>table.columns = [
+  { id: 'name', header: 'Employee', required: true },
+  { id: 'salary', header: 'Salary', visible: false }
+];</code></pre>
+        </div>
+
+        <div style="background: #ffffff; border: 1px solid var(--cvt-border-color); border-radius: 0.375rem; padding: 0.85rem;">
+          <h4 style="margin: 0 0 0.35rem 0; font-size: 0.85rem; font-weight: 700; color: var(--cvt-primary);">2. Persistence &amp; Batch Actions</h4>
+          <p style="margin: 0; font-size: 0.8rem; color: var(--cvt-text-muted); line-height: 1.4;">
+            Provide users with instant "Show all" and "Hide optional" buttons alongside automatic <code>localStorage</code> caching.
+          </p>
+          <pre style="background: #0f172a; color: #38bdf8; padding: 0.5rem; border-radius: 0.25rem; font-size: 0.725rem; margin-top: 0.4rem; overflow-x: auto;"><code>table.options = {
+  storageKey: 'user-preferences-v1'
+};</code></pre>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // Standalone implementation for zero-dependency file:// previewing
+    function resolveValue(row, path) {
+      if (!path) return undefined;
+      return String(path).split('.').reduce((acc, part) => (acc ? acc[part] : undefined), row);
+    }
+
+    function createElement(tag, cls, attrs) {
+      const el = document.createElement(tag);
+      if (cls) el.className = cls;
+      if (attrs) {
+        for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, String(v));
+      }
+      return el;
+    }
+
+    function removeAllChildren(p) {
+      while (p.firstChild) p.removeChild(p.firstChild);
+    }
+
+    class ColumnVisibilityTable extends HTMLElement {
+      constructor() {
+        super();
+        this._rows = [];
+        this._columns = [];
+        this._options = { storageKey: 'demo-col-vis-table' };
+        this._visibleMap = new Map();
+        this._isMenuOpen = false;
+
+        // Search, Sort, Pagination
+        this._searchTerm = '';
+        this._sortCriteria = [];
+        this._currentPage = 1;
+        this._pageSize = 5;
+        this._totalFilteredRows = 0;
+      }
+
+      get rows() { return this._rows; }
+      set rows(v) { 
+        this._rows = Array.isArray(v) ? v : []; 
+        this._currentPage = 1;
+        this.render(); 
+      }
+
+      get columns() { return this._columns; }
+      set columns(v) {
+        this._columns = Array.isArray(v) ? v : [];
+        this.initVisibility();
+        this.render();
+      }
+
+      get options() { return this._options; }
+      set options(opts) {
+        this._options = Object.assign({}, this._options, opts);
+        this.render();
+      }
+
+      initVisibility() {
+        this._visibleMap.clear();
+        let saved = null;
+        if (this._options.storageKey) {
+          try { saved = JSON.parse(localStorage.getItem(this._options.storageKey)); } catch {}
+        }
+        this._columns.forEach(col => {
+          if (col.required) {
+            this._visibleMap.set(col.id, true);
+          } else if (saved && typeof saved[col.id] === 'boolean') {
+            this._visibleMap.set(col.id, saved[col.id]);
+          } else {
+            this._visibleMap.set(col.id, col.visible !== false);
+          }
+        });
+      }
+
+      persist() {
+        if (!this._options.storageKey) return;
+        const obj = {};
+        this._visibleMap.forEach((v, k) => obj[k] = v);
+        try { localStorage.setItem(this._options.storageKey, JSON.stringify(obj)); } catch {}
+      }
+
+      connectedCallback() {
+        if (!this.containerEl) {
+          this.containerEl = createElement('div', 'cvt-wrapper');
+          this.toolbarEl = createElement('div', 'cvt-toolbar');
+
+          // Search Input
+          this.searchInput = createElement('input', 'cvt-search-input', {
+            type: 'text',
+            placeholder: 'Search team members, roles, emails...'
+          });
+          this.searchInput.addEventListener('input', (e) => {
+            this._searchTerm = e.target.value.trim().toLowerCase();
+            this._currentPage = 1;
+            this.render();
+          });
+          this.toolbarEl.appendChild(this.searchInput);
+
+          this.menuWrapperEl = createElement('div', 'cvt-menu-wrapper');
+          this.menuBtnEl = createElement('button', 'cvt-btn', { type: 'button' });
+          this.menuBtnEl.innerHTML = '⚙ Columns ▾';
+
+          this.menuDropdownEl = createElement('div', 'cvt-dropdown-menu');
+          this.menuWrapperEl.appendChild(this.menuBtnEl);
+          this.menuWrapperEl.appendChild(this.menuDropdownEl);
+          this.toolbarEl.appendChild(this.menuWrapperEl);
+
+          this.tableContainerEl = createElement('div', 'cvt-table-container');
+          this.tableEl = createElement('table', 'cvt-table');
+          this.theadEl = createElement('thead', 'cvt-thead');
+          this.tbodyEl = createElement('tbody', 'cvt-tbody');
+
+          this.tableEl.appendChild(this.theadEl);
+          this.tableEl.appendChild(this.tbodyEl);
+          this.tableContainerEl.appendChild(this.tableEl);
+
+          this.paginationEl = createElement('div', 'cvt-pagination-footer');
+
+          this.containerEl.appendChild(this.toolbarEl);
+          this.containerEl.appendChild(this.tableContainerEl);
+          this.containerEl.appendChild(this.paginationEl);
+          this.appendChild(this.containerEl);
+
+          this.menuBtnEl.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this._isMenuOpen = !this._isMenuOpen;
+            if (this._isMenuOpen) this.menuDropdownEl.classList.add('cvt-open');
+            else this.menuDropdownEl.classList.remove('cvt-open');
+          });
+
+          document.addEventListener('click', (e) => {
+            if (this._isMenuOpen && !this.menuWrapperEl.contains(e.target)) {
+              this._isMenuOpen = false;
+              this.menuDropdownEl.classList.remove('cvt-open');
+            }
+          });
+        }
+        this.render();
+      }
+
+      render() {
+        if (!this.containerEl) return;
+        this.renderMenu();
+        this.renderHeader();
+        this.renderBody();
+        this.renderPagination();
+      }
+
+      renderMenu() {
+        removeAllChildren(this.menuDropdownEl);
+
+        const actions = createElement('div', 'cvt-menu-actions');
+        const showAll = createElement('button', 'cvt-action-btn', { type: 'button' });
+        showAll.textContent = 'Show all';
+        showAll.addEventListener('click', () => {
+          this._columns.forEach(c => this._visibleMap.set(c.id, true));
+          this.persist();
+          this.render();
+        });
+
+        const hideOpt = createElement('button', 'cvt-action-btn', { type: 'button' });
+        hideOpt.textContent = 'Hide optional';
+        hideOpt.addEventListener('click', () => {
+          this._columns.forEach(c => this._visibleMap.set(c.id, c.required === true));
+          this.persist();
+          this.render();
+        });
+
+        actions.appendChild(showAll);
+        actions.appendChild(hideOpt);
+        this.menuDropdownEl.appendChild(actions);
+
+        const list = createElement('div', 'cvt-menu-list');
+        this._columns.forEach(col => {
+          const isVis = this._visibleMap.get(col.id) !== false;
+          const item = createElement('label', 'cvt-menu-item');
+          const chk = createElement('input', '', { type: 'checkbox' });
+          chk.checked = isVis;
+          if (col.required) chk.disabled = true;
+
+          chk.addEventListener('change', () => {
+            if (col.required) return;
+            this._visibleMap.set(col.id, chk.checked);
+            this.persist();
+            this.render();
+          });
+
+          const span = createElement('span');
+          span.textContent = col.header;
+          item.appendChild(chk);
+          item.appendChild(span);
+
+          if (col.required) {
+            const b = createElement('span', 'cvt-badge-required');
+            b.textContent = 'Required';
+            item.appendChild(b);
+          }
+          list.appendChild(item);
+        });
+        this.menuDropdownEl.appendChild(list);
+      }
+
+      renderHeader() {
+        removeAllChildren(this.theadEl);
+        const tr = createElement('tr', 'cvt-header-row');
+        this._columns.forEach(col => {
+          if (this._visibleMap.get(col.id) === false) return;
+          const th = createElement('th', 'cvt-th');
+          if (col.width) th.style.width = col.width;
+
+          const title = createElement('span');
+          title.textContent = col.header;
+          th.appendChild(title);
+
+          th.style.cursor = 'pointer';
+          th.title = 'Click to sort';
+          const cur = this._sortCriteria.find(s => s.columnId === col.id);
+          const icon = createElement('span');
+          icon.textContent = cur?.direction === 'asc' ? ' ▲' : cur?.direction === 'desc' ? ' ▼' : ' ⇅';
+          icon.style.marginLeft = '0.35rem';
+          th.appendChild(icon);
+
+          th.addEventListener('click', () => {
+            const active = this._sortCriteria.find(s => s.columnId === col.id);
+            let next = 'asc';
+            if (active && active.direction === 'asc') next = 'desc';
+            else if (active && active.direction === 'desc') next = null;
+            this._sortCriteria = next ? [{ columnId: col.id, direction: next }] : [];
+            this.render();
+          });
+
+          tr.appendChild(th);
+        });
+        this.theadEl.appendChild(tr);
+      }
+
+      renderBody() {
+        removeAllChildren(this.tbodyEl);
+        let list = [...this._rows];
+
+        // 1. Search
+        if (this._searchTerm) {
+          const q = this._searchTerm;
+          list = list.filter(row => Object.values(row).some(v => v != null && String(v).toLowerCase().includes(q)));
+        }
+        this._totalFilteredRows = list.length;
+
+        // 2. Sort
+        if (this._sortCriteria.length > 0) {
+          const crit = this._sortCriteria[0];
+          const col = this._columns.find(c => c.id === crit.columnId);
+          if (col && col.field) {
+            list.sort((a, b) => {
+              const valA = resolveValue(a, col.field);
+              const valB = resolveValue(b, col.field);
+              if (valA === valB) return 0;
+              if (valA == null) return 1;
+              if (valB == null) return -1;
+              const cmp = typeof valA === 'number' && typeof valB === 'number'
+                ? valA - valB
+                : String(valA).localeCompare(String(valB));
+              return crit.direction === 'asc' ? cmp : -cmp;
+            });
+          }
+        }
+
+        // 3. Pagination
+        const totalPages = Math.max(1, Math.ceil(this._totalFilteredRows / this._pageSize));
+        if (this._currentPage > totalPages) this._currentPage = totalPages;
+        const start = (this._currentPage - 1) * this._pageSize;
+        const pageRows = list.slice(start, start + this._pageSize);
+
+        const visibleColCount = this._columns.filter(c => this._visibleMap.get(c.id) !== false).length;
+
+        if (pageRows.length === 0) {
+          const tr = createElement('tr', 'cvt-row');
+          const td = createElement('td', 'cvt-td', { colspan: visibleColCount });
+          td.style.textAlign = 'center';
+          td.style.padding = '2rem 1rem';
+          td.style.color = 'var(--cvt-text-muted)';
+          td.textContent = this._searchTerm ? 'No staff records match your search filter.' : 'No staff records available.';
+          tr.appendChild(td);
+          this.tbodyEl.appendChild(tr);
+          return;
+        }
+
+        pageRows.forEach(row => {
+          const tr = createElement('tr', 'cvt-row');
+          this._columns.forEach(col => {
+            if (this._visibleMap.get(col.id) === false) return;
+            const td = createElement('td', 'cvt-td');
+            if (col.width) td.style.width = col.width;
+            const val = resolveValue(row, col.field);
+            td.textContent = val == null ? '' : String(val);
+            tr.appendChild(td);
+          });
+          this.tbodyEl.appendChild(tr);
+        });
+      }
+
+      renderPagination() {
+        if (!this.paginationEl) return;
+        removeAllChildren(this.paginationEl);
+
+        const totalPages = Math.max(1, Math.ceil(this._totalFilteredRows / this._pageSize));
+
+        const info = createElement('div');
+        const start = this._totalFilteredRows === 0 ? 0 : (this._currentPage - 1) * this._pageSize + 1;
+        const end = Math.min(this._totalFilteredRows, this._currentPage * this._pageSize);
+        info.innerHTML = `Showing <strong>${start}–${end}</strong> of <strong>${this._totalFilteredRows}</strong> records &bull; Page <strong>${this._currentPage}</strong> of <strong>${totalPages}</strong>`;
+        this.paginationEl.appendChild(info);
+
+        const controls = createElement('div', 'cvt-pagination-controls');
+
+        const sizeSelect = createElement('select', 'cvt-page-select');
+        [3, 5, 10].forEach(sz => {
+          const opt = createElement('option');
+          opt.value = String(sz);
+          opt.textContent = `${sz} / page`;
+          if (sz === this._pageSize) opt.selected = true;
+          sizeSelect.appendChild(opt);
+        });
+        sizeSelect.addEventListener('change', (e) => {
+          this._pageSize = Number(e.target.value);
+          this._currentPage = 1;
+          this.render();
+        });
+        controls.appendChild(sizeSelect);
+
+        const prevBtn = createElement('button', 'cvt-page-btn');
+        prevBtn.textContent = '‹ Prev';
+        if (this._currentPage <= 1) prevBtn.disabled = true;
+        prevBtn.addEventListener('click', () => {
+          if (this._currentPage > 1) {
+            this._currentPage--;
+            this.render();
+          }
+        });
+        controls.appendChild(prevBtn);
+
+        for (let p = 1; p <= totalPages; p++) {
+          const pageBtn = createElement('button', `cvt-page-btn ${p === this._currentPage ? 'active' : ''}`);
+          pageBtn.textContent = String(p);
+          pageBtn.addEventListener('click', () => {
+            this._currentPage = p;
+            this.render();
+          });
+          controls.appendChild(pageBtn);
+        }
+
+        const nextBtn = createElement('button', 'cvt-page-btn');
+        nextBtn.textContent = 'Next ›';
+        if (this._currentPage >= totalPages) nextBtn.disabled = true;
+        nextBtn.addEventListener('click', () => {
+          if (this._currentPage < totalPages) {
+            this._currentPage++;
+            this.render();
+          }
+        });
+        controls.appendChild(nextBtn);
+
+        this.paginationEl.appendChild(controls);
+      }
+    }
+
+    if (!window.customElements.get('column-visibility-table')) {
+      window.customElements.define('column-visibility-table', ColumnVisibilityTable);
+    }
+
+    // App Initialization
+    const table = document.getElementById('staff-table');
+
+    table.columns = [
+      { id: 'name', header: 'Employee Name', field: 'name', width: '220px', required: true }, // Cannot be hidden
+      { id: 'role', header: 'Role Title', field: 'role', width: '180px' },
+      { id: 'dept', header: 'Department', field: 'dept', width: '160px' },
+      { id: 'email', header: 'Email Address', field: 'email', width: '220px' },
+      { id: 'location', header: 'Primary Location', field: 'location', width: '160px' },
+      { id: 'start', header: 'Joined Date', field: 'start', width: '140px', visible: false } // Hidden by default
+    ];
+
+    table.rows = [
+      { name: 'Sarah Connor', role: 'Chief Security Officer', dept: 'Cyber Defense', email: 's.connor@cyberdyne.io', location: 'Austin, TX', start: '2021-04-12' },
+      { name: 'Miles Dyson', role: 'Principal AI Researcher', dept: 'Advanced Robotics', email: 'm.dyson@cyberdyne.io', location: 'Palo Alto, CA', start: '2019-08-01' },
+      { name: 'Marcus Wright', role: 'Staff Systems Architect', dept: 'Hardware Platforms', email: 'm.wright@cyberdyne.io', location: 'Seattle, WA', start: '2023-01-15' },
+      { name: 'John Connor', role: 'Operations Commander', dept: 'Tactical Intel', email: 'j.connor@cyberdyne.io', location: 'Los Angeles, CA', start: '2022-06-20' },
+      { name: 'Kate Brewster', role: 'Biomedical Informatics Lead', dept: 'Biosystems', email: 'k.brewster@cyberdyne.io', location: 'Boston, MA', start: '2020-11-04' },
+      { name: 'Kyle Reese', role: 'Senior Field Analyst', dept: 'Cyber Defense', email: 'k.reese@cyberdyne.io', location: 'Denver, CO', start: '2023-09-18' },
+      { name: 'Grace Harper', role: 'Augmentation Specialist', dept: 'Advanced Robotics', email: 'g.harper@cyberdyne.io', location: 'Chicago, IL', start: '2022-03-30' },
+      { name: 'Dani Ramos', role: 'Infrastructure Strategist', dept: 'Tactical Intel', email: 'd.ramos@cyberdyne.io', location: 'Mexico City, MX', start: '2024-01-10' },
+      { name: 'Peter Silberman', role: 'Director of Mental Health', dept: 'Human Resources', email: 'p.silberman@cyberdyne.io', location: 'New York, NY', start: '2018-05-19' },
+      { name: 'Danny Dyson', role: 'Cloud Platform Architect', dept: 'Advanced Robotics', email: 'd.dyson@cyberdyne.io', location: 'San Francisco, CA', start: '2023-11-01' },
+      { name: 'T-800 Cyber', role: 'Autonomous Infrastructure Agent', dept: 'Hardware Platforms', email: 'model101@cyberdyne.io', location: 'Datacenter A', start: '2020-02-29' },
+      { name: 'Cameron Phillips', role: 'Security Compliance Auditor', dept: 'Cyber Defense', email: 'c.phillips@cyberdyne.io', location: 'Washington, DC', start: '2022-08-14' }
+    ];
+  </script>
+</body>
+</html>

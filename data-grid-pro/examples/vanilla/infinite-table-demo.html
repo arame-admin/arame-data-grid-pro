@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Infinite Scrolling & Virtualized Data Table Demo</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --border: #334155;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #3b82f6;
+      --accent: #10b981;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      padding: 2rem;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    header {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    p.subtitle {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      max-width: 800px;
+      line-height: 1.5;
+    }
+
+    .controls-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1rem 1.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .controls-group {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .toggle-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      cursor: pointer;
+      color: #e2e8f0;
+      user-select: none;
+    }
+
+    .btn {
+      padding: 0.45rem 0.9rem;
+      border-radius: 0.375rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: #334155;
+      color: white;
+      transition: background 0.15s ease;
+    }
+
+    .btn:hover {
+      background: #475569;
+    }
+
+    .badge-info {
+      background: rgba(59, 130, 246, 0.15);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      color: #93c5fd;
+      padding: 0.25rem 0.6rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+    }
+
+    /* Live Data Stats Bar */
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .stat-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #ffffff;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .stat-subtitle {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* Search & Sort External Quick Bar */
+    .search-sort-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1rem 1.25rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .search-sort-group {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .search-box-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      min-width: 260px;
+    }
+
+    .search-input-field {
+      width: 100%;
+      background: #0f172a;
+      border: 1px solid var(--border);
+      border-radius: 0.375rem;
+      padding: 0.5rem 0.75rem 0.5rem 2rem;
+      font-size: 0.875rem;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .search-input-field:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+    }
+
+    .search-input-icon {
+      position: absolute;
+      left: 0.625rem;
+      width: 1rem;
+      height: 1rem;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .custom-select {
+      background: #0f172a;
+      border: 1px solid var(--border);
+      border-radius: 0.375rem;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.875rem;
+      color: var(--text);
+      outline: none;
+      cursor: pointer;
+    }
+
+    .custom-select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+    }
+
+    .table-wrapper {
+      background: #ffffff;
+      border-radius: 0.5rem;
+      overflow: hidden;
+      color: #0f172a;
+    }
+
+    .explanation-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+
+    @media (max-width: 768px) {
+      .explanation-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .info-box {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 1.25rem;
+    }
+
+    .info-box h3 {
+      font-size: 1rem;
+      color: #60a5fa;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .info-box p {
+      font-size: 0.85rem;
+      line-height: 1.45;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <h1>Infinite Scrolling & Virtualized Data Table</h1>
+        <div style="display: flex; gap: 0.75rem; align-items: center;">
+          <a href="index.html" style="color:var(--primary); font-weight:600; text-decoration:none; font-size:0.875rem; border:1px solid var(--border); background:var(--card-bg); padding:0.4rem 0.75rem; border-radius:0.375rem; transition: background 0.15s ease;">
+            ← Back to Gallery
+          </a>
+          <a href="docs.html" style="color:var(--text); font-weight:600; text-decoration:none; font-size:0.875rem; border:1px solid var(--border); background:var(--card-bg); padding:0.4rem 0.75rem; border-radius:0.375rem;">
+            📖 Documentation
+          </a>
+        </div>
+      </div>
+      <p class="subtitle">
+        A framework-agnostic Web Component with automatic proximity prefetching, cursor/offset incremental loading, row deduplication, request cancellation with <code>AbortSignal</code>, error retry, and optional DOM row virtualization.
+      </p>
+    </header>
+
+    <div class="controls-card">
+      <div class="controls-group">
+        <label class="toggle-label">
+          <input type="checkbox" id="toggleVirtualization" />
+          <span>Enable DOM Row Virtualization</span>
+        </label>
+        <label class="toggle-label">
+          <input type="checkbox" id="toggleManualMode" />
+          <span>Manual "Load more" Button Mode</span>
+        </label>
+        <label class="toggle-label">
+          <input type="checkbox" id="toggleSimulateError" />
+          <span>Simulate Network Error on Next Fetch</span>
+        </label>
+      </div>
+
+      <div class="controls-group">
+        <button class="btn" id="btnReset">Reset Stream</button>
+      </div>
+    </div>
+
+    <!-- Live Data Stats Cards -->
+    <div class="stats-bar">
+      <div class="stat-card">
+        <span class="stat-title">Loaded Rows in Memory</span>
+        <span class="stat-value" id="statLoadedCount">0</span>
+        <span class="stat-subtitle" id="statLoadedSub">Active DOM/Virtual records</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-title">Total Database Records</span>
+        <span class="stat-value" id="statTotalCount">300</span>
+        <span class="stat-subtitle">Remote mock records</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-title">Active Sort Order</span>
+        <span class="stat-value" id="statActiveSort" style="font-size:1.1rem; padding-top:0.35rem;">None</span>
+        <span class="stat-subtitle">Click header or select sort</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-title">Query Stream Status</span>
+        <span class="stat-value" id="statStatusText" style="font-size:1.1rem; color:#10b981; padding-top:0.35rem;">Idle</span>
+        <span class="stat-subtitle" id="statStatusSub">Ready for scroll / search</span>
+      </div>
+    </div>
+
+    <!-- Interactive Search & Sort Bar -->
+    <div class="search-sort-panel">
+      <div class="search-sort-group">
+        <label style="font-size:0.875rem; color:var(--text-muted); font-weight:500;">Search Database:</label>
+        <div class="search-box-wrap">
+          <svg class="search-input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+          <input type="text" id="externalSearchInput" class="search-input-field" placeholder="Filter by Name, Role, Dept, Email..." />
+        </div>
+      </div>
+
+      <div class="search-sort-group">
+        <label for="sortColumnSelect" style="font-size:0.875rem; color:var(--text-muted); font-weight:500;">Sort By:</label>
+        <select id="sortColumnSelect" class="custom-select">
+          <option value="">Default (Database order)</option>
+          <option value="id">Employee ID</option>
+          <option value="name">Full Name</option>
+          <option value="department">Department</option>
+          <option value="role">Role</option>
+          <option value="salary">Salary</option>
+          <option value="joinedDate">Joined Date</option>
+        </select>
+
+        <select id="sortDirectionSelect" class="custom-select">
+          <option value="asc">Ascending (▲)</option>
+          <option value="desc">Descending (▼)</option>
+        </select>
+
+        <button class="btn" id="btnClearSearchSort">Clear Search &amp; Sort</button>
+      </div>
+    </div>
+
+    <div class="table-wrapper">
+      <infinite-data-table id="demoTable"></infinite-data-table>
+    </div>
+
+    <div class="explanation-grid">
+      <div class="info-box">
+        <h3>1. Incremental Ingestion (Infinite Scroll)</h3>
+        <p>
+          Fetches data lazily in chunks (e.g. 25 rows) as the user approaches the bottom of the table. Minimizes initial network payload and server memory pressure. Uses request locks, query resets, and <code>AbortSignal</code> cancellation.
+        </p>
+      </div>
+      <div class="info-box">
+        <h3>2. DOM Row Virtualization (Optional)</h3>
+        <p>
+          Recycles and mounts only the rows currently visible within the viewport (plus overscan padding). Keeps DOM node count fixed (~20 nodes) even when 10,000+ items are accumulated in memory, eliminating browser rendering lag.
+        </p>
+      </div>
+    </div>
+
+    <!-- Usage Guide Section -->
+    <section class="info-box" style="margin-top: 1.5rem;" aria-label="Infinite Scroll Usage Guide">
+      <h3 style="color: #60a5fa; font-size: 1.1rem; margin-bottom: 0.75rem;">
+        <span>💡 How to Use Infinite Scrolling</span>
+      </h3>
+      <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem; line-height: 1.5;">
+        Configure continuous asynchronous pagination with prefetching and client/server search and sorting:
+      </p>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+        <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border); border-radius: 0.375rem; padding: 0.85rem;">
+          <h4 style="margin: 0 0 0.35rem 0; font-size: 0.85rem; font-weight: 700; color: var(--primary);">1. Supply Data Loader Function</h4>
+          <p style="margin: 0; font-size: 0.8rem; color: var(--text-muted); line-height: 1.4;">
+            Pass an asynchronous data-fetching callback supporting <code>startIndex</code>, <code>limit</code>, and <code>signal</code>.
+          </p>
+          <pre style="background: #090d16; color: #38bdf8; padding: 0.5rem; border-radius: 0.25rem; font-size: 0.725rem; margin-top: 0.4rem; overflow-x: auto;"><code>table.dataLoader = async ({ startIndex, limit, signal }) => {
+  const res = await fetch(`/api/data?offset=${startIndex}&amp;limit=${limit}`, { signal });
+  return await res.json();
+};</code></pre>
+        </div>
+
+        <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border); border-radius: 0.375rem; padding: 0.85rem;">
+          <h4 style="margin: 0 0 0.35rem 0; font-size: 0.85rem; font-weight: 700; color: var(--primary);">2. Threshold &amp; Virtualization</h4>
+          <p style="margin: 0; font-size: 0.8rem; color: var(--text-muted); line-height: 1.4;">
+            Tune distance prefetching via <code>thresholdPx</code> and toggle DOM node virtualization on high-volume datasets.
+          </p>
+          <pre style="background: #090d16; color: #38bdf8; padding: 0.5rem; border-radius: 0.25rem; font-size: 0.725rem; margin-top: 0.4rem; overflow-x: auto;"><code>table.options = {
+  thresholdPx: 200,
+  virtualization: true,
+  batchSize: 25
+};</code></pre>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // --- Mock Database Generator (300 items) ---
+    const DEPARTMENTS = ['Engineering', 'Design', 'Product', 'Marketing', 'Legal', 'Sales', 'Finance'];
+    const STATUSES = ['Active', 'Pending', 'Inactive', 'On Leave'];
+    const ROLES = ['Frontend Architect', 'Backend Engineer', 'Product Lead', 'UI Designer', 'DevOps Specialist', 'Data Scientist'];
+
+    const mockDatabase = Array.from({ length: 300 }, (_, i) => {
+      const id = i + 1;
+      return {
+        id: `EMP-${String(id).padStart(4, '0')}`,
+        name: `Employee ${id}`,
+        email: `employee.${id}@enterprise.io`,
+        department: DEPARTMENTS[i % DEPARTMENTS.length],
+        role: ROLES[i % ROLES.length],
+        status: STATUSES[i % STATUSES.length],
+        salary: 75000 + (id * 450) % 65000,
+        joinedDate: new Date(2021, (i * 3) % 12, (i * 7) % 28 + 1).toISOString().split('T')[0]
+      };
+    });
+
+    // --- Embedded Web Component Definition (Zero External Dependency) ---
+    function computeVirtualRange(scrollTop, viewportHeight, totalItems, rowHeight, overscanCount = 5) {
+      if (totalItems <= 0 || rowHeight <= 0) {
+        return { startIndex: 0, endIndex: 0, topPadding: 0, bottomPadding: 0, totalHeight: 0 };
+      }
+      const totalHeight = totalItems * rowHeight;
+      const rawStartIndex = Math.floor(scrollTop / rowHeight);
+      const visibleCount = Math.ceil(viewportHeight / rowHeight);
+      const startIndex = Math.max(0, rawStartIndex - overscanCount);
+      const endIndex = Math.min(totalItems, rawStartIndex + visibleCount + overscanCount);
+      const topPadding = startIndex * rowHeight;
+      const bottomPadding = Math.max(0, (totalItems - endIndex) * rowHeight);
+      return { startIndex, endIndex, topPadding, bottomPadding, totalHeight };
+    }
+
+    class InfiniteDataTableElement extends HTMLElement {
+      constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        this._columns = [];
+        this._allRows = [];
+        this._config = {
+          enabled: true,
+          paginationMode: 'offset',
+          batchSize: 25,
+          prefetchThresholdPx: 150,
+          rowIdKey: 'id',
+          manualLoadMode: false
+        };
+        this._isLoading = false;
+        this._hasMore = true;
+        this._offset = 0;
+        this._page = 1;
+        this._searchTerm = '';
+        this._sortRule = null;
+        this._error = null;
+        this._totalAvailable = undefined;
+        this._requestId = 0;
+        this._abortController = null;
+        this._boundOnScroll = null;
+        this._observer = null;
+      }
+
+      connectedCallback() {
+        this.renderShell();
+        this.setupEvents();
+        this.setupScrollListener();
+        this.renderHeaders();
+        this.refresh();
+        if (this._config.dataLoader) {
+          this.resetAndFetch();
+        }
+      }
+
+      disconnectedCallback() {
+        if (this._boundOnScroll && this._viewport) {
+          this._viewport.removeEventListener('scroll', this._boundOnScroll);
+        }
+        if (this._observer) this._observer.disconnect();
+        if (this._abortController) this._abortController.abort();
+      }
+
+      get columns() { return this._columns; }
+      set columns(val) {
+        this._columns = val || [];
+        if (this.shadowRoot && this._headerRow) {
+          this.renderHeaders();
+          this.refresh();
+        }
+      }
+
+      get config() { return this._config; }
+      set config(val) {
+        this._config = { ...this._config, ...val };
+        if (this.shadowRoot && this._viewport) {
+          this.setupScrollListener();
+          this.refresh();
+        }
+        if (val && val.dataLoader && (!this._allRows || this._allRows.length === 0) && !this._isLoading) {
+          this.resetAndFetch();
+        }
+      }
+
+      get searchTerm() { return this._searchTerm; }
+      get sortRule() { return this._sortRule; }
+      get allRows() { return this._allRows; }
+      get totalAvailable() { return this._totalAvailable; }
+
+      setSearchTerm(term) {
+        if (this._searchTerm === term) return;
+        this._searchTerm = term;
+        if (this._searchInput && this._searchInput.value !== term) {
+          this._searchInput.value = term;
+        }
+        this.resetAndFetch();
+      }
+
+      setSortRule(rule) {
+        this._sortRule = rule;
+        this.renderHeaders();
+        this.resetAndFetch();
+      }
+
+      resetAndFetch() {
+        if (this._abortController) this._abortController.abort();
+        this._allRows = [];
+        this._offset = 0;
+        this._page = 1;
+        this._hasMore = true;
+        this._error = null;
+        if (this._viewport) this._viewport.scrollTop = 0;
+        this.refresh();
+        this.fetchNextBatch();
+      }
+
+      retry() {
+        if (this._error) {
+          this._error = null;
+          this.renderFooter();
+          this.fetchNextBatch();
+        }
+      }
+
+      async fetchNextBatch() {
+        if (!this._config.enabled || this._isLoading || !this._hasMore || !this._config.dataLoader) return;
+
+        this._isLoading = true;
+        this._error = null;
+        this.renderFooter();
+
+        const currentReqId = ++this._requestId;
+        this._abortController = new AbortController();
+        const signal = this._abortController.signal;
+
+        const limit = this._config.batchSize || 25;
+        const req = {
+          pagination: { mode: 'offset', offset: this._offset, limit, page: this._page },
+          searchTerm: this._searchTerm,
+          sortRule: this._sortRule,
+          signal
+        };
+
+        try {
+          const res = await this._config.dataLoader(req);
+          if (currentReqId !== this._requestId || signal.aborted) return;
+
+          const rowKey = this._config.rowIdKey || 'id';
+          const existingIds = new Set(this._allRows.map(r => r[rowKey]));
+          const uniqueRows = res.rows.filter(r => !existingIds.has(r[rowKey]));
+
+          this._allRows = [...this._allRows, ...uniqueRows];
+          this._hasMore = res.hasMore;
+          this._totalAvailable = res.totalRows;
+          this._offset += res.rows.length;
+          this._page += 1;
+          this._isLoading = false;
+
+          this.refresh();
+          this.renderFooter();
+
+          this.dispatchEvent(new CustomEvent('infinite-table:load-batch', {
+            detail: {
+              batchIndex: this._page - 1,
+              loadedCount: uniqueRows.length,
+              totalLoaded: this._allRows.length,
+              totalAvailable: this._totalAvailable,
+              hasMore: this._hasMore
+            },
+            bubbles: true,
+            composed: true
+          }));
+        } catch (err) {
+          if (signal.aborted || currentReqId !== this._requestId) return;
+          this._isLoading = false;
+          this._error = err;
+          this.renderFooter();
+          this.dispatchEvent(new CustomEvent('infinite-table:error', {
+            detail: { error: err, retry: () => this.retry() },
+            bubbles: true,
+            composed: true
+          }));
+        }
+      }
+
+      renderShell() {
+        this.shadowRoot.innerHTML = `
+          <style>
+            :host {
+              display: block;
+              width: 100%;
+              --ift-primary: #3b82f6;
+              --ift-primary-hover: #2563eb;
+              --ift-bg: #ffffff;
+              --ift-header-bg: #f8fafc;
+              --ift-row-hover: #f1f5f9;
+              --ift-row-alt: #fdfdfe;
+              --ift-border-color: #e2e8f0;
+              --ift-text-main: #0f172a;
+              --ift-text-muted: #64748b;
+              --ift-font-size: 0.875rem;
+              --ift-font-family: inherit;
+            }
+            .ift-container {
+              font-family: var(--ift-font-family);
+              font-size: var(--ift-font-size);
+              color: var(--ift-text-main);
+              background: var(--ift-bg);
+              border: 1px solid var(--ift-border-color);
+              border-radius: 0.5rem;
+              display: flex;
+              flex-direction: column;
+              overflow: hidden;
+            }
+            .ift-toolbar {
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              padding: 0.75rem 1rem;
+              gap: 1rem;
+              border-bottom: 1px solid var(--ift-border-color);
+              background: var(--ift-bg);
+            }
+            .ift-search-wrapper {
+              position: relative;
+              max-width: 320px;
+              width: 100%;
+            }
+            .ift-search-input {
+              width: 100%;
+              padding: 0.375rem 0.625rem 0.375rem 1.75rem;
+              font-size: var(--ift-font-size);
+              border: 1px solid var(--ift-border-color);
+              border-radius: 0.375rem;
+              outline: none;
+            }
+            .ift-search-icon {
+              position: absolute;
+              left: 0.5rem;
+              top: 50%;
+              transform: translateY(-50%);
+              width: 0.875rem;
+              height: 0.875rem;
+              color: var(--ift-text-muted);
+            }
+            .ift-badge {
+              padding: 0.25rem 0.5rem;
+              border-radius: 9999px;
+              background: var(--ift-header-bg);
+              border: 1px solid var(--ift-border-color);
+              font-size: 0.75rem;
+              font-weight: 500;
+              color: var(--ift-text-muted);
+            }
+            .ift-viewport {
+              overflow: auto;
+              position: relative;
+              max-height: 480px;
+              height: 480px;
+            }
+            .ift-table {
+              width: 100%;
+              border-collapse: separate;
+              border-spacing: 0;
+              text-align: left;
+            }
+            .ift-thead {
+              position: sticky;
+              top: 0;
+              z-index: 10;
+              background: var(--ift-header-bg);
+              box-shadow: 0 1px 0 var(--ift-border-color);
+            }
+            .ift-th {
+              padding: 0.75rem 1rem;
+              font-weight: 600;
+              color: var(--ift-text-main);
+              border-bottom: 1px solid var(--ift-border-color);
+              white-space: nowrap;
+              user-select: none;
+              cursor: pointer;
+            }
+            .ift-th:hover {
+              background: #f1f5f9;
+            }
+            .ift-th-inner {
+              display: inline-flex;
+              align-items: center;
+              gap: 0.35rem;
+            }
+            .ift-td {
+              padding: 0.75rem 1rem;
+              border-bottom: 1px solid var(--ift-border-color);
+              white-space: nowrap;
+              vertical-align: middle;
+            }
+            .ift-tr:hover {
+              background: var(--ift-row-hover);
+            }
+            .ift-tr.alt {
+              background: var(--ift-row-alt);
+            }
+            .ift-spacer-row td {
+              padding: 0 !important;
+              border: none !important;
+              line-height: 0 !important;
+            }
+            .ift-footer-status {
+              padding: 0.75rem 1rem;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              border-top: 1px solid var(--ift-border-color);
+              background: var(--ift-bg);
+              min-height: 46px;
+            }
+            .ift-spinner {
+              width: 1.125rem;
+              height: 1.125rem;
+              border: 2px solid rgba(59, 130, 246, 0.2);
+              border-radius: 50%;
+              border-top-color: var(--ift-primary);
+              animation: ift-spin 0.7s linear infinite;
+              display: inline-block;
+              margin-right: 0.5rem;
+            }
+            @keyframes ift-spin { to { transform: rotate(360deg); } }
+            .ift-btn {
+              padding: 0.375rem 0.75rem;
+              border-radius: 0.375rem;
+              font-size: 0.8125rem;
+              font-weight: 500;
+              cursor: pointer;
+              border: 1px solid transparent;
+            }
+            .ift-btn-primary {
+              background: var(--ift-primary);
+              color: white;
+            }
+            .ift-btn-primary:hover {
+              background: var(--ift-primary-hover);
+            }
+            .ift-btn-retry {
+              background: #fee2e2;
+              color: #b91c1c;
+              border-color: #fca5a5;
+            }
+            .ift-error-bar {
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              gap: 1rem;
+              padding: 0.4rem 0.75rem;
+              background: #fef2f2;
+              color: #ef4444;
+              border: 1px solid #fecaca;
+              border-radius: 0.375rem;
+              font-size: 0.8125rem;
+              width: 100%;
+              max-width: 440px;
+            }
+          </style>
+          <div class="ift-container">
+            <div class="ift-toolbar">
+              <div class="ift-search-wrapper">
+                <svg class="ift-search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+                <input type="text" class="ift-search-input" placeholder="Search rows..." />
+              </div>
+              <span class="ift-badge ift-count-badge">0 records</span>
+            </div>
+
+            <div class="ift-viewport">
+              <table class="ift-table">
+                <thead class="ift-thead"><tr class="ift-header-row"></tr></thead>
+                <tbody class="ift-tbody"></tbody>
+              </table>
+            </div>
+
+            <div class="ift-footer-status"></div>
+          </div>
+        `;
+
+        this._viewport = this.shadowRoot.querySelector('.ift-viewport');
+        this._tbody = this.shadowRoot.querySelector('.ift-tbody');
+        this._headerRow = this.shadowRoot.querySelector('.ift-header-row');
+        this._footerStatus = this.shadowRoot.querySelector('.ift-footer-status');
+        this._countBadge = this.shadowRoot.querySelector('.ift-count-badge');
+        this._searchInput = this.shadowRoot.querySelector('.ift-search-input');
+      }
+
+      setupEvents() {
+        let timer = null;
+        this._searchInput.addEventListener('input', (e) => {
+          clearTimeout(timer);
+          timer = setTimeout(() => {
+            this.setSearchTerm(e.target.value.trim());
+          }, 250);
+        });
+      }
+
+      setupScrollListener() {
+        if (this._boundOnScroll && this._viewport) {
+          this._viewport.removeEventListener('scroll', this._boundOnScroll);
+        }
+        this._boundOnScroll = () => {
+          if (this._config.virtualization?.enabled) {
+            this.renderVirtual();
+          }
+          if (!this._config.manualLoadMode && !this._isLoading && this._hasMore) {
+            const { scrollTop, scrollHeight, clientHeight } = this._viewport;
+            const threshold = this._config.prefetchThresholdPx || 150;
+            if (scrollHeight - (scrollTop + clientHeight) <= threshold) {
+              this.fetchNextBatch();
+            }
+          }
+        };
+        this._viewport.addEventListener('scroll', this._boundOnScroll, { passive: true });
+      }
+
+      renderHeaders() {
+        this._headerRow.innerHTML = '';
+        for (const col of this._columns) {
+          const th = document.createElement('th');
+          th.className = 'ift-th';
+          const inner = document.createElement('div');
+          inner.className = 'ift-th-inner';
+          inner.innerHTML = `<span>${col.header}</span>`;
+          
+          if (this._sortRule?.column === col.key) {
+            inner.innerHTML += `<span>${this._sortRule.direction === 'asc' ? '▲' : '▼'}</span>`;
+          }
+          th.appendChild(inner);
+          th.addEventListener('click', () => {
+            const nextDir = this._sortRule?.column === col.key && this._sortRule.direction === 'asc' ? 'desc' : 'asc';
+            this.setSortRule({ column: col.key, direction: nextDir });
+          });
+          this._headerRow.appendChild(th);
+        }
+        this.dispatchEvent(new CustomEvent('infinite-table:sort-change', {
+          detail: { sortRule: this._sortRule },
+          bubbles: true,
+          composed: true
+        }));
+      }
+
+      refresh() {
+        if (this._config.virtualization?.enabled) {
+          this.renderVirtual();
+        } else {
+          this.renderAll();
+        }
+        this.renderFooter();
+        const total = this._totalAvailable !== undefined ? ` / ${this._totalAvailable}` : '';
+        this._countBadge.textContent = `${this._allRows.length}${total} records`;
+      }
+
+      renderAll() {
+        this._tbody.innerHTML = '';
+        if (this._allRows.length === 0 && !this._isLoading) {
+          this._tbody.innerHTML = `<tr><td colspan="${this._columns.length}" style="text-align:center;padding:2rem;color:#64748b;">No records found</td></tr>`;
+          return;
+        }
+        const frag = document.createDocumentFragment();
+        this._allRows.forEach((row, i) => {
+          frag.appendChild(this.buildRow(row, i));
+        });
+        this._tbody.appendChild(frag);
+      }
+
+      renderVirtual() {
+        const rowHeight = this._config.virtualization?.rowHeight || 45;
+        const viewportHeight = this._viewport.clientHeight || 480;
+        const scrollTop = this._viewport.scrollTop;
+        const range = computeVirtualRange(scrollTop, viewportHeight, this._allRows.length, rowHeight, 5);
+
+        this._tbody.innerHTML = '';
+        if (this._allRows.length === 0 && !this._isLoading) {
+          this._tbody.innerHTML = `<tr><td colspan="${this._columns.length}" style="text-align:center;padding:2rem;color:#64748b;">No records found</td></tr>`;
+          return;
+        }
+
+        if (range.topPadding > 0) {
+          const topTr = document.createElement('tr');
+          topTr.className = 'ift-spacer-row';
+          topTr.innerHTML = `<td colspan="${this._columns.length}" style="height:${range.topPadding}px;"></td>`;
+          this._tbody.appendChild(topTr);
+        }
+
+        const frag = document.createDocumentFragment();
+        for (let i = range.startIndex; i < range.endIndex; i++) {
+          const tr = this.buildRow(this._allRows[i], i);
+          tr.style.height = `${rowHeight}px`;
+          frag.appendChild(tr);
+        }
+        this._tbody.appendChild(frag);
+
+        if (range.bottomPadding > 0) {
+          const botTr = document.createElement('tr');
+          botTr.className = 'ift-spacer-row';
+          botTr.innerHTML = `<td colspan="${this._columns.length}" style="height:${range.bottomPadding}px;"></td>`;
+          this._tbody.appendChild(botTr);
+        }
+      }
+
+      buildRow(row, idx) {
+        const tr = document.createElement('tr');
+        tr.className = `ift-tr ${idx % 2 === 1 ? 'alt' : ''}`;
+        for (const col of this._columns) {
+          const td = document.createElement('td');
+          td.className = 'ift-td';
+          const val = row[col.key];
+          if (col.render) {
+            const out = col.render(val, row, idx);
+            if (out instanceof HTMLElement) td.appendChild(out);
+            else td.innerHTML = String(out);
+          } else {
+            td.textContent = val !== undefined && val !== null ? String(val) : '—';
+          }
+          tr.appendChild(td);
+        }
+        return tr;
+      }
+
+      renderFooter() {
+        if (this._error) {
+          this._footerStatus.innerHTML = `
+            <div class="ift-error-bar">
+              <span>Failed to load: ${this._error.message}</span>
+              <button class="ift-btn ift-btn-retry">Retry</button>
+            </div>
+          `;
+          this._footerStatus.querySelector('.ift-btn-retry')?.addEventListener('click', () => this.retry());
+          return;
+        }
+
+        if (this._isLoading) {
+          this._footerStatus.innerHTML = `
+            <div style="display:flex;align-items:center;color:#64748b;font-size:0.8125rem;">
+              <span class="ift-spinner"></span>
+              <span>Fetching batch...</span>
+            </div>
+          `;
+          return;
+        }
+
+        if (this._config.manualLoadMode && this._hasMore) {
+          this._footerStatus.innerHTML = `<button class="ift-btn ift-btn-primary ift-load-btn">Load more records</button>`;
+          this._footerStatus.querySelector('.ift-load-btn')?.addEventListener('click', () => this.fetchNextBatch());
+          return;
+        }
+
+        if (!this._hasMore && this._allRows.length > 0) {
+          this._footerStatus.innerHTML = `<span style="color:#64748b;font-size:0.8125rem;">All ${this._allRows.length} records loaded</span>`;
+          return;
+        }
+
+        this._footerStatus.innerHTML = '';
+      }
+    }
+
+    if (!customElements.get('infinite-data-table')) {
+      customElements.define('infinite-data-table', InfiniteDataTableElement);
+    }
+
+    // --- App Setup ---
+    let simulateErrorNext = false;
+    const table = document.getElementById('demoTable');
+
+    table.columns = [
+      { key: 'id', header: 'ID', width: '110px' },
+      { key: 'name', header: 'Full Name' },
+      { key: 'email', header: 'Email' },
+      { key: 'department', header: 'Department' },
+      { key: 'role', header: 'Role' },
+      {
+        key: 'status',
+        header: 'Status',
+        render: (val) => {
+          const colorMap = {
+            'Active': 'background:#dcfce7;color:#166534;',
+            'Pending': 'background:#fef9c3;color:#854d0e;',
+            'Inactive': 'background:#fee2e2;color:#991b1b;',
+            'On Leave': 'background:#e0e7ff;color:#3730a3;'
+          };
+          const style = colorMap[val] || 'background:#f1f5f9;color:#475569;';
+          return `<span style="padding:0.2rem 0.5rem;border-radius:9999px;font-size:0.75rem;font-weight:600;${style}">${val}</span>`;
+        }
+      },
+      {
+        key: 'salary',
+        header: 'Salary',
+        render: (val) => `$${Number(val).toLocaleString()}`
+      },
+      { key: 'joinedDate', header: 'Joined' }
+    ];
+
+    // Async Data Loader simulating network latency and remote DB filtering
+    const remoteDataLoader = async ({ pagination, searchTerm, sortRule, signal }) => {
+      // Simulate network roundtrip (300ms)
+      await new Promise(r => setTimeout(r, 300));
+      if (signal.aborted) throw new Error('Aborted');
+
+      if (simulateErrorNext) {
+        simulateErrorNext = false;
+        document.getElementById('toggleSimulateError').checked = false;
+        throw new Error('503 Service Unavailable (Simulated)');
+      }
+
+      let filtered = [...mockDatabase];
+
+      // Remote Search
+      if (searchTerm) {
+        const q = searchTerm.toLowerCase();
+        filtered = filtered.filter(row =>
+          row.name.toLowerCase().includes(q) ||
+          row.email.toLowerCase().includes(q) ||
+          row.department.toLowerCase().includes(q) ||
+          row.role.toLowerCase().includes(q) ||
+          row.id.toLowerCase().includes(q)
+        );
+      }
+
+      // Remote Sort
+      if (sortRule) {
+        filtered.sort((a, b) => {
+          const valA = a[sortRule.column];
+          const valB = b[sortRule.column];
+          if (valA === valB) return 0;
+          return (valA > valB ? 1 : -1) * (sortRule.direction === 'asc' ? 1 : -1);
+        });
+      }
+
+      const offset = pagination.offset || 0;
+      const limit = pagination.limit || 25;
+      const batchRows = filtered.slice(offset, offset + limit);
+      const hasMore = offset + batchRows.length < filtered.length;
+
+      return {
+        rows: batchRows,
+        hasMore,
+        totalRows: filtered.length
+      };
+    };
+
+    table.config = {
+      batchSize: 25,
+      prefetchThresholdPx: 140,
+      dataLoader: remoteDataLoader,
+      virtualization: {
+        enabled: false,
+        rowHeight: 46,
+        overscanCount: 5,
+        viewportHeight: 480
+      }
+    };
+
+    // UI Control Bindings
+    const statLoadedCount = document.getElementById('statLoadedCount');
+    const statTotalCount = document.getElementById('statTotalCount');
+    const statActiveSort = document.getElementById('statActiveSort');
+    const statStatusText = document.getElementById('statStatusText');
+    const statStatusSub = document.getElementById('statStatusSub');
+
+    const externalSearchInput = document.getElementById('externalSearchInput');
+    const sortColumnSelect = document.getElementById('sortColumnSelect');
+    const sortDirectionSelect = document.getElementById('sortDirectionSelect');
+    const btnClearSearchSort = document.getElementById('btnClearSearchSort');
+
+    // Update Live Statistics Display
+    function updateStats(detail) {
+      const loaded = detail?.totalLoaded ?? table.allRows?.length ?? 0;
+      const total = detail?.totalAvailable ?? mockDatabase.length;
+      statLoadedCount.textContent = loaded;
+      statTotalCount.textContent = total;
+
+      const sort = table.sortRule;
+      if (sort && sort.column) {
+        statActiveSort.textContent = `${sort.column} (${sort.direction === 'asc' ? '▲ ASC' : '▼ DESC'})`;
+      } else {
+        statActiveSort.textContent = 'None';
+      }
+
+      if (detail?.hasMore) {
+        statStatusText.textContent = `Streaming (${loaded} / ${total})`;
+        statStatusText.style.color = '#38bdf8';
+        statStatusSub.textContent = 'More records available on scroll';
+      } else {
+        statStatusText.textContent = `Complete (${loaded} / ${total})`;
+        statStatusText.style.color = '#10b981';
+        statStatusSub.textContent = 'All available records loaded';
+      }
+    }
+
+    // Listen to Table Custom Events
+    table.addEventListener('infinite-table:load-batch', (e) => {
+      updateStats(e.detail);
+    });
+
+    table.addEventListener('infinite-table:error', (e) => {
+      statStatusText.textContent = 'Fetch Error';
+      statStatusText.style.color = '#ef4444';
+      statStatusSub.textContent = e.detail?.error?.message || 'Network error';
+    });
+
+    table.addEventListener('infinite-table:sort-change', (e) => {
+      const rule = e.detail?.sortRule;
+      if (rule) {
+        sortColumnSelect.value = rule.column;
+        sortDirectionSelect.value = rule.direction;
+      } else {
+        sortColumnSelect.value = '';
+      }
+      updateStats();
+    });
+
+    // Wire External Search Bar
+    let searchDebounceTimer = null;
+    externalSearchInput.addEventListener('input', (e) => {
+      clearTimeout(searchDebounceTimer);
+      searchDebounceTimer = setTimeout(() => {
+        table.setSearchTerm(e.target.value.trim());
+        statStatusText.textContent = 'Searching...';
+        statStatusText.style.color = '#f59e0b';
+        statStatusSub.textContent = `Filtering database for "${e.target.value.trim()}"`;
+      }, 300);
+    });
+
+    // Wire External Sort Controls
+    function applyExternalSort() {
+      const col = sortColumnSelect.value;
+      const dir = sortDirectionSelect.value;
+      if (col) {
+        table.setSortRule({ column: col, direction: dir });
+      } else {
+        table.setSortRule(null);
+      }
+      updateStats();
+    }
+
+    sortColumnSelect.addEventListener('change', applyExternalSort);
+    sortDirectionSelect.addEventListener('change', () => {
+      if (sortColumnSelect.value) {
+        applyExternalSort();
+      }
+    });
+
+    btnClearSearchSort.addEventListener('click', () => {
+      externalSearchInput.value = '';
+      sortColumnSelect.value = '';
+      sortDirectionSelect.value = 'asc';
+      table.setSearchTerm('');
+      table.setSortRule(null);
+      updateStats();
+    });
+
+    document.getElementById('toggleVirtualization').addEventListener('change', (e) => {
+      table.config = {
+        virtualization: {
+          enabled: e.target.checked,
+          rowHeight: 46,
+          overscanCount: 5,
+          viewportHeight: 480
+        }
+      };
+    });
+
+    document.getElementById('toggleManualMode').addEventListener('change', (e) => {
+      table.config = {
+        manualLoadMode: e.target.checked
+      };
+    });
+
+    document.getElementById('toggleSimulateError').addEventListener('change', (e) => {
+      simulateErrorNext = e.target.checked;
+    });
+
+    document.getElementById('btnReset').addEventListener('click', () => {
+      table.resetAndFetch();
+      updateStats();
+    });
+
+    // Initial stats trigger
+    updateStats();
+  </script>
+</body>
+</html>

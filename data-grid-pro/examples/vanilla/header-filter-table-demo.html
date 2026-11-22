@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>In-Header Filtering Data Table Demo</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --border: #334155;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #3b82f6;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      padding: 2rem;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    header {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    p.subtitle {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      max-width: 880px;
+      line-height: 1.5;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.25rem 1.5rem;
+    }
+
+    .controls-grid {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .controls-group {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .toggle-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      color: #e2e8f0;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .btn {
+      padding: 0.45rem 0.9rem;
+      border-radius: 0.375rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: #334155;
+      color: white;
+      transition: background 0.15s ease;
+    }
+
+    .btn:hover { background: #475569; }
+
+    .table-container-wrap {
+      background: #ffffff;
+      border-radius: 0.5rem;
+      overflow: hidden;
+      color: #0f172a;
+    }
+
+    .log-panel {
+      margin-top: 1rem;
+      background: #090d16;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      font-family: monospace;
+      font-size: 0.8rem;
+      color: #38bdf8;
+      max-height: 160px;
+      overflow-y: auto;
+    }
+
+    .log-title {
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.7rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>In-Header Filter Data Table</h1>
+      <p class="subtitle">
+        A framework-agnostic Web Component with in-header filters: text (debounced), select dropdowns, multi-select checkboxes, number ranges, and date ranges. Combines with global search, column sorting, pagination, and resizable columns.
+      </p>
+    </header>
+
+    <div class="card">
+      <div class="controls-grid">
+        <div class="controls-group">
+          <label class="toggle-label">
+            <input type="checkbox" id="toggleTheme" />
+            <span>Dark Theme</span>
+          </label>
+          <label class="toggle-label">
+            <input type="checkbox" id="toggleServerMode" />
+            <span>Simulate Server-Side Data Loader Mode</span>
+          </label>
+        </div>
+
+        <div class="controls-group">
+          <button class="btn" id="btnClearAllHeaderFilters">Clear All Active Filters</button>
+          <button class="btn" id="btnResetAllData">Reset Dataset</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-container-wrap">
+      <header-filter-data-table id="filterTable"></header-filter-data-table>
+    </div>
+
+    <!-- Usage Guide Section -->
+    <section class="card" style="margin-top: 0.5rem;" aria-label="In-Header Filter Usage Guide">
+      <h3 style="margin: 0 0 0.75rem 0; font-size: 1.15rem; font-weight: 700; color: #ffffff; display: flex; align-items: center; gap: 0.5rem;">
+        <span>💡 How to Use In-Header Filters</span>
+      </h3>
+      <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.25rem; line-height: 1.5;">
+        Embed dedicated filtering widgets directly inside the second row of the table header without requiring separate toolbar drawers.
+      </p>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+        <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border); border-radius: 0.375rem; padding: 1rem;">
+          <h4 style="margin: 0 0 0.5rem 0; font-size: 0.875rem; font-weight: 700; color: var(--primary);">1. Configure Header Filter Widgets</h4>
+          <p style="margin: 0; font-size: 0.8125rem; color: var(--text-muted); line-height: 1.5;">
+            Assign <code>filter: { type: 'text' | 'select' | 'multi-select' | 'number-range' | 'date-range' }</code> in column metadata.
+          </p>
+          <pre style="background: #090d16; color: #38bdf8; padding: 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-top: 0.5rem; overflow-x: auto;"><code>{
+  key: 'genre',
+  header: 'Genre',
+  filter: { type: 'select', options: ['Action', 'Drama', 'Sci-Fi'] }
+}</code></pre>
+        </div>
+
+        <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border); border-radius: 0.375rem; padding: 1rem;">
+          <h4 style="margin: 0 0 0.5rem 0; font-size: 0.875rem; font-weight: 700; color: var(--primary);">2. Automatic Debounced Execution</h4>
+          <p style="margin: 0; font-size: 0.8125rem; color: var(--text-muted); line-height: 1.5;">
+            Inputs are automatically debounced (250ms) to ensure instantaneous UI updates without keystroke lag or stutter.
+          </p>
+          <pre style="background: #090d16; color: #38bdf8; padding: 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-top: 0.5rem; overflow-x: auto;"><code>table.addEventListener('hft:filter-change', (e) => {
+  console.log('Active Filters:', e.detail.filters);
+});</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <div class="log-panel" id="logOutput">
+      <div class="log-title">Header Filter Event Stream:</div>
+      <div id="logList">&gt; Ready. Try typing in the Title/Actor filters, choosing a Genre/Rating, or adjusting the Release Year range.</div>
+    </div>
+  </div>
+
+  <script>
+    // --- Embedded HeaderFilterDataTable Web Component (Zero External Dependency) ---
+    function isFilterActive(v) {
+      if (v === null || v === undefined || v === '') return false;
+      if (Array.isArray(v)) return v.length > 0;
+      if (typeof v === 'object') {
+        return (v.min !== undefined && v.min !== '') || (v.max !== undefined && v.max !== '') || Boolean(v.start || v.end);
+      }
+      return true;
+    }
+
+    function applyFilters(rows, cols, activeFilters, search) {
+      let result = rows;
+      if (search && search.trim() !== '') {
+        const q = search.toLowerCase();
+        result = result.filter(r => Object.values(r).some(val => String(val).toLowerCase().includes(q)));
+      }
+      const activeEntries = Object.entries(activeFilters).filter(([_, v]) => isFilterActive(v));
+      if (activeEntries.length === 0) return result;
+
+      const colMap = new Map();
+      cols.forEach(c => colMap.set(String(c.key), c));
+
+      return result.filter(r => {
+        for (const [key, fVal] of activeEntries) {
+          const col = colMap.get(key);
+          const raw = r[key];
+          if (!col || !col.filter) continue;
+          const type = col.filter.type;
+
+          if (type === 'text') {
+            if (!String(raw).toLowerCase().includes(String(fVal).toLowerCase().trim())) return false;
+          } else if (type === 'select') {
+            if (fVal !== '' && String(raw) !== String(fVal)) return false;
+          } else if (type === 'multi-select') {
+            if (Array.isArray(fVal) && fVal.length > 0 && !fVal.includes(String(raw))) return false;
+          } else if (type === 'number-range') {
+            const num = Number(raw);
+            if (fVal.min !== undefined && fVal.min !== '' && num < Number(fVal.min)) return false;
+            if (fVal.max !== undefined && fVal.max !== '' && num > Number(fVal.max)) return false;
+          } else if (type === 'date-range') {
+            const rTime = new Date(raw).getTime();
+            if (fVal.start && rTime < new Date(fVal.start).getTime()) return false;
+            if (fVal.end && rTime > new Date(fVal.end).setHours(23, 59, 59, 999)) return false;
+          }
+        }
+        return true;
+      });
+    }
+
+    class HeaderFilterDataTableElement extends HTMLElement {
+      constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        this._columns = [];
+        this._allRows = [];
+        this._activeFilters = {};
+        this._options = { pagination: { enabled: true, pageSize: 8 }, sorting: { enabled: true }, search: { enabled: true } };
+        this._currentPage = 1;
+        this._pageSize = 8;
+        this._searchTerm = '';
+        this._sortRule = null;
+        this._totalRows = 0;
+        this._debounceMap = new Map();
+      }
+
+      connectedCallback() {
+        this.renderDom();
+        this.setupEvents();
+        this.refresh();
+      }
+
+      get columns() { return this._columns; }
+      set columns(v) { this._columns = v || []; if (this.shadowRoot) { this.renderHeader(); this.refresh(); } }
+
+      get data() { return this._allRows; }
+      set data(v) { this._allRows = v || []; if (this.shadowRoot) { this.refresh(); } }
+
+      get options() { return this._options; }
+      set options(v) { this._options = { ...this._options, ...v }; if (this.shadowRoot) { this.renderHeader(); this.refresh(); } }
+
+      get activeFilters() { return { ...this._activeFilters }; }
+
+      setFilter(k, val, debounce = false) {
+        if (debounce) {
+          if (this._debounceMap.has(k)) clearTimeout(this._debounceMap.get(k));
+          this._debounceMap.set(k, setTimeout(() => {
+            this.applyFilterInternal(k, val);
+            this._debounceMap.delete(k);
+          }, 250));
+        } else {
+          this.applyFilterInternal(k, val);
+        }
+      }
+
+      applyFilterInternal(k, val) {
+        if (!isFilterActive(val)) delete this._activeFilters[k];
+        else this._activeFilters[k] = val;
+        this._currentPage = 1;
+
+        this.dispatchEvent(new CustomEvent('header-filter:change', {
+          detail: { columnKey: k, filterValue: val, activeFilters: this.activeFilters },
+          bubbles: true, composed: true
+        }));
+
+        this.refresh();
+      }
+
+      clearFilter(k) {
+        delete this._activeFilters[k];
+        this._currentPage = 1;
+        this.dispatchEvent(new CustomEvent('header-filter:clear', {
+          detail: { clearedColumnKey: k, activeFilters: this.activeFilters },
+          bubbles: true, composed: true
+        }));
+        this.renderHeader();
+        this.refresh();
+      }
+
+      clearAllFilters() {
+        this._activeFilters = {};
+        this._currentPage = 1;
+        this.dispatchEvent(new CustomEvent('header-filter:clear', {
+          detail: { activeFilters: {} },
+          bubbles: true, composed: true
+        }));
+        this.renderHeader();
+        this.refresh();
+      }
+
+      setSearchTerm(t) {
+        this._searchTerm = t;
+        this._currentPage = 1;
+        this.refresh();
+      }
+
+      setSortRule(rule) {
+        this._sortRule = rule;
+        this.renderHeader();
+        this.refresh();
+      }
+
+      setPage(p) {
+        const max = Math.max(1, Math.ceil(this._totalRows / this._pageSize));
+        this._currentPage = Math.max(1, Math.min(p, max));
+        this.refresh();
+      }
+
+      renderDom() {
+        this.shadowRoot.innerHTML = `
+          <style>
+            :host {
+              display: block; width: 100%;
+              --hft-primary: #3b82f6; --hft-bg: #ffffff; --hft-header-bg: #f8fafc;
+              --hft-row-hover: #f1f5f9; --hft-row-alt: #fdfdfe; --hft-border-color: #e2e8f0;
+              --hft-text-main: #0f172a; --hft-text-muted: #64748b;
+              --hft-filter-active-bg: #eff6ff; --hft-filter-active-border: #3b82f6;
+              --hft-font-family: inherit; --hft-font-size: 0.875rem;
+            }
+            :host([theme="dark"]) {
+              --hft-primary: #60a5fa; --hft-bg: #0f172a; --hft-header-bg: #1e293b;
+              --hft-row-hover: #1e293b; --hft-row-alt: #0b1120; --hft-border-color: #334155;
+              --hft-text-main: #f8fafc; --hft-text-muted: #94a3b8;
+              --hft-filter-active-bg: #1e293b; --hft-filter-active-border: #60a5fa;
+            }
+            .hft-container {
+              font-family: var(--hft-font-family); font-size: var(--hft-font-size);
+              color: var(--hft-text-main); background: var(--hft-bg);
+              border: 1px solid var(--hft-border-color); border-radius: 0.5rem;
+              display: flex; flex-direction: column; overflow: hidden;
+            }
+            .hft-toolbar {
+              display: flex; align-items: center; justify-content: space-between;
+              padding: 0.75rem 1rem; border-bottom: 1px solid var(--hft-border-color);
+              gap: 1rem;
+            }
+            .hft-search-input {
+              padding: 0.45rem 0.75rem; border: 1px solid var(--hft-border-color);
+              border-radius: 0.375rem; outline: none; font-size: var(--hft-font-size);
+              background: var(--hft-bg); color: var(--hft-text-main); min-width: 270px;
+              box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+              transition: all 0.15s ease-in-out;
+            }
+            .hft-search-input:hover { border-color: #94a3b8; }
+            .hft-search-input:focus {
+              border-color: var(--hft-primary);
+              box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+            }
+            .hft-viewport { overflow: auto; max-height: 520px; }
+            .hft-table { width: 100%; border-collapse: separate; border-spacing: 0; text-align: left; }
+            .hft-thead { position: sticky; top: 0; z-index: 20; background: var(--hft-header-bg); }
+            .hft-th {
+              padding: 0.6rem 0.75rem; font-weight: 600; color: var(--hft-text-main);
+              border-bottom: 1px solid var(--hft-border-color); vertical-align: top;
+            }
+            .hft-th.filtered { background-color: var(--hft-filter-active-bg); }
+            .hft-th-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.35rem; cursor: pointer; }
+            .hft-filter-input, .hft-filter-select {
+              width: 100%; height: 1.95rem; padding: 0.25rem 0.5rem; font-size: 0.8125rem;
+              border: 1px solid var(--hft-border-color); border-radius: 0.375rem;
+              background: var(--hft-bg); color: var(--hft-text-main); outline: none;
+              transition: all 0.15s ease;
+            }
+            .hft-filter-input:hover, .hft-filter-select:hover { border-color: #94a3b8; }
+            .hft-filter-input:focus, .hft-filter-select:focus {
+              border-color: var(--hft-primary);
+              box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+            }
+            .hft-filter-input.active, .hft-filter-select.active {
+              border-color: var(--hft-filter-active-border); background: var(--hft-filter-active-bg);
+            }
+            .hft-range-wrap { display: flex; gap: 0.35rem; align-items: center; }
+            .hft-range-wrap input {
+              width: 50%; height: 1.95rem; padding: 0.25rem 0.4rem; font-size: 0.8125rem;
+              border: 1px solid var(--hft-border-color); border-radius: 0.375rem;
+              background: var(--hft-bg); color: var(--hft-text-main); outline: none;
+              transition: all 0.15s ease;
+            }
+            .hft-range-wrap input:focus {
+              border-color: var(--hft-primary);
+              box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+            }
+            .hft-clear-btn { background: none; border: none; cursor: pointer; color: var(--hft-text-muted); padding: 0 0.25rem; }
+            .hft-clear-btn:hover { color: #ef4444; }
+            .hft-td { padding: 0.65rem 0.85rem; border-bottom: 1px solid var(--hft-border-color); white-space: nowrap; }
+            .hft-tr:hover { background: var(--hft-row-hover); }
+            .hft-tr.alt { background: var(--hft-row-alt); }
+            .hft-tr.alt:hover { background: var(--hft-row-hover); }
+            .hft-badge {
+              padding: 0.25rem 0.5rem; border-radius: 9999px; background: var(--hft-header-bg);
+              border: 1px solid var(--hft-border-color); font-size: 0.75rem; color: var(--hft-text-muted);
+            }
+            .hft-badge.active-indicator { background: #eff6ff; border-color: #93c5fd; color: #2563eb; font-weight: 600; }
+            .hft-pagination {
+              display: flex; align-items: center; justify-content: space-between;
+              padding: 0.75rem 1rem; border-top: 1px solid var(--hft-border-color);
+              font-size: 0.8125rem; color: var(--hft-text-muted);
+            }
+            .hft-btn {
+              padding: 0.25rem 0.6rem; border-radius: 0.375rem; border: 1px solid var(--hft-border-color);
+              background: var(--hft-bg); color: var(--hft-text-main); cursor: pointer;
+            }
+            .hft-btn:hover:not(:disabled) { background: var(--hft-row-hover); }
+            .hft-btn.active { background: var(--hft-primary); color: white; border-color: var(--hft-primary); }
+          </style>
+
+          <div class="hft-container">
+            <div class="hft-toolbar">
+              <input type="text" class="hft-search-input" placeholder="Search globally across all rows..." />
+              <div style="display:flex;align-items:center;gap:0.75rem;">
+                <span class="hft-badge filter-badge" style="display:none;">0 filters active</span>
+                <span class="hft-badge meta-badge">0 records</span>
+              </div>
+            </div>
+            <div class="hft-viewport">
+              <table class="hft-table">
+                <thead class="hft-thead"><tr class="hft-header-tr"></tr></thead>
+                <tbody class="hft-tbody"></tbody>
+              </table>
+            </div>
+            <div class="hft-pagination"></div>
+          </div>
+        `;
+
+        this._headerTr = this.shadowRoot.querySelector('.hft-header-tr');
+        this._tbody = this.shadowRoot.querySelector('.hft-tbody');
+        this._pagination = this.shadowRoot.querySelector('.hft-pagination');
+        this._metaBadge = this.shadowRoot.querySelector('.meta-badge');
+        this._filterBadge = this.shadowRoot.querySelector('.filter-badge');
+        this._searchInput = this.shadowRoot.querySelector('.hft-search-input');
+      }
+
+      setupEvents() {
+        this._searchInput.addEventListener('input', (e) => this.setSearchTerm(e.target.value.trim()));
+      }
+
+      renderHeader() {
+        this._headerTr.innerHTML = '';
+        this._columns.forEach(col => {
+          const th = document.createElement('th');
+          th.className = 'hft-th';
+          if (isFilterActive(this._activeFilters[col.key])) th.classList.add('filtered');
+          if (col.width) th.style.width = col.width;
+
+          const top = document.createElement('div');
+          top.className = 'hft-th-top';
+          let label = col.header;
+          if (this._sortRule?.column === col.key) {
+            label += ` ${this._sortRule.direction === 'asc' ? '▲' : '▼'}`;
+          }
+          top.textContent = label;
+          top.addEventListener('click', () => {
+            const next = this._sortRule?.column === col.key && this._sortRule.direction === 'asc' ? 'desc' : 'asc';
+            this.setSortRule({ column: col.key, direction: next });
+          });
+          th.appendChild(top);
+
+          // In-header filter
+          if (col.filter) {
+            const ctrlWrap = document.createElement('div');
+            ctrlWrap.style.display = 'flex';
+            ctrlWrap.style.alignItems = 'center';
+            ctrlWrap.style.gap = '0.25rem';
+            const val = this._activeFilters[col.key];
+
+            if (col.filter.type === 'text') {
+              const inp = document.createElement('input');
+              inp.className = `hft-filter-input ${isFilterActive(val) ? 'active' : ''}`;
+              inp.placeholder = col.filter.placeholder || 'Filter...';
+              inp.value = val !== undefined ? val : '';
+              inp.addEventListener('input', (e) => this.setFilter(col.key, e.target.value, true));
+              ctrlWrap.appendChild(inp);
+            } else if (col.filter.type === 'select') {
+              const sel = document.createElement('select');
+              sel.className = `hft-filter-select ${isFilterActive(val) ? 'active' : ''}`;
+              sel.innerHTML = `<option value="">All</option>` + (col.filter.options || []).map(o => `<option value="${o.value}" ${String(o.value) === String(val) ? 'selected' : ''}>${o.label}</option>`).join('');
+              sel.addEventListener('change', (e) => this.setFilter(col.key, e.target.value, false));
+              ctrlWrap.appendChild(sel);
+            } else if (col.filter.type === 'number-range') {
+              const rw = document.createElement('div');
+              rw.className = 'hft-range-wrap';
+              const minI = document.createElement('input'); minI.placeholder = 'Min'; minI.type = 'number';
+              const maxI = document.createElement('input'); maxI.placeholder = 'Max'; maxI.type = 'number';
+              if (val) { minI.value = val.min || ''; maxI.value = val.max || ''; }
+              const onRChange = () => this.setFilter(col.key, { min: minI.value, max: maxI.value }, true);
+              minI.addEventListener('input', onRChange); maxI.addEventListener('input', onRChange);
+              rw.appendChild(minI); rw.appendChild(document.createTextNode('-')); rw.appendChild(maxI);
+              ctrlWrap.appendChild(rw);
+            }
+
+            if (isFilterActive(val)) {
+              const clr = document.createElement('button');
+              clr.className = 'hft-clear-btn';
+              clr.innerHTML = '&times;';
+              clr.title = 'Clear filter';
+              clr.addEventListener('click', () => this.clearFilter(col.key));
+              ctrlWrap.appendChild(clr);
+            }
+
+            th.appendChild(ctrlWrap);
+          }
+
+          this._headerTr.appendChild(th);
+        });
+      }
+
+      refresh() {
+        this.renderBody();
+        this.renderPagination();
+        this._metaBadge.textContent = `${this._totalRows} records`;
+
+        const activeCount = Object.keys(this._activeFilters).length;
+        if (activeCount > 0) {
+          this._filterBadge.style.display = 'inline-flex';
+          this._filterBadge.classList.add('active-indicator');
+          this._filterBadge.textContent = `${activeCount} filter${activeCount > 1 ? 's' : ''} active`;
+        } else {
+          this._filterBadge.style.display = 'none';
+        }
+      }
+
+      renderBody() {
+        this._tbody.innerHTML = '';
+        let list = applyFilters(this._allRows, this._columns, this._activeFilters, this._searchTerm);
+
+        if (this._sortRule) {
+          const { column, direction } = this._sortRule;
+          list.sort((a, b) => {
+            const va = a[column]; const vb = b[column];
+            if (va === vb) return 0;
+            return (va > vb ? 1 : -1) * (direction === 'asc' ? 1 : -1);
+          });
+        }
+
+        this._totalRows = list.length;
+        const start = (this._currentPage - 1) * this._pageSize;
+        const paged = list.slice(start, start + this._pageSize);
+
+        if (paged.length === 0) {
+          this._tbody.innerHTML = `<tr><td colspan="${this._columns.length}" style="text-align:center;padding:2.5rem;color:#64748b;">No records match your filters</td></tr>`;
+          return;
+        }
+
+        const frag = document.createDocumentFragment();
+        paged.forEach((row, rIdx) => {
+          const tr = document.createElement('tr');
+          tr.className = `hft-tr ${rIdx % 2 === 1 ? 'alt' : ''}`;
+          this._columns.forEach(c => {
+            const td = document.createElement('td');
+            td.className = 'hft-td';
+            const val = row[c.key];
+            if (c.render) {
+              const res = c.render(val, row, rIdx);
+              if (res instanceof HTMLElement) td.appendChild(res);
+              else td.innerHTML = String(res);
+            } else {
+              td.textContent = val !== undefined ? String(val) : '—';
+            }
+            tr.appendChild(td);
+          });
+          frag.appendChild(tr);
+        });
+
+        this._tbody.appendChild(frag);
+      }
+
+      renderPagination() {
+        const totalPages = Math.max(1, Math.ceil(this._totalRows / this._pageSize));
+        this._pagination.innerHTML = `
+          <div>Page <strong>${this._currentPage}</strong> of <strong>${totalPages}</strong> (${this._totalRows} total items)</div>
+          <div style="display:flex;gap:0.25rem;">
+            <button class="hft-btn prev" ${this._currentPage <= 1 ? 'disabled' : ''}>Prev</button>
+            <span class="hft-btn active">${this._currentPage}</span>
+            <button class="hft-btn next" ${this._currentPage >= totalPages ? 'disabled' : ''}>Next</button>
+          </div>
+        `;
+        this._pagination.querySelector('.prev')?.addEventListener('click', () => this.setPage(this._currentPage - 1));
+        this._pagination.querySelector('.next')?.addEventListener('click', () => this.setPage(this._currentPage + 1));
+      }
+    }
+
+    if (!customElements.get('header-filter-data-table')) {
+      customElements.define('header-filter-data-table', HeaderFilterDataTableElement);
+    }
+
+    // --- App Setup ---
+    const table = document.getElementById('filterTable');
+
+    const sampleMovies = [
+      { id: 'M-101', title: 'Inception', director: 'Christopher Nolan', genre: 'Sci-Fi', rating: 'PG-13', year: 2010, score: 8.8, boxOffice: '$836M' },
+      { id: 'M-102', title: 'The Dark Knight', director: 'Christopher Nolan', genre: 'Action', rating: 'PG-13', year: 2008, score: 9.0, boxOffice: '$1.006B' },
+      { id: 'M-103', title: 'Pulp Fiction', director: 'Quentin Tarantino', genre: 'Crime', rating: 'R', year: 1994, score: 8.9, boxOffice: '$213M' },
+      { id: 'M-104', title: 'Interstellar', director: 'Christopher Nolan', genre: 'Sci-Fi', rating: 'PG-13', year: 2014, score: 8.7, boxOffice: '$773M' },
+      { id: 'M-105', title: 'The Matrix', director: 'Lana & Lilly Wachowski', genre: 'Sci-Fi', rating: 'R', year: 1999, score: 8.7, boxOffice: '$467M' },
+      { id: 'M-106', title: 'Parasite', director: 'Bong Joon-ho', genre: 'Thriller', rating: 'R', year: 2019, score: 8.5, boxOffice: '$263M' },
+      { id: 'M-107', title: 'Whiplash', director: 'Damien Chazelle', genre: 'Drama', rating: 'R', year: 2014, score: 8.5, boxOffice: '$49M' },
+      { id: 'M-108', title: 'Spirited Away', director: 'Hayao Miyazaki', genre: 'Animation', rating: 'PG', year: 2001, score: 8.6, boxOffice: '$395M' },
+      { id: 'M-109', title: 'The Grand Budapest Hotel', director: 'Wes Anderson', genre: 'Comedy', rating: 'R', year: 2014, score: 8.1, boxOffice: '$173M' },
+      { id: 'M-110', title: 'Spider-Man: Across the Spider-Verse', director: 'Joaquim Dos Santos', genre: 'Animation', rating: 'PG', year: 2023, score: 8.6, boxOffice: '$690M' },
+      { id: 'M-111', title: 'Oppenheimer', director: 'Christopher Nolan', genre: 'Drama', rating: 'R', year: 2023, score: 8.9, boxOffice: '$957M' },
+      { id: 'M-112', title: 'Blade Runner 2049', director: 'Denis Villeneuve', genre: 'Sci-Fi', rating: 'R', year: 2017, score: 8.0, boxOffice: '$267M' },
+      { id: 'M-113', title: 'Dune: Part Two', director: 'Denis Villeneuve', genre: 'Sci-Fi', rating: 'PG-13', year: 2024, score: 8.6, boxOffice: '$714M' },
+      { id: 'M-114', title: 'Everything Everywhere All at Once', director: 'Daniels', genre: 'Sci-Fi', rating: 'R', year: 2022, score: 7.8, boxOffice: '$143M' },
+      { id: 'M-115', title: 'Mad Max: Fury Road', director: 'George Miller', genre: 'Action', rating: 'R', year: 2015, score: 8.1, boxOffice: '$380M' },
+      { id: 'M-116', title: 'The Departed', director: 'Martin Scorsese', genre: 'Crime', rating: 'R', year: 2006, score: 8.5, boxOffice: '$291M' },
+      { id: 'M-117', title: 'Arrival', director: 'Denis Villeneuve', genre: 'Sci-Fi', rating: 'PG-13', year: 2016, score: 7.9, boxOffice: '$203M' },
+      { id: 'M-118', title: 'Fight Club', director: 'David Fincher', genre: 'Drama', rating: 'R', year: 1999, score: 8.8, boxOffice: '$101M' }
+    ];
+
+    table.columns = [
+      { key: 'id', header: 'ID', width: '90px' },
+      {
+        key: 'title',
+        header: 'Movie Title',
+        width: '240px',
+        filter: { type: 'text', placeholder: 'Search title...' }
+      },
+      {
+        key: 'director',
+        header: 'Director',
+        width: '210px',
+        filter: { type: 'text', placeholder: 'Search director...' }
+      },
+      {
+        key: 'genre',
+        header: 'Genre',
+        width: '150px',
+        filter: {
+          type: 'select',
+          options: [
+            { label: 'Action', value: 'Action' },
+            { label: 'Sci-Fi', value: 'Sci-Fi' },
+            { label: 'Drama', value: 'Drama' },
+            { label: 'Thriller', value: 'Thriller' },
+            { label: 'Crime', value: 'Crime' },
+            { label: 'Animation', value: 'Animation' },
+            { label: 'Comedy', value: 'Comedy' }
+          ]
+        }
+      },
+      {
+        key: 'rating',
+        header: 'Age Rating',
+        width: '130px',
+        filter: {
+          type: 'select',
+          options: [
+            { label: 'PG', value: 'PG' },
+            { label: 'PG-13', value: 'PG-13' },
+            { label: 'R', value: 'R' }
+          ]
+        }
+      },
+      {
+        key: 'year',
+        header: 'Year (Range)',
+        width: '170px',
+        filter: { type: 'number-range' }
+      },
+      {
+        key: 'score',
+        header: 'IMDb',
+        width: '100px',
+        render: (val) => `⭐ ${val}`
+      },
+      { key: 'boxOffice', header: 'Box Office', width: '120px' }
+    ];
+
+    table.data = sampleMovies;
+
+    // Logging & Events
+    const logList = document.getElementById('logList');
+    table.addEventListener('header-filter:change', (e) => {
+      const { columnKey, filterValue, activeFilters } = e.detail;
+      const entry = document.createElement('div');
+      entry.innerHTML = `&gt; Filter Changed on <strong>${columnKey}</strong> &rarr; Value: <code>${JSON.stringify(filterValue)}</code> (Active: ${Object.keys(activeFilters).join(', ')})`;
+      logList.insertBefore(entry, logList.firstChild);
+    });
+
+    table.addEventListener('header-filter:clear', (e) => {
+      const entry = document.createElement('div');
+      entry.innerHTML = `&gt; Filter Cleared: <strong>${e.detail.clearedColumnKey || 'ALL'}</strong>`;
+      logList.insertBefore(entry, logList.firstChild);
+    });
+
+    // Control buttons
+    document.getElementById('btnClearAllHeaderFilters').addEventListener('click', () => {
+      table.clearAllFilters();
+    });
+
+    document.getElementById('btnResetAllData').addEventListener('click', () => {
+      table.clearAllFilters();
+      table.setSearchTerm('');
+      table.data = [...sampleMovies];
+    });
+
+    document.getElementById('toggleTheme').addEventListener('change', (e) => {
+      if (e.target.checked) table.setAttribute('theme', 'dark');
+      else table.removeAttribute('theme');
+    });
+  </script>
+</body>
+</html>

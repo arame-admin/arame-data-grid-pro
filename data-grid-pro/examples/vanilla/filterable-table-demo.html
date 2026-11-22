@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Filterable Data Table Demo</title>
+  <style>
+    :root, [data-theme="light"] {
+      --ft-primary: #2563eb;
+      --ft-primary-hover: #1d4ed8;
+      --ft-bg-surface: #ffffff;
+      --ft-bg-header: #f8fafc;
+      --ft-bg-hover: #f1f5f9;
+      --ft-text-main: #0f172a;
+      --ft-text-muted: #64748b;
+      --ft-border-color: #e2e8f0;
+      --ft-focus-ring: rgba(37, 99, 235, 0.35);
+      --ft-radius: 0.5rem;
+      --ft-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+      --ft-cell-py: 0.65rem;
+      --ft-cell-px: 0.85rem;
+    }
+
+    body {
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      padding: 2rem;
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 1.5rem;
+      border-radius: 0.75rem;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    }
+
+    filterable-data-table {
+      display: block;
+      color: var(--ft-text-main);
+      background-color: var(--ft-bg-surface);
+      border: 1px solid var(--ft-border-color);
+      border-radius: var(--ft-radius);
+      box-shadow: var(--ft-shadow);
+      position: relative;
+    }
+    filterable-data-table * { box-sizing: border-box; }
+
+    .ft-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      background-color: var(--ft-bg-header);
+      border-bottom: 1px solid var(--ft-border-color);
+    }
+    .ft-toolbar-left, .ft-toolbar-right { display: flex; align-items: center; gap: 0.5rem; }
+    .ft-search-input {
+      border: 1px solid var(--ft-border-color);
+      background-color: var(--ft-bg-surface);
+      color: var(--ft-text-main);
+      border-radius: 0.375rem;
+      padding: 0.45rem 0.75rem;
+      font-size: 0.875rem;
+      min-width: 260px;
+      outline: none;
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+      transition: all 0.15s ease-in-out;
+    }
+    .ft-search-input:focus {
+      border-color: var(--ft-primary);
+      box-shadow: 0 0 0 3px var(--ft-focus-ring);
+    }
+    .ft-badge-filter-count {
+      padding: 0.25rem 0.6rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: 9999px;
+      background: #eff6ff;
+      color: var(--ft-primary);
+      border: 1px solid rgba(37, 99, 235, 0.25);
+    }
+    .ft-btn-clear-all {
+      background: transparent;
+      border: 1px solid var(--ft-border-color);
+      border-radius: 0.375rem;
+      padding: 0.35rem 0.65rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--ft-text-main);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .ft-btn-clear-all:hover {
+      background: var(--ft-bg-hover);
+      border-color: #94a3b8;
+    }
+    .ft-btn-clear-all:focus-visible {
+      outline: 2px solid var(--ft-primary);
+      outline-offset: 2px;
+    }
+
+    .ft-table-container { width: 100%; overflow-x: auto; max-height: 550px; }
+    .ft-table { width: 100%; border-collapse: collapse; text-align: left; }
+    .ft-thead { position: sticky; top: 0; z-index: 10; background-color: var(--ft-bg-header); }
+    .ft-th {
+      padding: var(--ft-cell-py) var(--ft-cell-px);
+      font-weight: 600;
+      color: var(--ft-text-muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+    }
+    .ft-filter-row th {
+      padding: 0.45rem var(--ft-cell-px) 0.65rem;
+      border-bottom: 1px solid var(--ft-border-color);
+      background-color: var(--ft-bg-header);
+    }
+    .ft-input, .ft-select {
+      width: 100%;
+      height: 2rem;
+      padding: 0.3rem 0.55rem;
+      font-size: 0.8125rem;
+      border: 1px solid var(--ft-border-color);
+      border-radius: 0.375rem;
+      background-color: var(--ft-bg-surface);
+      color: var(--ft-text-main);
+      outline: none;
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03);
+      transition: all 0.15s ease;
+    }
+    .ft-input:hover, .ft-select:hover {
+      border-color: #94a3b8;
+    }
+    .ft-input:focus, .ft-select:focus {
+      border-color: var(--ft-primary);
+      box-shadow: 0 0 0 3px var(--ft-focus-ring);
+    }
+    .ft-select {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+      background-position: right 0.5rem center;
+      background-repeat: no-repeat;
+      background-size: 1.1em 1.1em;
+      padding-right: 1.75rem;
+      cursor: pointer;
+    }
+    .ft-range-group { display: flex; gap: 0.35rem; align-items: center; }
+    .ft-range-group input { width: 50%; }
+
+    .ft-tbody .ft-row { border-bottom: 1px solid var(--ft-border-color); }
+    .ft-tbody .ft-row:hover { background-color: var(--ft-bg-hover); }
+    .ft-td { padding: var(--ft-cell-py) var(--ft-cell-px); color: var(--ft-text-main); vertical-align: middle; }
+
+    .ft-th-sortable { cursor: pointer; user-select: none; }
+    .ft-th-sortable:hover { background-color: #f1f5f9; }
+
+    .ft-pagination-footer {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      background-color: var(--ft-bg-header);
+      border-top: 1px solid var(--ft-border-color);
+      font-size: 0.875rem;
+      color: var(--ft-text-muted);
+    }
+    .ft-pagination-left, .ft-pagination-right { display: flex; align-items: center; gap: 0.5rem; }
+    .ft-page-size-select {
+      border: 1px solid var(--ft-border-color);
+      background-color: var(--ft-bg-surface);
+      color: var(--ft-text-main);
+      border-radius: 0.375rem;
+      padding: 0.3rem 0.55rem;
+      font-size: 0.8125rem;
+      outline: none;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .ft-page-size-select:focus {
+      border-color: var(--ft-primary);
+      box-shadow: 0 0 0 3px var(--ft-focus-ring);
+    }
+    .ft-page-btn {
+      padding: 0.3rem 0.65rem;
+      border: 1px solid var(--ft-border-color);
+      border-radius: 0.375rem;
+      background: var(--ft-bg-surface);
+      color: var(--ft-text-main);
+      font-size: 0.8125rem;
+      cursor: pointer;
+      min-width: 2rem;
+      text-align: center;
+      transition: all 0.15s ease;
+    }
+    .ft-page-btn:hover:not(:disabled) {
+      background: var(--ft-bg-hover);
+      border-color: #94a3b8;
+    }
+    .ft-page-btn:focus-visible {
+      outline: none;
+      border-color: var(--ft-primary);
+      box-shadow: 0 0 0 3px var(--ft-focus-ring);
+    }
+    .ft-page-btn.active {
+      background: var(--ft-primary);
+      color: #ffffff;
+      border-color: var(--ft-primary);
+    }
+    .ft-page-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Multi-Column Filterable Data Table Demo</h2>
+    <p style="color: #64748b; font-size: 0.875rem; margin-bottom: 1rem;">
+      Narrow records using a global search and dedicated per-column filters:
+      <strong>Text search</strong> (Client), <strong>Select dropdown</strong> (Status), <strong>Number range</strong> (Amount min/max), and <strong>Date range</strong> (Invoice Date start/end).
+    </p>
+
+    <filterable-data-table id="invoice-table"></filterable-data-table>
+
+    <!-- Usage Guide Section -->
+    <section style="margin-top: 2rem; background: #f8fafc; border: 1px solid var(--ft-border-color); border-radius: 0.5rem; padding: 1.25rem;" aria-label="Filterable Table Usage Guide">
+      <h3 style="margin: 0 0 0.5rem 0; font-size: 1.1rem; font-weight: 700; color: var(--ft-text-main); display: flex; align-items: center; gap: 0.5rem;">
+        <span>💡 How to Use Column Filtering</span>
+      </h3>
+      <p style="color: var(--ft-text-muted); font-size: 0.85rem; margin-bottom: 1rem; line-height: 1.5;">
+        Multi-Column Filtering combines instant debounced global searching with per-column controls like text matching, single/multi-select dropdowns, number min/max ranges, and date boundaries.
+      </p>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem;">
+        <div style="background: #ffffff; border: 1px solid var(--ft-border-color); border-radius: 0.375rem; padding: 0.85rem;">
+          <h4 style="margin: 0 0 0.35rem 0; font-size: 0.85rem; font-weight: 700; color: var(--ft-primary);">1. Define Column Filter Types</h4>
+          <p style="margin: 0; font-size: 0.8rem; color: var(--ft-text-muted); line-height: 1.4;">
+            Assign <code>filter: 'text' | 'select' | 'number-range' | 'date-range'</code> in your column configuration.
+          </p>
+          <pre style="background: #0f172a; color: #38bdf8; padding: 0.5rem; border-radius: 0.25rem; font-size: 0.725rem; margin-top: 0.4rem; overflow-x: auto;"><code>{ id: 'status', filter: 'select', filterOptions: ['Paid', 'Pending'] }
+{ id: 'amount', filter: 'number-range' }</code></pre>
+        </div>
+
+        <div style="background: #ffffff; border: 1px solid var(--ft-border-color); border-radius: 0.375rem; padding: 0.85rem;">
+          <h4 style="margin: 0 0 0.35rem 0; font-size: 0.85rem; font-weight: 700; color: var(--ft-primary);">2. Filter Count &amp; Reset</h4>
+          <p style="margin: 0; font-size: 0.8rem; color: var(--ft-text-muted); line-height: 1.4;">
+            Active filter count badges automatically increment and decrement, with single-click "Clear All Filters" resetting all inputs.
+          </p>
+          <pre style="background: #0f172a; color: #38bdf8; padding: 0.5rem; border-radius: 0.25rem; font-size: 0.725rem; margin-top: 0.4rem; overflow-x: auto;"><code>table.clearFilters(); // Resets all column filters &amp; searches</code></pre>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // Standalone implementation for zero-dependency file:// previewing
+    function resolveValue(row, path) {
+      if (!path) return undefined;
+      return String(path).split('.').reduce((acc, part) => (acc ? acc[part] : undefined), row);
+    }
+
+    function isFilterActive(val) {
+      if (val == null) return false;
+      if (typeof val === 'string') return val.trim().length > 0;
+      if (Array.isArray(val)) return val.length > 0;
+      if (typeof val === 'object') return Boolean(val.min) || Boolean(val.max) || Boolean(val.start) || Boolean(val.end);
+      return true;
+    }
+
+    function filterRows(rows, filters, globalSearch, columns) {
+      const q = globalSearch.trim().toLowerCase();
+      return rows.filter(row => {
+        if (q) {
+          const match = columns.some(c => {
+            const v = resolveValue(row, c.field);
+            return v != null && String(v).toLowerCase().includes(q);
+          });
+          if (!match) return false;
+        }
+
+        for (const f of filters) {
+          if (!isFilterActive(f.value)) continue;
+          const col = columns.find(c => c.id === f.columnId);
+          if (!col || !col.field) continue;
+          const raw = resolveValue(row, col.field);
+
+          if (f.type === 'text') {
+            if (!String(raw || '').toLowerCase().includes(String(f.value).trim().toLowerCase())) return false;
+          } else if (f.type === 'select') {
+            if (String(raw) !== String(f.value)) return false;
+          } else if (f.type === 'number-range') {
+            const num = Number(raw);
+            if (isNaN(num)) return false;
+            if (f.value.min !== '' && f.value.min != null && num < Number(f.value.min)) return false;
+            if (f.value.max !== '' && f.value.max != null && num > Number(f.value.max)) return false;
+          } else if (f.type === 'date-range') {
+            const d = new Date(raw).getTime();
+            if (isNaN(d)) return false;
+            if (f.value.start && d < new Date(f.value.start).getTime()) return false;
+            if (f.value.end && d > new Date(f.value.end + 'T23:59:59').getTime()) return false;
+          }
+        }
+        return true;
+      });
+    }
+
+    function createElement(tag, cls, attrs) {
+      const el = document.createElement(tag);
+      if (cls) el.className = cls;
+      if (attrs) {
+        for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, String(v));
+      }
+      return el;
+    }
+
+    function removeAllChildren(p) {
+      while (p.firstChild) p.removeChild(p.firstChild);
+    }
+
+    class FilterableDataTable extends HTMLElement {
+      constructor() {
+        super();
+        this._rows = [];
+        this._columns = [];
+        this._options = {};
+        this._globalSearch = '';
+        this._filters = new Map();
+        this._sortCriteria = [];
+        this._pageIndex = 0;
+        this._pageSize = 5;
+      }
+
+      get rows() { return this._rows; }
+      set rows(v) { this._rows = Array.isArray(v) ? v : []; this.render(); }
+
+      get columns() { return this._columns; }
+      set columns(v) { this._columns = Array.isArray(v) ? v : []; this.render(); }
+
+      get activeCount() {
+        let count = 0;
+        this._filters.forEach(f => { if (isFilterActive(f.value)) count++; });
+        return count;
+      }
+
+      connectedCallback() {
+        if (!this.containerEl) {
+          this.containerEl = createElement('div', 'ft-wrapper');
+          this.toolbarEl = createElement('div', 'ft-toolbar');
+          this.tableContainerEl = createElement('div', 'ft-table-container');
+          this.tableEl = createElement('table', 'ft-table');
+          this.theadEl = createElement('thead', 'ft-thead');
+          this.tbodyEl = createElement('tbody', 'ft-tbody');
+          this.footerEl = createElement('div', 'ft-pagination-footer');
+
+          this.tableEl.appendChild(this.theadEl);
+          this.tableEl.appendChild(this.tbodyEl);
+          this.tableContainerEl.appendChild(this.tableEl);
+          this.containerEl.appendChild(this.toolbarEl);
+          this.containerEl.appendChild(this.tableContainerEl);
+          this.containerEl.appendChild(this.footerEl);
+          this.appendChild(this.containerEl);
+        }
+        this.render();
+      }
+
+      render() {
+        if (!this.containerEl) return;
+        this.renderToolbar();
+        this.renderHeader();
+        this.renderBody();
+        this.renderFooter();
+      }
+
+      renderToolbar() {
+        removeAllChildren(this.toolbarEl);
+        const left = createElement('div', 'ft-toolbar-left');
+        const search = createElement('input', 'ft-search-input', {
+          type: 'search',
+          placeholder: 'Search invoices globally...',
+          value: this._globalSearch
+        });
+        search.addEventListener('input', () => {
+          this._globalSearch = search.value;
+          this._pageIndex = 0;
+          this.render();
+        });
+        left.appendChild(search);
+
+        const right = createElement('div', 'ft-toolbar-right');
+        const cnt = this.activeCount;
+        if (cnt > 0 || this._globalSearch) {
+          const badge = createElement('span', 'ft-badge-filter-count');
+          badge.textContent = `${cnt} filter${cnt === 1 ? '' : 's'} active`;
+          right.appendChild(badge);
+
+          const clear = createElement('button', 'ft-btn-clear-all', { type: 'button' });
+          clear.textContent = 'Clear all';
+          clear.addEventListener('click', () => {
+            this._filters.clear();
+            this._globalSearch = '';
+            this._pageIndex = 0;
+            this.render();
+          });
+          right.appendChild(clear);
+        }
+
+        this.toolbarEl.appendChild(left);
+        this.toolbarEl.appendChild(right);
+      }
+
+      renderHeader() {
+        removeAllChildren(this.theadEl);
+        const trHead = createElement('tr');
+        this._columns.forEach(c => {
+          const th = createElement('th', 'ft-th ft-th-sortable');
+          if (c.width) th.style.width = c.width;
+          const active = this._sortCriteria.find(sc => sc.columnId === c.id);
+          const icon = active?.direction === 'asc' ? ' ▲' : active?.direction === 'desc' ? ' ▼' : ' ⇅';
+          th.textContent = `${c.header} ${icon}`;
+          th.title = 'Click to sort';
+          th.addEventListener('click', () => {
+            const cur = this._sortCriteria.find(sc => sc.columnId === c.id);
+            let next = 'asc';
+            if (cur && cur.direction === 'asc') next = 'desc';
+            else if (cur && cur.direction === 'desc') next = null;
+            this._sortCriteria = next ? [{ columnId: c.id, direction: next }] : [];
+            this.render();
+          });
+          trHead.appendChild(th);
+        });
+        this.theadEl.appendChild(trHead);
+
+        const trFilt = createElement('tr', 'ft-filter-row');
+        this._columns.forEach(c => {
+          const th = createElement('th');
+          if (c.filter) {
+            const f = c.filter;
+            const cur = this._filters.get(c.id)?.value;
+
+            if (f.type === 'text') {
+              const input = createElement('input', 'ft-input', { placeholder: 'Filter text...', value: cur || '' });
+              input.addEventListener('input', () => {
+                this._filters.set(c.id, { columnId: c.id, type: 'text', value: input.value });
+                this._pageIndex = 0;
+                this.renderToolbar();
+                this.renderBody();
+                this.renderFooter();
+              });
+              th.appendChild(input);
+            } else if (f.type === 'select') {
+              const sel = createElement('select', 'ft-select');
+              sel.innerHTML = '<option value="">All Statuses</option>' + f.options.map(o => `<option value="${o.value}" ${cur === o.value ? 'selected' : ''}>${o.label}</option>`).join('');
+              sel.addEventListener('change', () => {
+                this._filters.set(c.id, { columnId: c.id, type: 'select', value: sel.value });
+                this._pageIndex = 0;
+                this.renderToolbar();
+                this.renderBody();
+                this.renderFooter();
+              });
+              th.appendChild(sel);
+            } else if (f.type === 'number-range') {
+              const group = createElement('div', 'ft-range-group');
+              const minIn = createElement('input', 'ft-input', { type: 'number', placeholder: 'Min', value: cur?.min || '' });
+              const maxIn = createElement('input', 'ft-input', { type: 'number', placeholder: 'Max', value: cur?.max || '' });
+              const update = () => {
+                this._filters.set(c.id, { columnId: c.id, type: 'number-range', value: { min: minIn.value, max: maxIn.value } });
+                this._pageIndex = 0;
+                this.renderToolbar();
+                this.renderBody();
+                this.renderFooter();
+              };
+              minIn.addEventListener('input', update);
+              maxIn.addEventListener('input', update);
+              group.appendChild(minIn);
+              group.appendChild(maxIn);
+              th.appendChild(group);
+            } else if (f.type === 'date-range') {
+              const group = createElement('div', 'ft-range-group');
+              const sIn = createElement('input', 'ft-input', { type: 'date', value: cur?.start || '' });
+              const eIn = createElement('input', 'ft-input', { type: 'date', value: cur?.end || '' });
+              const update = () => {
+                this._filters.set(c.id, { columnId: c.id, type: 'date-range', value: { start: sIn.value, end: eIn.value } });
+                this._pageIndex = 0;
+                this.renderToolbar();
+                this.renderBody();
+                this.renderFooter();
+              };
+              sIn.addEventListener('change', update);
+              eIn.addEventListener('change', update);
+              group.appendChild(sIn);
+              group.appendChild(eIn);
+              th.appendChild(group);
+            }
+          }
+          trFilt.appendChild(th);
+        });
+        this.theadEl.appendChild(trFilt);
+      }
+
+      renderBody() {
+        removeAllChildren(this.tbodyEl);
+        let filtered = filterRows(this._rows, Array.from(this._filters.values()), this._globalSearch, this._columns);
+
+        // Sorting
+        if (this._sortCriteria.length > 0) {
+          const crit = this._sortCriteria[0];
+          const col = this._columns.find(c => c.id === crit.columnId);
+          if (col && col.field) {
+            filtered = [...filtered].sort((a, b) => {
+              const valA = resolveValue(a, col.field);
+              const valB = resolveValue(b, col.field);
+              if (valA == null && valB == null) return 0;
+              if (valA == null) return crit.direction === 'asc' ? -1 : 1;
+              if (valB == null) return crit.direction === 'asc' ? 1 : -1;
+              if (typeof valA === 'number' && typeof valB === 'number') {
+                return crit.direction === 'asc' ? valA - valB : valB - valA;
+              }
+              const strA = String(valA).toLowerCase();
+              const strB = String(valB).toLowerCase();
+              if (strA < strB) return crit.direction === 'asc' ? -1 : 1;
+              if (strA > strB) return crit.direction === 'asc' ? 1 : -1;
+              return 0;
+            });
+          }
+        }
+
+        this._filteredRows = filtered;
+        this._totalRows = filtered.length;
+        this._totalPages = Math.max(1, Math.ceil(this._totalRows / this._pageSize));
+        if (this._pageIndex >= this._totalPages) this._pageIndex = Math.max(0, this._totalPages - 1);
+
+        if (filtered.length === 0) {
+          const tr = createElement('tr', 'ft-row');
+          const td = createElement('td', 'ft-td', { colspan: this._columns.length });
+          td.style.textAlign = 'center';
+          td.style.padding = '2rem';
+          td.textContent = 'No matching records found.';
+          tr.appendChild(td);
+          this.tbodyEl.appendChild(tr);
+          return;
+        }
+
+        const paged = filtered.slice(this._pageIndex * this._pageSize, (this._pageIndex + 1) * this._pageSize);
+
+        paged.forEach(row => {
+          const tr = createElement('tr', 'ft-row');
+          this._columns.forEach(c => {
+            const td = createElement('td', 'ft-td');
+            const val = resolveValue(row, c.field);
+            if (c.formatter) td.textContent = c.formatter(val, row);
+            else td.textContent = val == null ? '' : String(val);
+            tr.appendChild(td);
+          });
+          this.tbodyEl.appendChild(tr);
+        });
+      }
+
+      renderFooter() {
+        removeAllChildren(this.footerEl);
+        const total = this._totalRows || 0;
+        const totalPages = this._totalPages || 1;
+        const currentPage = this._pageIndex + 1;
+        const start = total === 0 ? 0 : this._pageIndex * this._pageSize + 1;
+        const end = Math.min((this._pageIndex + 1) * this._pageSize, total);
+
+        const left = createElement('div', 'ft-pagination-left');
+        const sizeLabel = createElement('label');
+        sizeLabel.textContent = 'Rows per page: ';
+        const sizeSel = createElement('select', 'ft-page-size-select');
+        [5, 10, 20].forEach(sz => {
+          const opt = createElement('option', '', { value: sz });
+          opt.textContent = String(sz);
+          if (sz === this._pageSize) opt.selected = true;
+          sizeSel.appendChild(opt);
+        });
+        sizeSel.addEventListener('change', () => {
+          this._pageSize = Number(sizeSel.value);
+          this._pageIndex = 0;
+          this.render();
+        });
+        left.appendChild(sizeLabel);
+        left.appendChild(sizeSel);
+
+        const countInfo = createElement('span');
+        countInfo.style.marginLeft = '0.5rem';
+        countInfo.textContent = `Showing ${start}–${end} of ${total} records`;
+        left.appendChild(countInfo);
+
+        const right = createElement('div', 'ft-pagination-right');
+        const prevBtn = createElement('button', 'ft-page-btn', { type: 'button' });
+        prevBtn.textContent = '‹ Prev';
+        prevBtn.disabled = this._pageIndex === 0;
+        prevBtn.addEventListener('click', () => {
+          if (this._pageIndex > 0) {
+            this._pageIndex--;
+            this.render();
+          }
+        });
+        right.appendChild(prevBtn);
+
+        for (let p = 1; p <= totalPages; p++) {
+          const pBtn = createElement('button', `ft-page-btn ${p === currentPage ? 'active' : ''}`, { type: 'button' });
+          pBtn.textContent = String(p);
+          pBtn.addEventListener('click', () => {
+            this._pageIndex = p - 1;
+            this.render();
+          });
+          right.appendChild(pBtn);
+        }
+
+        const nextBtn = createElement('button', 'ft-page-btn', { type: 'button' });
+        nextBtn.textContent = 'Next ›';
+        nextBtn.disabled = this._pageIndex >= totalPages - 1;
+        nextBtn.addEventListener('click', () => {
+          if (this._pageIndex < totalPages - 1) {
+            this._pageIndex++;
+            this.render();
+          }
+        });
+        right.appendChild(nextBtn);
+
+        this.footerEl.appendChild(left);
+        this.footerEl.appendChild(right);
+      }
+    }
+
+    if (!window.customElements.get('filterable-data-table')) {
+      window.customElements.define('filterable-data-table', FilterableDataTable);
+    }
+
+    // App Initialization
+    const table = document.getElementById('invoice-table');
+
+    table.columns = [
+      { id: 'client', header: 'Client Account', field: 'client', width: '220px', filter: { type: 'text' } },
+      { id: 'status', header: 'Billing Status', field: 'status', width: '160px', filter: { type: 'select', options: [{ label: 'Paid', value: 'Paid' }, { label: 'Pending', value: 'Pending' }, { label: 'Overdue', value: 'Overdue' }] } },
+      { id: 'amount', header: 'Invoice Amount', field: 'amount', width: '200px', filter: { type: 'number-range' }, formatter: (v) => `$${Number(v).toLocaleString()}` },
+      { id: 'date', header: 'Invoice Date', field: 'date', width: '240px', filter: { type: 'date-range' } }
+    ];
+
+    table.rows = [
+      { client: 'Stripe Corporation', status: 'Paid', amount: 14500, date: '2024-01-10' },
+      { client: 'Vercel Platform', status: 'Pending', amount: 8200, date: '2024-02-14' },
+      { client: 'Supabase Cloud', status: 'Paid', amount: 3900, date: '2024-02-28' },
+      { client: 'Linear App', status: 'Overdue', amount: 1800, date: '2024-03-05' },
+      { client: 'Figma Systems', status: 'Paid', amount: 22000, date: '2024-03-19' },
+      { client: 'Datadog Ops', status: 'Paid', amount: 9600, date: '2024-03-24' },
+      { client: 'Snowflake Analytics', status: 'Pending', amount: 31500, date: '2024-04-02' },
+      { client: 'Cloudflare Network', status: 'Paid', amount: 12400, date: '2024-04-11' },
+      { client: 'GitHub Enterprise', status: 'Pending', amount: 16800, date: '2024-04-18' },
+      { client: 'HashiCorp Vault', status: 'Overdue', amount: 7300, date: '2024-05-01' },
+      { client: 'MongoDB Atlas', status: 'Paid', amount: 11200, date: '2024-05-15' },
+      { client: 'Twilio SendGrid', status: 'Paid', amount: 4500, date: '2024-05-22' }
+    ];
+  </script>
+</body>
+</html>

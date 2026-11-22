@@ -1,0 +1,1530 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Documentation — arame-data-grid-pro</title>
+    <style>
+      :root {
+        --bg: #0f172a;
+        --card-bg: #1e293b;
+        --sidebar-bg: #111827;
+        --border: #334155;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --primary: #3b82f6;
+        --primary-hover: #2563eb;
+        --accent: #10b981;
+        --code-bg: #0b1120;
+        --tag-bg: rgba(59, 130, 246, 0.15);
+        --tag-text: #93c5fd;
+        --font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+          Arial, sans-serif;
+        --transition: 0.18s ease;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        scroll-behavior: smooth !important;
+      }
+
+      body {
+        font-family: var(--font-family);
+        background-color: var(--bg);
+        color: var(--text);
+        line-height: 1.6;
+        min-height: 100vh;
+      }
+
+      /* Accessibility Skip Link */
+      .skip-link {
+        position: absolute;
+        top: -40px;
+        left: 0;
+        background: var(--primary);
+        color: #ffffff;
+        padding: 0.5rem 1rem;
+        z-index: 100;
+        text-decoration: none;
+        font-weight: 600;
+      }
+      .skip-link:focus {
+        top: 0;
+      }
+
+      /* Layout */
+      .doc-layout {
+        display: flex;
+        min-height: 100vh;
+      }
+
+      /* Sidebar Navigation */
+      aside.sidebar {
+        width: 280px;
+        background: var(--sidebar-bg);
+        border-right: 1px solid var(--border);
+        padding: 1.75rem 1.25rem;
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        overflow-y: auto;
+        flex-shrink: 0;
+      }
+
+      @media (max-width: 900px) {
+        .doc-layout {
+          flex-direction: column;
+        }
+        aside.sidebar {
+          width: 100%;
+          height: auto;
+          position: relative;
+          border-right: none;
+          border-bottom: 1px solid var(--border);
+        }
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #ffffff;
+        margin-bottom: 0.25rem;
+      }
+
+      .brand-sub {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 1.75rem;
+      }
+
+      .nav-toc ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+      }
+
+      .nav-toc a {
+        color: var(--text-muted);
+        text-decoration: none;
+        font-size: 0.9rem;
+        display: block;
+        padding: 0.4rem 0.6rem;
+        border-radius: 0.375rem;
+        transition:
+          background var(--transition),
+          color var(--transition);
+      }
+
+      .nav-toc a:hover,
+      .nav-toc a:focus-visible {
+        color: #ffffff;
+        background: rgba(255, 255, 255, 0.06);
+      }
+
+      /* Main Content Area */
+      main.doc-content {
+        flex: 1;
+        padding: 3rem 4rem;
+        max-width: 1040px;
+        overflow-x: hidden;
+      }
+
+      @media (max-width: 600px) {
+        main.doc-content {
+          padding: 2rem 1.25rem;
+        }
+      }
+
+      h1.doc-title {
+        font-size: 2.25rem;
+        font-weight: 800;
+        color: #ffffff;
+        margin-bottom: 0.75rem;
+      }
+
+      p.doc-lead {
+        font-size: 1.1rem;
+        color: var(--text-muted);
+        margin-bottom: 2.5rem;
+        line-height: 1.6;
+      }
+
+      section.doc-section {
+        margin-bottom: 3.5rem;
+        scroll-margin-top: 2rem;
+      }
+
+      h2 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #ffffff;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 0.5rem;
+        margin-bottom: 1.25rem;
+      }
+
+      h3 {
+        font-size: 1.15rem;
+        font-weight: 600;
+        color: #e2e8f0;
+        margin: 1.5rem 0 0.5rem 0;
+      }
+
+      p,
+      li {
+        color: #cbd5e1;
+        font-size: 0.95rem;
+        margin-bottom: 0.75rem;
+      }
+
+      ul,
+      ol {
+        padding-left: 1.5rem;
+        margin-bottom: 1rem;
+      }
+
+      /* Code Blocks */
+      .code-container {
+        position: relative;
+        margin: 1rem 0 1.5rem 0;
+      }
+
+      .btn-copy-code {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        background: #1e293b;
+        border: 1px solid #334155;
+        color: #94a3b8;
+        font-size: 0.75rem;
+        padding: 0.25rem 0.55rem;
+        border-radius: 0.375rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        transition: all 0.15s ease;
+        z-index: 5;
+      }
+
+      .btn-copy-code:hover {
+        background: var(--primary);
+        color: #ffffff;
+        border-color: #3b82f6;
+      }
+
+      .btn-copy-code.copied {
+        background: #16a34a;
+        color: #ffffff;
+        border-color: #22c55e;
+      }
+
+      pre {
+        background: var(--code-bg);
+        border: 1px solid var(--border);
+        border-radius: 0.5rem;
+        padding: 1.25rem;
+        padding-top: 1.75rem;
+        overflow-x: auto;
+        font-family:
+          ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 0.85rem;
+        color: #e2e8f0;
+        margin: 0;
+        line-height: 1.5;
+      }
+
+      .table-spec-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 0.5rem;
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .table-spec-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 0.5rem;
+      }
+
+      .table-spec-title {
+        font-size: 1.1rem;
+        color: #ffffff;
+        font-weight: 700;
+      }
+
+      .table-spec-badge {
+        font-size: 0.75rem;
+        background: rgba(37, 99, 235, 0.15);
+        color: #60a5fa;
+        border: 1px solid rgba(37, 99, 235, 0.3);
+        padding: 0.2rem 0.5rem;
+        border-radius: 9999px;
+      }
+
+      code {
+        font-family:
+          ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        background: var(--code-bg);
+        border: 1px solid #1e293b;
+        padding: 0.15rem 0.35rem;
+        border-radius: 0.25rem;
+        font-size: 0.85em;
+        color: #93c5fd;
+      }
+
+      /* Tables */
+      table.doc-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1.25rem 0;
+        font-size: 0.875rem;
+      }
+
+      table.doc-table th,
+      table.doc-table td {
+        border: 1px solid var(--border);
+        padding: 0.65rem 0.85rem;
+        text-align: left;
+      }
+
+      table.doc-table th {
+        background: var(--card-bg);
+        color: #ffffff;
+        font-weight: 600;
+      }
+
+      table.doc-table tr:nth-child(even) {
+        background: rgba(30, 41, 59, 0.4);
+      }
+
+      /* Cards */
+      .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1rem;
+        margin: 1.25rem 0;
+      }
+
+      .feature-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 0.5rem;
+        padding: 1rem 1.25rem;
+      }
+
+      .feature-card h4 {
+        font-size: 0.95rem;
+        color: #ffffff;
+        margin-bottom: 0.35rem;
+      }
+
+      .feature-card p {
+        font-size: 0.825rem;
+        color: var(--text-muted);
+        margin: 0;
+      }
+
+      /* Callout Note */
+      .callout {
+        background: rgba(59, 130, 246, 0.1);
+        border-left: 4px solid var(--primary);
+        padding: 1rem;
+        border-radius: 0 0.375rem 0.375rem 0;
+        margin: 1.25rem 0;
+        font-size: 0.9rem;
+        color: #cbd5e1;
+      }
+
+      .callout strong {
+        color: #ffffff;
+      }
+
+      /* Motion */
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          transition-duration: 0.01ms !important;
+          scroll-behavior: auto !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <a href="#main-doc" class="skip-link">Skip to documentation</a>
+
+    <div class="doc-layout">
+      <!-- Sidebar Navigation -->
+      <aside
+        class="sidebar"
+        role="navigation"
+        aria-label="Documentation Navigation"
+      >
+        <div class="brand">
+          <span>⚡ arame-data-grid-pro</span>
+        </div>
+        <div class="brand-sub">Beginner-Friendly Guide</div>
+
+        <nav class="nav-toc">
+          <ul>
+            <li>
+              <a href="#section-introduction">1. What is this library?</a>
+            </li>
+            <li><a href="#section-keyterms">2. Key Terms Explained</a></li>
+            <li>
+              <a href="#section-prerequisites"
+                >3. Prerequisites &amp; Requirements</a
+              >
+            </li>
+            <li><a href="#section-installation">4. Installation</a></li>
+            <li><a href="#section-quickstart">5. 5-Minute Quick Start</a></li>
+            <li>
+              <a href="#section-configuration"
+                >6. Registering &amp; Configuring</a
+              >
+            </li>
+            <li>
+              <a href="#section-dataloading"
+                >7. Loading Data (Client vs Server)</a
+              >
+            </li>
+            <li>
+              <a href="#section-tableguides">8. Table Types &amp; Gallery</a>
+            </li>
+            <li>
+              <a href="#section-events-a11y">9. Events &amp; Accessibility</a>
+            </li>
+            <li><a href="#section-troubleshooting">10. Troubleshooting</a></li>
+            <li
+              style="
+                margin-top: 1rem;
+                border-top: 1px solid var(--border);
+                padding-top: 0.75rem;
+              "
+            >
+              <a
+                href="gallery.html"
+                style="color: var(--primary); font-weight: 600"
+                >&larr; Open Table Gallery</a
+              >
+            </li>
+            <li>
+              <a
+                href="configurable-table-demo.html"
+                style="color: var(--accent); font-weight: 600"
+                >&rarr; Configurable Playground</a
+              >
+            </li>
+          </ul>
+        </nav>
+      </aside>
+
+      <!-- Main Content -->
+      <main id="main-doc" class="doc-content" role="main">
+        <h1 class="doc-title">Data Table Beginner Guide &amp; Reference</h1>
+        <p class="doc-lead">
+          Learn how to install, register, and configure interactive data tables
+          in simple, everyday language. Works in plain HTML, Next.js, React,
+          Vue, Svelte, or any other web tool.
+        </p>
+
+        <!-- 1. Introduction -->
+        <section id="section-introduction" class="doc-section">
+          <h2>1. What is this library for?</h2>
+          <p>
+            Whenever you build a website or dashboard, you often need to show
+            lists of items—like customer contacts, store products, or financial
+            reports.
+          </p>
+          <p>
+            <code>arame-data-grid-pro</code> gives you ready-made data tables
+            that come with search bars, sortable headers, page buttons, and cell
+            editing built right in.
+          </p>
+          <div class="feature-grid">
+            <div class="feature-card">
+              <h4>Works Anywhere</h4>
+              <p>
+                Built with standard browser Web Components. Use it directly in
+                regular HTML, or inside modern frameworks like Next.js, React,
+                and Vue without needing special plugins.
+              </p>
+            </div>
+            <div class="feature-card">
+              <h4>No Extra Styling Dependencies</h4>
+              <p>
+                Everything is styled cleanly out of the box. You do not need to
+                install Tailwind CSS or any external theme library.
+              </p>
+            </div>
+            <div class="feature-card">
+              <h4>13 Specialized Table Types</h4>
+              <p>
+                Includes sticky columns, expandable details, hierarchical trees,
+                and live payroll calculators with instant math formulas.
+              </p>
+            </div>
+            <div class="feature-card">
+              <h4>Ready to Use Immediately</h4>
+              <p>
+                Search, column sorting, and pagination work out of the box with
+                zero complex setup.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. Key Terms Explained -->
+        <section id="section-keyterms" class="doc-section">
+          <h2>2. Key Terms Explained Simply</h2>
+          <p>
+            If you are new to web development, here is what these common terms
+            mean:
+          </p>
+          <ul>
+            <li>
+              <strong>Web Component / Custom Element:</strong> A custom HTML tag
+              defined with JavaScript (like <code>&lt;pro-data-grid&gt;</code>).
+              The browser recognizes it and behaves just like native HTML tags
+              such as <code>&lt;button&gt;</code> or <code>&lt;table&gt;</code>.
+            </li>
+            <li>
+              <strong>Client-Side Data:</strong> All your data is already
+              downloaded into the user's browser. Searching and sorting are
+              instant because your visitor's computer does all the work.
+            </li>
+            <li>
+              <strong>Server-Side Data:</strong> Your data lives in a database
+              on a remote server. The table only downloads a small batch of rows
+              (like 10 or 25) at a time when someone types in search or clicks
+              next page.
+            </li>
+            <li>
+              <strong>Debounce (<code>searchDebounceMs</code>):</strong> A brief
+              delay (e.g., 300 milliseconds) that waits for the user to pause
+              typing before sending a search request, preventing too many
+              unnecessary network queries.
+            </li>
+            <li>
+              <strong>AbortSignal:</strong> A browser feature that stops old
+              search requests if a user types a new character before the
+              previous result finishes loading.
+            </li>
+            <li>
+              <strong>Events:</strong> Notifications the table sends when a user
+              does something, such as clicking a row, saving an edit, or
+              deleting an item.
+            </li>
+          </ul>
+
+          <div
+            class="callout"
+            style="
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              flex-wrap: wrap;
+              gap: 1rem;
+              margin-top: 1.5rem;
+              background: var(--card-bg);
+              border: 1px solid var(--border-color);
+              border-left: 4px solid var(--primary);
+              padding: 1rem 1.25rem;
+              border-radius: 0.5rem;
+            "
+          >
+            <div>
+              <strong
+                style="
+                  color: var(--text-color);
+                  font-size: 1rem;
+                  display: block;
+                  margin-bottom: 0.25rem;
+                "
+                >Explore All Table Implementations</strong
+              >
+              <span style="font-size: 0.875rem; color: var(--text-muted)"
+                >Ready to see all these concepts in action? Browse all 15
+                interactive table types in the Demo Gallery.</span
+              >
+            </div>
+            <a
+              href="index.html"
+              class="btn"
+              style="
+                background: var(--primary);
+                color: #ffffff;
+                text-decoration: none;
+                font-weight: 600;
+                padding: 0.5rem 1rem;
+                border-radius: 0.375rem;
+                display: inline-flex;
+                align-items: center;
+                gap: 0.4rem;
+                font-size: 0.875rem;
+                transition: background 0.15s ease;
+              "
+            >
+              <span>Go to Demo Gallery (index.html) &rarr;</span>
+            </a>
+          </div>
+        </section>
+
+        <!-- 3. Prerequisites -->
+        <section id="section-prerequisites" class="doc-section">
+          <h2>3. Prerequisites &amp; System Requirements</h2>
+          <p>
+            <code>arame-data-grid-pro</code> is designed with lightweight,
+            native browser standards. Before integrating, review the minimum
+            requirements:
+          </p>
+
+          <div class="feature-grid">
+            <div class="feature-card">
+              <h4>Modern Web Browsers</h4>
+              <p>
+                Native Custom Elements v1 and modern JavaScript (ES2020+) are
+                supported across:
+              </p>
+              <ul style="margin: 0.5rem 0 0 1rem; font-size: 0.8125rem">
+                <li>Chrome / Edge / Chromium v75+</li>
+                <li>Firefox v63+</li>
+                <li>Safari v12.1+ (macOS &amp; iOS)</li>
+              </ul>
+            </div>
+            <div class="feature-card">
+              <h4>Node.js &amp; Package Tools</h4>
+              <p>
+                If installing via package managers or building from source:
+              </p>
+              <ul style="margin: 0.5rem 0 0 1rem; font-size: 0.8125rem">
+                <li>Node.js v18.0.0 or higher (Node LTS v20+ recommended)</li>
+                <li>npm, pnpm, or yarn</li>
+                <li>TypeScript 5.0+ (optional, for type checking)</li>
+              </ul>
+            </div>
+            <div class="feature-card">
+              <h4>Zero External CSS / Frameworks</h4>
+              <p>
+                No Tailwind, Bootstrap, React, or Vue dependencies are needed.
+                All layout, animations, and theming run on standalone CSS.
+              </p>
+            </div>
+            <div class="feature-card">
+              <h4>Offline &amp; file:/// Ready</h4>
+              <p>
+                All standalone demos run out-of-the-box locally without needing
+                a web server or bundler step.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 4. Installation -->
+        <section id="section-installation" class="doc-section">
+          <h2>4. Installation</h2>
+          <p>
+            You can install the library into an existing project using npm,
+            pnpm, or yarn:
+          </p>
+          <pre><code># Using npm:
+npm install arame-data-grid-pro
+
+# Using pnpm:
+pnpm add arame-data-grid-pro
+
+# Using yarn:
+yarn add arame-data-grid-pro</code></pre>
+
+          <h3>Build &amp; Test Commands</h3>
+          <p>
+            If you are working directly in this repository, you can use these
+            commands:
+          </p>
+          <pre><code>npm run build      # Builds the library files and type declarations
+npm test           # Runs the project test suite
+npm run typecheck  # Checks for any TypeScript errors</code></pre>
+
+          <div class="callout">
+            <strong>No server needed for demos:</strong> You can open any file
+            in the <code>examples/vanilla/</code> folder (such as
+            <code>gallery.html</code>) directly in your browser with a
+            double-click.
+          </div>
+        </section>
+
+        <!-- 5. Quick Start -->
+        <section id="section-quickstart" class="doc-section">
+          <h2>5. 5-Minute Quick Start</h2>
+          <p>
+            Here is a complete, working HTML example you can save as
+            <code>index.html</code> and open in your browser:
+          </p>
+          <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8" /&gt;
+  &lt;title&gt;Data Grid Quick Start&lt;/title&gt;
+  &lt;!-- Include the default stylesheet --&gt;
+  &lt;link rel="stylesheet" href="../../dist/styles.css" /&gt;
+&lt;/head&gt;
+&lt;body style="font-family: sans-serif; padding: 2rem;"&gt;
+
+  &lt;h1&gt;Team Directory&lt;/h1&gt;
+
+  &lt;!-- 1. Add the custom element tag to your HTML --&gt;
+  &lt;pro-data-grid id="myGrid"&gt;&lt;/pro-data-grid&gt;
+
+  &lt;!-- 2. Configure columns and rows in JavaScript --&gt;
+  &lt;script type="module"&gt;
+    import '../../dist/index.js';
+
+    const grid = document.getElementById('myGrid');
+
+    // Define the columns you want to display
+    grid.columns = [
+      { id: 'id', header: 'ID', field: 'id', width: '80px' },
+      { id: 'name', header: 'Full Name', field: 'name', sortable: true },
+      { id: 'role', header: 'Role', field: 'role', sortable: true },
+      {
+        id: 'salary',
+        header: 'Salary',
+        field: 'salary',
+        sortable: true,
+        formatter: (val) =&gt; `$${Number(val).toLocaleString()}`
+      }
+    ];
+
+    // Provide your row data
+    grid.rows = [
+      { id: '1', name: 'Alice Walker', role: 'Engineering Lead', salary: 145000 },
+      { id: '2', name: 'Brian Miller', role: 'Product Manager', salary: 130000 },
+      { id: '3', name: 'Clara Patel', role: 'UX Designer', salary: 115000 }
+    ];
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+        </section>
+
+        <!-- 6. Registration & Configuration -->
+        <section id="section-configuration" class="doc-section">
+          <h2>6. Registering &amp; Configuring Tables</h2>
+          <p>
+            When you import a table module, the custom element tag is registered
+            in the browser automatically:
+          </p>
+          <table class="doc-table">
+            <thead>
+              <tr>
+                <th>Import Path</th>
+                <th>HTML Tag Name</th>
+                <th>Common Use Case</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>arame-data-grid-pro</code></td>
+                <td><code>&lt;pro-data-grid&gt;</code></td>
+                <td>Main data grid with sorting, search, and pagination</td>
+              </tr>
+              <tr>
+                <td><code>arame-data-grid-pro/sticky-table</code></td>
+                <td><code>&lt;sticky-data-table&gt;</code></td>
+                <td>
+                  Lock first/last columns in place while scrolling horizontally
+                </td>
+              </tr>
+              <tr>
+                <td><code>arame-data-grid-pro/expandable-table</code></td>
+                <td><code>&lt;expandable-data-table&gt;</code></td>
+                <td>Click a row to expand and view nested details</td>
+              </tr>
+              <tr>
+                <td>
+                  <code>arame-data-grid-pro/column-visibility-table</code>
+                </td>
+                <td><code>&lt;column-visibility-table&gt;</code></td>
+                <td>Menu allowing users to show or hide columns</td>
+              </tr>
+              <tr>
+                <td><code>arame-data-grid-pro/filterable-table</code></td>
+                <td><code>&lt;filterable-data-table&gt;</code></td>
+                <td>
+                  Filter rows by specific conditions like "contains" or "greater
+                  than"
+                </td>
+              </tr>
+              <tr>
+                <td><code>arame-data-grid-pro/editable-table</code></td>
+                <td><code>&lt;editable-data-table&gt;</code></td>
+                <td>Double-click cells to edit text or numbers inline</td>
+              </tr>
+              <tr>
+                <td><code>arame-data-grid-pro/grouped-table</code></td>
+                <td><code>&lt;grouped-data-table&gt;</code></td>
+                <td>Group rows under collapsible category headings</td>
+              </tr>
+              <tr>
+                <td><code>arame-data-grid-pro/context-menu-table</code></td>
+                <td><code>&lt;context-menu-data-table&gt;</code></td>
+                <td>
+                  Right-click menu with custom actions (edit, duplicate, delete)
+                </td>
+              </tr>
+              <tr>
+                <td><code>arame-data-grid-pro/infinite-table</code></td>
+                <td><code>&lt;infinite-data-table&gt;</code></td>
+                <td>Scroll endlessly without page numbers</td>
+              </tr>
+              <tr>
+                <td><code>arame-data-grid-pro/calculated-table</code></td>
+                <td><code>&lt;calculated-data-table&gt;</code></td>
+                <td>
+                  Formulas that auto-calculate totals and bonuses when inputs
+                  change
+                </td>
+              </tr>
+              <tr>
+                <td><code>arame-data-grid-pro/header-filter-table</code></td>
+                <td><code>&lt;header-filter-data-table&gt;</code></td>
+                <td>Filter input boxes directly in each column header</td>
+              </tr>
+              <tr>
+                <td><code>arame-data-grid-pro/tree-table</code></td>
+                <td><code>&lt;tree-data-table&gt;</code></td>
+                <td>Nested parent-child folder views</td>
+              </tr>
+              <tr>
+                <td><code>arame-data-grid-pro/advanced-filter-table</code></td>
+                <td><code>&lt;advanced-filter-data-table&gt;</code></td>
+                <td>Multi-condition filter builder with AND/OR rules</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>Main Table Options</h3>
+          <p>Set options using <code>grid.options = { ... }</code>:</p>
+          <pre><code>grid.options = {
+  pagination: true,           // Enable pagination bar at bottom
+  pageSize: 10,               // Number of rows per page
+  searchable: true,           // Enable global search box
+  editable: true,             // Enable double-click cell editing
+  deletable: true,            // Show delete buttons on rows
+  confirmDelete: true,        // Ask user before deleting a row
+  rowReordering: true,        // Enable dragging rows up or down
+  columnReordering: true,     // Enable dragging headers left or right
+  columnResizing: true,       // Enable draggable column width resizers
+  stickyFirstColumn: true,    // Freeze first column on left
+  stickyActions: true,        // Freeze actions column on right
+  footerAggregations: true,   // Pinned summary aggregations (SUM/AVG)
+  statePersistence: true      // Sync settings & layout to localStorage
+};</code></pre>
+        </section>
+
+        <!-- 7. Data Loading -->
+        <section id="section-dataloading" class="doc-section">
+          <h2>7. Loading Data: Client-Side vs. Server-Side</h2>
+
+          <h3>Client-Side Data (Simple &amp; Fast)</h3>
+          <p>
+            For smaller datasets (hundreds or thousands of rows), assign your
+            array directly to <code>grid.rows</code>:
+          </p>
+          <pre><code>grid.rows = [
+  { id: '1', name: 'Desk Chair', price: 189.99 },
+  { id: '2', name: 'Monitor Arm', price: 79.50 }
+];</code></pre>
+
+          <h3>Server-Side Data (For Large Databases)</h3>
+          <p>
+            For large datasets, set <code>serverSide: true</code> and provide a
+            <code>serverDataLoader</code> function. The table calls this
+            function automatically whenever the user changes pages, types in
+            search, or sorts columns:
+          </p>
+          <pre><code>grid.options = {
+  serverSide: true,
+  searchDebounceMs: 300,              // Wait 300ms after user stops typing
+  keepPreviousDataWhileLoading: true, // Keep showing previous rows while loading
+
+  serverDataLoader: async (params) => {
+    // params provides: pageIndex, pageSize, globalSearch, sortCriteria, and signal
+    const query = new URLSearchParams({
+      page: String(params.pageIndex),
+      limit: String(params.pageSize),
+      q: params.globalSearch || ''
+    });
+
+    // Pass params.signal so outdated requests cancel automatically
+    const res = await fetch(`/api/products?${query}`, { signal: params.signal });
+    const json = await res.json();
+
+    // Always return rows for this page and total count of all matching records
+    return {
+      rows: json.items,
+      totalRows: json.totalCount
+    };
+  }
+};</code></pre>
+        </section>
+
+        <!-- 8. Table Guides -->
+        <section id="section-tableguides" class="doc-section">
+          <h2>8. Table Variant Guides &amp; Gallery</h2>
+          <p>
+            You can test every table variant directly in the interactive demo
+            pages:
+          </p>
+
+          <div class="feature-grid">
+            <div class="feature-card">
+              <h4>
+                <a
+                  href="index.html"
+                  style="color: #93c5fd; text-decoration: underline"
+                  >Demo Gallery (index.html)</a
+                >
+              </h4>
+              <p>
+                Visual hub showing live preview cards, feature highlights, and
+                direct links to all 15 table variations.
+              </p>
+            </div>
+            <div class="feature-card">
+              <h4>
+                <a
+                  href="configurable-table-demo.html"
+                  style="color: #93c5fd; text-decoration: underline"
+                  >Configurable Table Playground</a
+                >
+              </h4>
+              <p>
+                Live settings panel where you can toggle search, pagination,
+                borders, drag &amp; drop, and density on the fly.
+              </p>
+            </div>
+          </div>
+
+          <h3>Comprehensive Table Specifications &amp; Full Code Examples:</h3>
+          <p>Every table type below contains a detailed description, features breakdown, and <strong>complete standalone HTML/JavaScript code</strong> you can copy and run immediately:</p>
+
+          <!-- 1. Core Grid -->
+          <div class="table-spec-card" id="spec-core-grid">
+            <div class="table-spec-header">
+              <span class="table-spec-title">1. Core Data Grid (core-grid-demo.html)</span>
+              <span class="table-spec-badge">&lt;pro-data-grid&gt;</span>
+            </div>
+            <p>The flagship enterprise data grid. Supports client-side sorting, debounced global search, page size selection, multi-row checkbox selection, and CSV data export.</p>
+            <ul>
+              <li><strong>Live Page:</strong> <a href="core-grid-demo.html" style="color:#60a5fa;">core-grid-demo.html</a></li>
+              <li><strong>HTML Tag:</strong> <code>&lt;pro-data-grid&gt;&lt;/pro-data-grid&gt;</code></li>
+              <li><strong>Key Options:</strong> <code>pagination: true</code>, <code>pageSize: 10</code>, <code>selectable: true</code>, <code>multiSelect: true</code></li>
+            </ul>
+            <div class="code-container">
+              <button type="button" class="btn-copy-code">Copy Full Code</button>
+              <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8" /&gt;
+  &lt;title&gt;Core Data Grid Demo&lt;/title&gt;
+  &lt;link rel="stylesheet" href="./dist/styles.css" /&gt;
+&lt;/head&gt;
+&lt;body style="padding: 2rem; font-family: sans-serif;"&gt;
+  &lt;h2&gt;Enterprise Core Data Grid&lt;/h2&gt;
+  &lt;pro-data-grid id="myCoreGrid"&gt;&lt;/pro-data-grid&gt;
+
+  &lt;script type="module"&gt;
+    import './dist/index.js';
+
+    const grid = document.getElementById('myCoreGrid');
+    grid.columns = [
+      { id: 'id', header: 'ID', field: 'id', width: '80px', sortable: true },
+      { id: 'name', header: 'Customer Name', field: 'name', sortable: true },
+      { id: 'tier', header: 'Subscription Tier', field: 'tier', sortable: true },
+      { 
+        id: 'revenue', 
+        header: 'Annual Revenue', 
+        field: 'revenue', 
+        sortable: true,
+        formatter: (v) => `$${Number(v).toLocaleString()}`
+      }
+    ];
+
+    grid.rows = [
+      { id: 'CUST-01', name: 'Alpha Dynamics', tier: 'Enterprise', revenue: 154000 },
+      { id: 'CUST-02', name: 'Beta Horizon', tier: 'Growth', revenue: 64000 },
+      { id: 'CUST-03', name: 'Gamma Logic', tier: 'Starter', revenue: 19000 },
+      { id: 'CUST-04', name: 'Delta Software', tier: 'Enterprise', revenue: 240000 }
+    ];
+
+    grid.options = {
+      pagination: true,
+      pageSize: 5,
+      searchable: true,
+      selectable: true,
+      multiSelect: true
+    };
+
+    grid.addEventListener('pdg:select', (e) => {
+      console.log('Selected rows:', e.detail.selectedIds);
+    });
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+            </div>
+          </div>
+
+          <!-- 2. Sticky Columns -->
+          <div class="table-spec-card" id="spec-sticky">
+            <div class="table-spec-header">
+              <span class="table-spec-title">2. Sticky First Column (sticky-table-demo.html)</span>
+              <span class="table-spec-badge">&lt;sticky-data-table&gt;</span>
+            </div>
+            <p>Pins the primary identifier column to <code>left: 0</code> with guaranteed 100% opaque solid background. Automatically applies an elevated right-edge drop shadow whenever users scroll horizontally past 2px.</p>
+            <ul>
+              <li><strong>Live Page:</strong> <a href="sticky-table-demo.html" style="color:#60a5fa;">sticky-table-demo.html</a></li>
+              <li><strong>HTML Tag:</strong> <code>&lt;sticky-data-table sticky-first-column="true"&gt;&lt;/sticky-data-table&gt;</code></li>
+            </ul>
+            <div class="code-container">
+              <button type="button" class="btn-copy-code">Copy Full Code</button>
+              <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8" /&gt;
+  &lt;title&gt;Sticky Column Table Demo&lt;/title&gt;
+  &lt;link rel="stylesheet" href="./dist/styles.css" /&gt;
+&lt;/head&gt;
+&lt;body style="padding: 2rem; font-family: sans-serif;"&gt;
+  &lt;h2&gt;Pinned Primary Column Table&lt;/h2&gt;
+  &lt;sticky-data-table id="stickyGrid" sticky-first-column="true"&gt;&lt;/sticky-data-table&gt;
+
+  &lt;script type="module"&gt;
+    import './dist/sticky-table/index.js';
+
+    const table = document.getElementById('stickyGrid');
+    table.columns = [
+      { id: 'product', header: 'Product Name', field: 'name', width: '220px', sortable: true },
+      { id: 'sku', header: 'SKU Code', field: 'sku', width: '150px' },
+      { id: 'category', header: 'Category', field: 'category', width: '160px' },
+      { id: 'price', header: 'Unit Price', field: 'price', width: '130px' },
+      { id: 'stock', header: 'Warehouse Stock', field: 'stock', width: '140px' },
+      { id: 'leadTime', header: 'Lead Time (Days)', field: 'leadTime', width: '150px' }
+    ];
+
+    table.rows = [
+      { name: 'Ultra-High GPU 48GB', sku: 'GPU-48G', category: 'Hardware', price: '$2,999', stock: 45, leadTime: 7 },
+      { name: 'Quantum Core X1', sku: 'CPU-QC-X1', category: 'Computing', price: '$1,450', stock: 120, leadTime: 4 },
+      { name: 'DDR5 ECC RAM 64GB', sku: 'RAM-D5-64', category: 'Memory', price: '$340', stock: 350, leadTime: 3 }
+    ];
+
+    table.options = {
+      stickyFirstColumn: true,
+      stickyColumnWidth: '220px'
+    };
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+            </div>
+          </div>
+
+          <!-- 3. Expandable Rows -->
+          <div class="table-spec-card" id="spec-expandable">
+            <div class="table-spec-header">
+              <span class="table-spec-title">3. Expandable Rows / Master-Detail (expandable-table-demo.html)</span>
+              <span class="table-spec-badge">&lt;expandable-data-table&gt;</span>
+            </div>
+            <p>Supports clicking a <code>▶ / ▼</code> chevron toggle to inspect child details, nested sub-tables, vehicle telemetry diagnostics, or dossier summaries.</p>
+            <ul>
+              <li><strong>Live Page:</strong> <a href="expandable-table-demo.html" style="color:#60a5fa;">expandable-table-demo.html</a></li>
+              <li><strong>HTML Tag:</strong> <code>&lt;expandable-data-table&gt;&lt;/expandable-data-table&gt;</code></li>
+            </ul>
+            <div class="code-container">
+              <button type="button" class="btn-copy-code">Copy Full Code</button>
+              <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8" /&gt;
+  &lt;title&gt;Expandable Row Table&lt;/title&gt;
+  &lt;link rel="stylesheet" href="./dist/styles.css" /&gt;
+&lt;/head&gt;
+&lt;body style="padding: 2rem; font-family: sans-serif;"&gt;
+  &lt;h2&gt;Master-Detail Expandable Table&lt;/h2&gt;
+  &lt;expandable-data-table id="expandTable"&gt;&lt;/expandable-data-table&gt;
+
+  &lt;script type="module"&gt;
+    import './dist/expandable-table/index.js';
+
+    const table = document.getElementById('expandTable');
+    table.columns = [
+      { id: 'orderId', header: 'Order ID', field: 'orderId', width: '130px' },
+      { id: 'client', header: 'Client', field: 'client', sortable: true },
+      { id: 'total', header: 'Total Value', field: 'total', formatter: v => `$${v.toFixed(2)}` }
+    ];
+
+    table.rows = [
+      { orderId: 'ORD-501', client: 'Apex Labs', total: 4250.00, items: ['Server Rack', 'UPS Battery', 'Patch Panel'] },
+      { orderId: 'ORD-502', client: 'Omega Bio', total: 1180.50, items: ['Sensor Node', 'Gateway Unit'] }
+    ];
+
+    table.options = {
+      expandable: true,
+      rowDetailRenderer: (row) => `
+        &lt;div style="padding: 0.75rem 1rem; background: #0f172a; border-left: 3px solid #3b82f6;"&gt;
+          &lt;strong style="color: #60a5fa;"&gt;Line Items for ${row.orderId}:&lt;/strong&gt;
+          &lt;ul style="margin: 0.25rem 0 0 1.25rem; color: #cbd5e1;"&gt;
+            ${row.items.map(item => `&lt;li&gt;${item}&lt;/li&gt;`).join('')}
+          &lt;/ul&gt;
+        &lt;/div&gt;
+      `
+    };
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+            </div>
+          </div>
+
+          <!-- 4. Column Visibility -->
+          <div class="table-spec-card" id="spec-col-visibility">
+            <div class="table-spec-header">
+              <span class="table-spec-title">4. Column Visibility Filter (column-visibility-demo.html)</span>
+              <span class="table-spec-badge">&lt;column-visibility-table&gt;</span>
+            </div>
+            <p>Empowers end users to customize their dashboard by showing, hiding, and restoring default column visibility via an interactive popover menu with live checkboxes.</p>
+            <ul>
+              <li><strong>Live Page:</strong> <a href="column-visibility-demo.html" style="color:#60a5fa;">column-visibility-demo.html</a></li>
+              <li><strong>HTML Tag:</strong> <code>&lt;column-visibility-table&gt;&lt;/column-visibility-table&gt;</code></li>
+            </ul>
+            <div class="code-container">
+              <button type="button" class="btn-copy-code">Copy Full Code</button>
+              <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8" /&gt;
+  &lt;title&gt;Column Visibility Table&lt;/title&gt;
+  &lt;link rel="stylesheet" href="./dist/styles.css" /&gt;
+&lt;/head&gt;
+&lt;body style="padding: 2rem; font-family: sans-serif;"&gt;
+  &lt;h2&gt;Dynamic Column Visibility Table&lt;/h2&gt;
+  &lt;column-visibility-table id="colVisTable"&gt;&lt;/column-visibility-table&gt;
+
+  &lt;script type="module"&gt;
+    import './dist/column-visibility-table/index.js';
+
+    const table = document.getElementById('colVisTable');
+    table.columns = [
+      { id: 'id', header: 'User ID', field: 'id', width: '100px' },
+      { id: 'name', header: 'Name', field: 'name' },
+      { id: 'role', header: 'Position', field: 'role' },
+      { id: 'email', header: 'Email Address', field: 'email', visible: false },
+      { id: 'phone', header: 'Phone Number', field: 'phone', visible: false }
+    ];
+
+    table.rows = [
+      { id: 'USR-1', name: 'John Doe', role: 'DevOps Architect', email: 'john@example.com', phone: '+1 555-0199' },
+      { id: 'USR-2', name: 'Jane Roe', role: 'Security Engineer', email: 'jane@example.com', phone: '+1 555-0288' }
+    ];
+
+    table.options = {
+      columnVisibilityMenu: true
+    };
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+            </div>
+          </div>
+
+          <!-- 5. Advanced Filter Table -->
+          <div class="table-spec-card" id="spec-adv-filter">
+            <div class="table-spec-header">
+              <span class="table-spec-title">5. Advanced Filter &amp; Rule Builder (advanced-filter-table-demo.html)</span>
+              <span class="table-spec-badge">&lt;advanced-filter-data-table&gt;</span>
+            </div>
+            <p>Visual rule composer with nested <code>AND</code> / <code>OR</code> logic, one-click preset buttons, and active filter chip tags that can be individually removed.</p>
+            <ul>
+              <li><strong>Live Page:</strong> <a href="advanced-filter-table-demo.html" style="color:#60a5fa;">advanced-filter-table-demo.html</a></li>
+              <li><strong>HTML Tag:</strong> <code>&lt;advanced-filter-data-table&gt;&lt;/advanced-filter-data-table&gt;</code></li>
+            </ul>
+            <div class="code-container">
+              <button type="button" class="btn-copy-code">Copy Full Code</button>
+              <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8" /&gt;
+  &lt;title&gt;Advanced Filter Table Demo&lt;/title&gt;
+  &lt;link rel="stylesheet" href="./dist/styles.css" /&gt;
+&lt;/head&gt;
+&lt;body style="padding: 2rem; font-family: sans-serif;"&gt;
+  &lt;h2&gt;Multi-Rule Filter Builder Grid&lt;/h2&gt;
+  &lt;advanced-filter-data-table id="filterGrid"&gt;&lt;/advanced-filter-data-table&gt;
+
+  &lt;script type="module"&gt;
+    import './dist/advanced-filter-table/index.js';
+
+    const grid = document.getElementById('filterGrid');
+    grid.columns = [
+      { id: 'name', header: 'Project Name', field: 'name', sortable: true },
+      { id: 'status', header: 'Status', field: 'status', sortable: true },
+      { id: 'budget', header: 'Budget ($)', field: 'budget', sortable: true }
+    ];
+
+    grid.rows = [
+      { name: 'Apollo Next', status: 'Active', budget: 125000 },
+      { name: 'Titan Core', status: 'Pending', budget: 45000 },
+      { name: 'Voyager Cloud', status: 'Active', budget: 210000 }
+    ];
+
+    grid.filterExpression = {
+      logic: 'AND',
+      rules: [
+        { field: 'status', operator: 'equals', value: 'Active' },
+        { field: 'budget', operator: 'greaterThan', value: '100000' }
+      ]
+    };
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+            </div>
+          </div>
+
+          <!-- 6. Calculated Payroll -->
+          <div class="table-spec-card" id="spec-calculated">
+            <div class="table-spec-header">
+              <span class="table-spec-title">6. Calculated Payroll &amp; Formulas (calculated-table-demo.html)</span>
+              <span class="table-spec-badge">&lt;calculated-data-table&gt;</span>
+            </div>
+            <p>Reactive formula columns that automatically recalculate net pay, tax withholdings, and bonus totals whenever dependent editable inputs change.</p>
+            <ul>
+              <li><strong>Live Page:</strong> <a href="calculated-table-demo.html" style="color:#60a5fa;">calculated-table-demo.html</a></li>
+              <li><strong>HTML Tag:</strong> <code>&lt;calculated-data-table&gt;&lt;/calculated-data-table&gt;</code></li>
+            </ul>
+            <div class="code-container">
+              <button type="button" class="btn-copy-code">Copy Full Code</button>
+              <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8" /&gt;
+  &lt;title&gt;Calculated Payroll Table&lt;/title&gt;
+  &lt;link rel="stylesheet" href="./dist/styles.css" /&gt;
+&lt;/head&gt;
+&lt;body style="padding: 2rem; font-family: sans-serif;"&gt;
+  &lt;h2&gt;Live Reactive Payroll Table&lt;/h2&gt;
+  &lt;calculated-data-table id="payrollGrid"&gt;&lt;/calculated-data-table&gt;
+
+  &lt;script type="module"&gt;
+    import './dist/calculated-table/index.js';
+
+    const grid = document.getElementById('payrollGrid');
+    grid.columns = [
+      { id: 'emp', header: 'Employee', field: 'name' },
+      { id: 'base', header: 'Base Pay', field: 'base', editable: true },
+      { id: 'bonusPct', header: 'Bonus %', field: 'bonusPct', editable: true },
+      { 
+        id: 'totalPay', 
+        header: 'Total Compensation', 
+        calculate: (row) => row.base + (row.base * (row.bonusPct / 100)),
+        formatter: (val) => `$${Number(val).toLocaleString()}`
+      }
+    ];
+
+    grid.rows = [
+      { name: 'Alice Walker', base: 140000, bonusPct: 15 },
+      { name: 'Brian Miller', base: 120000, bonusPct: 10 }
+    ];
+
+    grid.options = { editable: true };
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+            </div>
+          </div>
+
+          <!-- 7. Configurable Studio Playground -->
+          <div class="table-spec-card" id="spec-configurable">
+            <div class="table-spec-header">
+              <span class="table-spec-title">7. Configurable Table Playground (configurable-table-demo.html)</span>
+              <span class="table-spec-badge">All-in-One Studio</span>
+            </div>
+            <p>Unifies all library features in a single playground with a live sidebar to toggle search, density, selection, multi-sorting, drag and drop, and context menus on the fly.</p>
+            <ul>
+              <li><strong>Live Page:</strong> <a href="configurable-table-demo.html" style="color:#60a5fa;">configurable-table-demo.html</a></li>
+              <li><strong>Demo Gallery:</strong> <a href="index.html" style="color:#60a5fa;">index.html</a></li>
+            </ul>
+            <div class="code-container">
+              <button type="button" class="btn-copy-code">Copy Full Code</button>
+              <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8" /&gt;
+  &lt;title&gt;All-in-One Configurable Data Table&lt;/title&gt;
+  &lt;link rel="stylesheet" href="./dist/styles.css" /&gt;
+&lt;/head&gt;
+&lt;body style="padding: 2rem; font-family: sans-serif;"&gt;
+  &lt;h2&gt;All Features Configurable Data Table&lt;/h2&gt;
+  &lt;pro-data-grid id="studioGrid"&gt;&lt;/pro-data-grid&gt;
+
+  &lt;script type="module"&gt;
+    import './dist/index.js';
+
+    const grid = document.getElementById('studioGrid');
+    grid.columns = [
+      { id: 'id', header: 'ID', field: 'id', width: '90px' },
+      { id: 'client', header: 'Client Account', field: 'client', sortable: true, editable: true },
+      { id: 'tier', header: 'Tier', field: 'tier', sortable: true },
+      { id: 'arr', header: 'Annual ARR', field: 'arr', sortable: true, formatter: v => `$${Number(v).toLocaleString()}` }
+    ];
+
+    grid.rows = [
+      { id: 'REC-1', client: 'Acme Corp', tier: 'Enterprise', arr: 125000 },
+      { id: 'REC-2', client: 'Globex Ltd', tier: 'Growth', arr: 48000 }
+    ];
+
+    grid.options = {
+      pagination: true,
+      search: true,
+      sorting: true,
+      multiSort: true,
+      selectable: true,
+      multiSelect: true,
+      editable: true,
+      rowReordering: true,
+      columnReordering: true,
+      stickyFirstColumn: true,
+      contextMenu: true
+    };
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- 9. Events & Accessibility -->
+        <section id="section-events-a11y" class="doc-section">
+          <h2>9. Events &amp; Accessibility</h2>
+          <p>
+            The table triggers standard browser events you can listen to with
+            JavaScript:
+          </p>
+          <table class="doc-table">
+            <thead>
+              <tr>
+                <th>Event Name</th>
+                <th>What it does</th>
+                <th>Example Detail Data</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>pdg:select</code></td>
+                <td>Fires when rows are checked or unchecked</td>
+                <td><code>{ selectedIds: ['1', '3'] }</code></td>
+              </tr>
+              <tr>
+                <td><code>pdg:sort</code></td>
+                <td>Fires when someone clicks a column to sort</td>
+                <td>
+                  <code
+                    >{ criteria: [{ columnId: 'name', direction: 'asc' }]
+                    }</code
+                  >
+                </td>
+              </tr>
+              <tr>
+                <td><code>pdg:page</code></td>
+                <td>Fires when the user changes page or page size</td>
+                <td><code>{ pageIndex: 2, pageSize: 10 }</code></td>
+              </tr>
+              <tr>
+                <td><code>pdg:edit-save</code></td>
+                <td>Fires when someone saves an edited cell</td>
+                <td>
+                  <code
+                    >{ rowId: '1', columnId: 'role', newValue: 'Director'
+                    }</code
+                  >
+                </td>
+              </tr>
+              <tr>
+                <td><code>pdg:delete</code></td>
+                <td>Fires when a row's delete button is clicked</td>
+                <td><code>{ rowId: '4', row: { ... } }</code></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>Handling Selected Items &amp; Bulk Actions</h3>
+          <p>
+            Listen to <code>pdg:select</code> to capture selected row
+            identifiers, retrieve full objects, or perform batch operations:
+          </p>
+          <pre><code>// 1. Listen for selection changes in real-time
+grid.addEventListener('pdg:select', (event) => {
+  const selectedIds = event.detail.selectedIds; // e.g. ['1', '3']
+  console.log(`${selectedIds.length} rows selected:`, selectedIds);
+
+  // Toggle batch action button state
+  const btnDeleteAll = document.getElementById('btnBatchDelete');
+  if (btnDeleteAll) btnDeleteAll.disabled = selectedIds.length === 0;
+});
+
+// 2. Retrieve the complete row data records for selected items
+const selectedRows = grid.getSelectedRows();
+console.log('Selected row records:', selectedRows);
+
+// 3. Batch delete or clear programmatically
+grid.deleteSelectedRows(); // Removes selected rows and updates UI
+grid.clearSelection();     // Deselects all rows
+grid.selectAll();          // Selects all currently filtered rows</code></pre>
+
+          <h3>Accessibility (A11y) Built-in</h3>
+          <ul>
+            <li>
+              <strong>Keyboard Friendly:</strong> Move through cells using arrow
+              keys, open editors with <kbd>Enter</kbd>, and toggle checkboxes
+              with <kbd>Space</kbd>.
+            </li>
+            <li>
+              <strong>Screen Readers:</strong> Standard ARIA roles
+              (<code>role="grid"</code>, <code>role="row"</code>,
+              <code>role="columnheader"</code>) announce cell information
+              clearly.
+            </li>
+            <li>
+              <strong>Respects Motion Preferences:</strong> If someone turns on
+              "Reduce motion" in their operating system, animations are
+              automatically disabled.
+            </li>
+          </ul>
+        </section>
+
+        <!-- 10. Troubleshooting -->
+        <section id="section-troubleshooting" class="doc-section">
+          <h2>10. Simple Troubleshooting</h2>
+
+          <h3>
+            1. "Access to script at 'file:///...' has been blocked by CORS
+            policy"
+          </h3>
+          <p>
+            <strong>Why this happens:</strong> Browsers do not allow
+            <code>import</code> statements between separate local files when
+            opened directly with <code>file:///</code>.<br />
+            <strong>How to fix it:</strong> All demo files in
+            <code>examples/vanilla/</code> have their scripts placed inline so
+            you can double-click them right from your folder without any error.
+            If you write your own files, run a small local server with
+            <code>npx serve</code> or Vite.
+          </p>
+
+          <h3>
+            2. "window is not defined" or "customElements is not defined" in
+            Next.js
+          </h3>
+          <p>
+            <strong>Why this happens:</strong> Next.js tries to run your page on
+            the server first, where there is no browser
+            <code>window</code>.<br />
+            <strong>How to fix it:</strong> Put <code>'use client';</code> at
+            the top of your component file, and configure your table inside a
+            <code>useEffect()</code> hook.
+          </p>
+
+          <h3>3. The table has no styles or looks like plain text</h3>
+          <p>
+            <strong>Why this happens:</strong> The CSS stylesheet is not
+            linked.<br />
+            <strong>How to fix it:</strong> Add
+            <code
+              >&lt;link rel="stylesheet" href="./dist/styles.css" /&gt;</code
+            >
+            in HTML or <code>import 'arame-data-grid-pro/styles.css';</code> in
+            your JS/TS code.
+          </p>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      // Smooth scrolling handler for table of contents and internal anchor links
+      document.addEventListener("DOMContentLoaded", () => {
+        // If URL already contains a hash (e.g. #section-configuration) on direct navigation
+        if (window.location.hash) {
+          const target = document.querySelector(window.location.hash);
+          if (target) {
+            setTimeout(() => {
+              target.scrollIntoView({ behavior: "smooth", block: "start" });
+            }, 80);
+          }
+        }
+
+        // Intercept anchor clicks to ensure universal smooth scroll across browsers & webviews
+        document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+          anchor.addEventListener("click", function (e) {
+            const href = this.getAttribute("href");
+            if (!href || href === "#") return;
+            const target = document.querySelector(href);
+            if (target) {
+              e.preventDefault();
+              target.scrollIntoView({ behavior: "smooth", block: "start" });
+              history.pushState(null, "", href);
+            }
+          });
+        // Universal Copy-Code Handler
+        document.querySelectorAll('.btn-copy-code').forEach((btn) => {
+          btn.addEventListener('click', async () => {
+            const container = btn.closest('.code-container');
+            const codeEl = container ? container.querySelector('code') : null;
+            if (!codeEl) return;
+            const codeText = codeEl.innerText || codeEl.textContent;
+            try {
+              if (navigator.clipboard && navigator.clipboard.writeText) {
+                await navigator.clipboard.writeText(codeText);
+              } else {
+                const ta = document.createElement('textarea');
+                ta.value = codeText;
+                ta.style.position = 'fixed';
+                ta.style.opacity = '0';
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+              }
+              btn.textContent = '✓ Copied!';
+              btn.classList.add('copied');
+              setTimeout(() => {
+                btn.textContent = 'Copy Full Code';
+                btn.classList.remove('copied');
+              }, 2000);
+            } catch (err) {
+              console.error('Copy failed', err);
+              btn.textContent = 'Failed';
+              setTimeout(() => { btn.textContent = 'Copy Full Code'; }, 1500);
+            }
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

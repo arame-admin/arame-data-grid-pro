@@ -1,0 +1,292 @@
+:root, [data-theme="light"] {
+  --et-primary: #2563eb;
+  --et-primary-hover: #1d4ed8;
+  --et-danger: #ef4444;
+  --et-danger-border: #f87171;
+  --et-bg-surface: #ffffff;
+  --et-bg-header: #f8fafc;
+  --et-bg-hover: #f1f5f9;
+  --et-bg-editing: #eff6ff;
+  --et-text-main: #0f172a;
+  --et-text-muted: #64748b;
+  --et-border-color: #e2e8f0;
+  --et-focus-ring: rgba(37, 99, 235, 0.35);
+  --et-radius: 0.5rem;
+  --et-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  --et-cell-py: 0.65rem;
+  --et-cell-px: 0.85rem;
+}
+
+[data-theme="dark"] {
+  --et-primary: #3b82f6;
+  --et-primary-hover: #60a5fa;
+  --et-danger: #f87171;
+  --et-danger-border: #ef4444;
+  --et-bg-surface: #0f172a;
+  --et-bg-header: #1e293b;
+  --et-bg-hover: #334155;
+  --et-bg-editing: #172554;
+  --et-text-main: #f8fafc;
+  --et-text-muted: #94a3b8;
+  --et-border-color: #334155;
+  --et-focus-ring: rgba(59, 130, 246, 0.4);
+  --et-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.4);
+}
+
+editable-data-table {
+  display: block;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: var(--et-text-main);
+  background-color: var(--et-bg-surface);
+  border: 1px solid var(--et-border-color);
+  border-radius: var(--et-radius);
+  box-shadow: var(--et-shadow);
+  overflow: visible;
+  box-sizing: border-box;
+  position: relative;
+}
+
+editable-data-table * {
+  box-sizing: border-box;
+}
+
+/* Densities */
+editable-data-table[density="compact"] {
+  --et-cell-py: 0.35rem;
+  --et-cell-px: 0.65rem;
+  font-size: 0.8125rem;
+}
+editable-data-table[density="comfortable"] {
+  --et-cell-py: 0.65rem;
+  --et-cell-px: 0.85rem;
+  font-size: 0.875rem;
+}
+editable-data-table[density="spacious"] {
+  --et-cell-py: 1rem;
+  --et-cell-px: 1.15rem;
+  font-size: 1rem;
+}
+
+/* Toolbar */
+.et-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background-color: var(--et-bg-header);
+  border-bottom: 1px solid var(--et-border-color);
+}
+.et-search-input {
+  border: 1px solid var(--et-border-color);
+  background-color: var(--et-bg-surface);
+  color: var(--et-text-main);
+  border-radius: 0.375rem;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.875rem;
+  outline: none;
+  min-width: 240px;
+}
+.et-search-input:focus {
+  border-color: var(--et-primary);
+  box-shadow: 0 0 0 3px var(--et-focus-ring);
+}
+
+/* Table */
+.et-table-container {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 560px;
+}
+.et-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+.et-thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: var(--et-bg-header);
+  border-bottom: 2px solid var(--et-border-color);
+}
+.et-th {
+  padding: var(--et-cell-py) var(--et-cell-px);
+  font-weight: 600;
+  color: var(--et-text-muted);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  user-select: none;
+}
+.et-th-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.et-sortable {
+  cursor: pointer;
+}
+.et-sortable:hover {
+  color: var(--et-text-main);
+}
+.et-sort-icon {
+  font-size: 0.75rem;
+  color: var(--et-text-muted);
+}
+
+.et-tbody .et-row {
+  border-bottom: 1px solid var(--et-border-color);
+  transition: background-color 0.15s ease;
+}
+.et-tbody .et-row:hover {
+  background-color: var(--et-bg-hover);
+}
+.et-td {
+  padding: var(--et-cell-py) var(--et-cell-px);
+  color: var(--et-text-main);
+  vertical-align: middle;
+  position: relative;
+}
+
+/* Editable Cell States */
+.et-cell-editable {
+  cursor: pointer;
+  position: relative;
+}
+.et-cell-editable:hover {
+  background-color: rgba(37, 99, 235, 0.04);
+}
+.et-cell-editable:hover::after {
+  content: '✎';
+  font-size: 0.7rem;
+  color: var(--et-text-muted);
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.et-cell-editing {
+  padding: 0.25rem 0.5rem !important;
+  background-color: var(--et-bg-editing) !important;
+}
+
+.et-editor-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  width: 100%;
+}
+
+.et-input, .et-select {
+  width: 100%;
+  padding: 0.35rem 0.5rem;
+  font-size: inherit;
+  font-family: inherit;
+  border: 1px solid var(--et-primary);
+  border-radius: 0.25rem;
+  background-color: var(--et-bg-surface);
+  color: var(--et-text-main);
+  outline: none;
+  box-shadow: 0 0 0 2px var(--et-focus-ring);
+}
+.et-input-error {
+  border-color: var(--et-danger) !important;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.3) !important;
+}
+
+.et-checkbox {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--et-primary);
+}
+
+/* Validation Tooltip */
+.et-validation-error-bubble {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  background: #ffffff;
+  color: #b91c1c;
+  border: 1px solid #fca5a5;
+  border-radius: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  white-space: nowrap;
+  z-index: 30;
+}
+[data-theme="dark"] .et-validation-error-bubble {
+  background: #7f1d1d;
+  color: #fecaca;
+  border-color: #991b1b;
+}
+
+/* Save / Cancel Quick Controls */
+.et-editor-controls {
+  display: inline-flex;
+  gap: 0.2rem;
+}
+.et-btn-save, .et-btn-cancel {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.875rem;
+  padding: 0.1rem 0.3rem;
+  border-radius: 0.2rem;
+}
+.et-btn-save { color: #16a34a; }
+.et-btn-cancel { color: #dc2626; }
+.et-btn-save:hover { background: #dcfce7; }
+.et-btn-cancel:hover { background: #fee2e2; }
+
+/* Pagination Footer */
+.et-pagination-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-top: 1px solid var(--et-border-color);
+  background-color: var(--et-bg-header);
+  gap: 0.5rem;
+  font-size: 0.875rem;
+}
+.tbl-btn {
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--et-border-color);
+  border-radius: 0.25rem;
+  background: var(--et-bg-surface);
+  color: var(--et-text-main);
+  cursor: pointer;
+  font-size: 0.8125rem;
+  margin: 0 0.1rem;
+}
+.tbl-btn:hover { background-color: var(--et-bg-hover); }
+.tbl-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  editable-data-table,
+  .et-row,
+  .et-td,
+  .tbl-btn {
+    transition: none !important;
+  }
+}
+
+.et-editor-input:focus-visible,
+.et-editor-select:focus-visible,
+.et-btn-save:focus-visible,
+.et-btn-cancel:focus-visible,
+.tbl-btn:focus-visible {
+  outline: 2px solid var(--et-primary);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px var(--et-focus-ring);
+}

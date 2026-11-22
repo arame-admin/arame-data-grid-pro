@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sticky First Column Data Table Demo</title>
+  <style>
+    :root, [data-theme="light"] {
+      --st-primary: #2563eb;
+      --st-primary-hover: #1d4ed8;
+      --st-bg-surface: #ffffff;
+      --st-bg-header: #f8fafc;
+      --st-bg-hover: #f1f5f9;
+      --st-bg-selected: rgba(37, 99, 235, 0.08);
+      --st-bg-sticky: #ffffff;
+      --st-bg-sticky-header: #f8fafc;
+      --st-bg-sticky-hover: #f1f5f9;
+      --st-bg-sticky-selected: #eef2ff;
+      --st-text-main: #0f172a;
+      --st-text-muted: #64748b;
+      --st-border-color: #e2e8f0;
+      --st-border-strong: #cbd5e1;
+      --st-focus-ring: rgba(37, 99, 235, 0.35);
+      --st-radius: 0.5rem;
+      --st-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+      --st-sticky-shadow-color: rgba(0, 0, 0, 0.12);
+      --st-cell-py: 0.75rem;
+      --st-cell-px: 1rem;
+    }
+
+    [data-theme="dark"] {
+      --st-primary: #3b82f6;
+      --st-primary-hover: #60a5fa;
+      --st-bg-surface: #0f172a;
+      --st-bg-header: #1e293b;
+      --st-bg-hover: #334155;
+      --st-bg-selected: rgba(59, 130, 246, 0.15);
+      --st-bg-sticky: #0f172a;
+      --st-bg-sticky-header: #1e293b;
+      --st-bg-sticky-hover: #334155;
+      --st-bg-sticky-selected: #1e293b;
+      --st-text-main: #f8fafc;
+      --st-text-muted: #94a3b8;
+      --st-border-color: #334155;
+      --st-border-strong: #475569;
+      --st-focus-ring: rgba(59, 130, 246, 0.4);
+      --st-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.4);
+      --st-sticky-shadow-color: rgba(0, 0, 0, 0.5);
+    }
+
+    body {
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      padding: 2rem;
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 1.5rem;
+      border-radius: 0.75rem;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    }
+
+    .controls-bar {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 0.4rem 0.8rem;
+      border-radius: 0.375rem;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      font-size: 0.875rem;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .btn:hover { background: #f8fafc; }
+
+    /* Toolbar: Search & Meta */
+    .st-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.75rem 1rem;
+      background-color: var(--st-bg-header);
+      border-bottom: 1px solid var(--st-border-color);
+      flex-wrap: wrap;
+    }
+    .st-search-input {
+      padding: 0.45rem 0.75rem;
+      border: 1px solid var(--st-border-color);
+      border-radius: 0.375rem;
+      background: var(--st-bg-surface);
+      color: var(--st-text-main);
+      font-size: 0.875rem;
+      min-width: 260px;
+      outline: none;
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+      transition: all 0.15s ease-in-out;
+    }
+    .st-search-input:hover {
+      border-color: #94a3b8;
+    }
+    .st-search-input:focus {
+      border-color: var(--st-primary);
+      box-shadow: 0 0 0 3px var(--st-focus-ring);
+    }
+    .st-meta {
+      font-size: 0.8125rem;
+      color: var(--st-text-muted);
+      font-weight: 500;
+    }
+
+    /* Pagination Footer */
+    .st-pagination-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.75rem 1rem;
+      background-color: var(--st-bg-header);
+      border-top: 1px solid var(--st-border-color);
+      font-size: 0.8125rem;
+      color: var(--st-text-muted);
+      flex-wrap: wrap;
+    }
+    .st-pagination-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .st-page-btn {
+      padding: 0.3rem 0.65rem;
+      border: 1px solid var(--st-border-color);
+      background: var(--st-bg-surface);
+      color: var(--st-text-main);
+      border-radius: 0.375rem;
+      font-size: 0.8125rem;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.15s ease;
+    }
+    .st-page-btn:hover:not(:disabled) {
+      background: var(--st-bg-hover);
+      border-color: #94a3b8;
+    }
+    .st-page-btn:focus-visible {
+      outline: none;
+      border-color: var(--st-primary);
+      box-shadow: 0 0 0 3px var(--st-focus-ring);
+    }
+    .st-page-btn.active {
+      background: var(--st-primary);
+      color: #ffffff;
+      border-color: var(--st-primary);
+    }
+    .st-page-btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+    .st-page-select {
+      padding: 0.3rem 0.65rem;
+      border: 1px solid var(--st-border-color);
+      border-radius: 0.375rem;
+      background: var(--st-bg-surface);
+      color: var(--st-text-main);
+      outline: none;
+      font-size: 0.8125rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .st-page-select:focus {
+      border-color: var(--st-primary);
+      box-shadow: 0 0 0 3px var(--st-focus-ring);
+    }
+      color: var(--st-text-main);
+      font-size: 0.8125rem;
+      outline: none;
+    }
+
+    sticky-data-table {
+      display: block;
+      color: var(--st-text-main);
+      background-color: var(--st-bg-surface);
+      border: 1px solid var(--st-border-color);
+      border-radius: var(--st-radius);
+      box-shadow: var(--st-shadow);
+      overflow: hidden;
+      box-sizing: border-box;
+      position: relative;
+    }
+    sticky-data-table * { box-sizing: border-box; }
+
+    .st-scroll-viewport {
+      position: relative;
+      width: 100%;
+      overflow-x: auto;
+      overflow-y: auto;
+      max-height: 480px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .st-table {
+      width: max-content;
+      min-width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      text-align: left;
+    }
+    .st-thead { position: sticky; top: 0; z-index: 10; }
+    .st-th {
+      background-color: var(--st-bg-header);
+      color: var(--st-text-muted);
+      font-weight: 600;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: var(--st-cell-py) var(--st-cell-px);
+      border-bottom: 2px solid var(--st-border-color);
+      border-right: 1px solid var(--st-border-color);
+      white-space: nowrap;
+      user-select: none;
+      position: relative;
+    }
+    .st-th:last-child { border-right: none; }
+    .st-th-inner { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+    .st-sortable { cursor: pointer; }
+    .st-sortable:hover { color: var(--st-text-main); }
+    .st-resizer {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 6px;
+      height: 100%;
+      cursor: col-resize;
+      user-select: none;
+    }
+    .st-resizer:hover { background-color: var(--st-primary); }
+
+    .st-tbody .st-row { transition: background-color 0.15s ease; }
+    .st-tbody .st-row:hover { background-color: var(--st-bg-hover); }
+    .st-td {
+      background-color: var(--st-bg-surface);
+      color: var(--st-text-main);
+      padding: var(--st-cell-py) var(--st-cell-px);
+      border-bottom: 1px solid var(--st-border-color);
+      border-right: 1px solid var(--st-border-color);
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+    .st-td:last-child { border-right: none; }
+
+    /* Sticky column positioning */
+    sticky-data-table[sticky-first-column="true"] .st-col-sticky {
+      position: sticky;
+      left: 0;
+      z-index: 5;
+      background-color: var(--st-bg-sticky) !important;
+    }
+    sticky-data-table[sticky-first-column="true"] th.st-col-sticky {
+      z-index: 20;
+      background-color: var(--st-bg-sticky-header) !important;
+    }
+    sticky-data-table[sticky-first-column="true"] .st-tbody .st-row:hover .st-col-sticky {
+      background-color: var(--st-bg-sticky-hover) !important;
+    }
+    sticky-data-table[sticky-first-column="true"] .st-scroll-viewport.st-is-scrolled .st-col-sticky {
+      box-shadow: 4px 0 8px -2px var(--st-sticky-shadow-color);
+      border-right: 1px solid var(--st-border-strong);
+    }
+
+    /* RTL */
+    sticky-data-table[dir="rtl"][sticky-first-column="true"] .st-col-sticky {
+      left: auto;
+      right: 0;
+      border-right: none;
+      border-left: 1px solid var(--st-border-color);
+    }
+    sticky-data-table[dir="rtl"][sticky-first-column="true"] .st-scroll-viewport.st-is-scrolled .st-col-sticky {
+      box-shadow: -4px 0 8px -2px var(--st-sticky-shadow-color);
+      border-left: 1px solid var(--st-border-strong);
+    }
+    sticky-data-table[dir="rtl"] .st-resizer { right: auto; left: 0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Sticky First Column Data Table</h2>
+    <p style="color: #64748b; font-size: 0.875rem; margin-bottom: 1rem;">
+      The first column (<strong>Product Name</strong>) remains locked at the edge while all other specification columns scroll horizontally. 
+      Supports edge drop-shadow on scroll, column resizing, RTL direction toggling, and sorting.
+    </p>
+
+    <div class="controls-bar">
+      <button id="toggle-sticky-btn" class="btn">Toggle Sticky Column: ON</button>
+      <button id="toggle-rtl-btn" class="btn">Toggle Direction: LTR</button>
+      <button id="toggle-theme-btn" class="btn">Toggle Dark Theme</button>
+    </div>
+
+    <!-- Sticky Data Table Web Component -->
+    <sticky-data-table id="inventory-table" sticky-first-column="true"></sticky-data-table>
+
+    <!-- Usage Guide Section -->
+    <section style="margin-top: 2rem; background: var(--st-bg-surface); border: 1px solid var(--st-border-color); border-radius: var(--st-radius); padding: 1.5rem; box-shadow: var(--st-shadow);" aria-label="Sticky Column Usage Guide">
+      <h3 style="margin: 0 0 0.5rem 0; font-size: 1.15rem; font-weight: 700; color: var(--st-text-main); display: flex; align-items: center; gap: 0.5rem;">
+        <span>📌 How to Use Sticky Columns</span>
+      </h3>
+      <p style="color: var(--st-text-muted); font-size: 0.875rem; margin-bottom: 1.25rem; line-height: 1.5;">
+        Sticky column pinning allows key identifier columns (such as Product Name, Employee ID, or Model) to remain persistently fixed to the viewport edge during wide horizontal table scrolling.
+      </p>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+        <div style="background: var(--st-bg-header); border: 1px solid var(--st-border-color); border-radius: 0.375rem; padding: 1rem;">
+          <h4 style="margin: 0 0 0.5rem 0; font-size: 0.875rem; font-weight: 700; color: var(--st-primary);">1. Enable Sticky Attribute</h4>
+          <p style="margin: 0; font-size: 0.8125rem; color: var(--st-text-muted); line-height: 1.5;">
+            Add the <code>sticky-first-column="true"</code> attribute to the custom element tag or toggle it dynamically via JavaScript.
+          </p>
+          <pre style="background: #0f172a; color: #38bdf8; padding: 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-top: 0.5rem; overflow-x: auto;"><code>&lt;sticky-data-table
+  id="my-table"
+  sticky-first-column="true"&gt;
+&lt;/sticky-data-table&gt;</code></pre>
+        </div>
+
+        <div style="background: var(--st-bg-header); border: 1px solid var(--st-border-color); border-radius: 0.375rem; padding: 1rem;">
+          <h4 style="margin: 0 0 0.5rem 0; font-size: 0.875rem; font-weight: 700; color: var(--st-primary);">2. Scroll Elevation Shadows</h4>
+          <p style="margin: 0; font-size: 0.8125rem; color: var(--st-text-muted); line-height: 1.5;">
+            When the user scrolls horizontally, the table container adds <code>st-is-scrolled</code> to cast an elevation shadow along the pinned edge to clearly demarcate boundary depth.
+          </p>
+          <pre style="background: #0f172a; color: #38bdf8; padding: 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-top: 0.5rem; overflow-x: auto;"><code>.st-scroll-viewport.st-is-scrolled .st-col-sticky {
+  box-shadow: 4px 0 8px -2px rgba(0,0,0,0.15);
+}</code></pre>
+        </div>
+
+        <div style="background: var(--st-bg-header); border: 1px solid var(--st-border-color); border-radius: 0.375rem; padding: 1rem;">
+          <h4 style="margin: 0 0 0.5rem 0; font-size: 0.875rem; font-weight: 700; color: var(--st-primary);">3. RTL &amp; Column Resizing</h4>
+          <p style="margin: 0; font-size: 0.8125rem; color: var(--st-text-muted); line-height: 1.5;">
+            Fully respects <code>dir="rtl"</code> by anchoring the column to the right boundary with inverted drop-shadows and mirrored column resizer handles.
+          </p>
+          <pre style="background: #0f172a; color: #38bdf8; padding: 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-top: 0.5rem; overflow-x: auto;"><code>tableEl.setAttribute('dir', 'rtl');</code></pre>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // Embedded implementation for immediate file:// previewing
+    function resolveValue(row, fieldPath) {
+      if (!fieldPath) return undefined;
+      const path = String(fieldPath);
+      if (!path.includes('.')) return row[path];
+      return path.split('.').reduce((acc, part) => (acc ? acc[part] : undefined), row);
+    }
+
+    function createElement(tagName, className, attrs) {
+      const el = document.createElement(tagName);
+      if (className) el.className = className;
+      if (attrs) {
+        for (const [key, value] of Object.entries(attrs)) {
+          if (typeof value === 'boolean') {
+            if (value) el.setAttribute(key, '');
+            else el.removeAttribute(key);
+          } else {
+            el.setAttribute(key, String(value));
+          }
+        }
+      }
+      return el;
+    }
+
+    function removeAllChildren(parent) {
+      while (parent.firstChild) parent.removeChild(parent.firstChild);
+    }
+
+    class StickyDataTable extends HTMLElement {
+      constructor() {
+        super();
+        this._rows = [];
+        this._columns = [];
+        this._options = { stickyFirstColumn: true, stickyColumnWidth: '220px' };
+        this._sortCriteria = [];
+        this._isScrolled = false;
+        this.activeResizingCol = null;
+
+        // Search & Pagination state
+        this._searchTerm = '';
+        this._currentPage = 1;
+        this._pageSize = 5;
+        this._totalFilteredRows = 0;
+      }
+
+      get rows() { return this._rows; }
+      set rows(v) { 
+        this._rows = Array.isArray(v) ? v : []; 
+        this._currentPage = 1;
+        this.render(); 
+      }
+
+      get columns() { return this._columns; }
+      set columns(v) { this._columns = Array.isArray(v) ? v : []; this.render(); }
+
+      get options() { return this._options; }
+      set options(opts) {
+        this._options = Object.assign({}, this._options, opts);
+        this.setAttribute('sticky-first-column', this._options.stickyFirstColumn !== false ? 'true' : 'false');
+        this.render();
+      }
+
+      connectedCallback() {
+        if (!this.viewportEl) {
+          // 1. Toolbar (Search & Record Meta)
+          this.toolbarEl = createElement('div', 'st-toolbar');
+          this.searchInput = createElement('input', 'st-search-input', {
+            type: 'text',
+            placeholder: 'Search specifications, products, warehouses...'
+          });
+          this.searchInput.addEventListener('input', (e) => {
+            this._searchTerm = e.target.value.trim().toLowerCase();
+            this._currentPage = 1;
+            this.render();
+          });
+          this.metaEl = createElement('span', 'st-meta');
+          this.toolbarEl.appendChild(this.searchInput);
+          this.toolbarEl.appendChild(this.metaEl);
+          this.appendChild(this.toolbarEl);
+
+          // 2. Viewport & Table
+          this.viewportEl = createElement('div', 'st-scroll-viewport');
+          this.tableEl = createElement('table', 'st-table');
+          this.theadEl = createElement('thead', 'st-thead');
+          this.tbodyEl = createElement('tbody', 'st-tbody');
+
+          this.tableEl.appendChild(this.theadEl);
+          this.tableEl.appendChild(this.tbodyEl);
+          this.viewportEl.appendChild(this.tableEl);
+          this.appendChild(this.viewportEl);
+
+          // 3. Pagination Footer
+          this.paginationEl = createElement('div', 'st-pagination-footer');
+          this.appendChild(this.paginationEl);
+
+          this.viewportEl.addEventListener('scroll', () => {
+            const scrollPos = Math.abs(this.viewportEl.scrollLeft);
+            const isScrolled = scrollPos > 2;
+            if (this._isScrolled !== isScrolled) {
+              this._isScrolled = isScrolled;
+              if (this._isScrolled) this.viewportEl.classList.add('st-is-scrolled');
+              else this.viewportEl.classList.remove('st-is-scrolled');
+            }
+          }, { passive: true });
+
+          window.addEventListener('mousemove', (e) => {
+            if (!this.activeResizingCol) return;
+            const isRTL = this.getAttribute('dir') === 'rtl';
+            const delta = (e.clientX - this.activeResizingCol.startX) * (isRTL ? -1 : 1);
+            const w = Math.max(80, this.activeResizingCol.startW + delta);
+            this.activeResizingCol.col.width = `${w}px`;
+            this.activeResizingCol.th.style.width = `${w}px`;
+          });
+
+          window.addEventListener('mouseup', () => {
+            if (this.activeResizingCol) {
+              this.activeResizingCol = null;
+              this.renderBody();
+            }
+          });
+        }
+        this.render();
+      }
+
+      render() {
+        if (!this.viewportEl) return;
+        this.renderHeader();
+        this.renderBody();
+        this.renderPagination();
+      }
+
+      renderHeader() {
+        removeAllChildren(this.theadEl);
+        const tr = createElement('tr', 'st-header-row');
+        const isSticky = this._options.stickyFirstColumn !== false;
+
+        this._columns.forEach((col, idx) => {
+          const isThisSticky = isSticky && idx === 0;
+          const th = createElement('th', `st-th ${isThisSticky ? 'st-col-sticky' : ''}`);
+          const w = col.width || (isThisSticky ? this._options.stickyColumnWidth || '220px' : '160px');
+          th.style.width = w;
+
+          const inner = createElement('div', 'st-th-inner');
+          const title = createElement('span');
+          title.textContent = col.header;
+          inner.appendChild(title);
+
+          if (col.sortable) {
+            th.classList.add('st-sortable');
+            const icon = createElement('span');
+            const active = this._sortCriteria.find(c => c.columnId === col.id);
+            icon.textContent = active?.direction === 'asc' ? ' ▲' : active?.direction === 'desc' ? ' ▼' : ' ⇅';
+            inner.appendChild(icon);
+            th.addEventListener('click', () => {
+              const cur = this._sortCriteria.find(c => c.columnId === col.id);
+              let next = 'asc';
+              if (cur && cur.direction === 'asc') next = 'desc';
+              else if (cur && cur.direction === 'desc') next = null;
+              this._sortCriteria = next ? [{ columnId: col.id, direction: next }] : [];
+              this.render();
+            });
+          }
+          th.appendChild(inner);
+
+          const resizer = createElement('div', 'st-resizer');
+          resizer.addEventListener('mousedown', (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            this.activeResizingCol = {
+              col,
+              startX: e.clientX,
+              startW: th.getBoundingClientRect().width,
+              th
+            };
+          });
+          th.appendChild(resizer);
+          tr.appendChild(th);
+        });
+        this.theadEl.appendChild(tr);
+      }
+
+      renderBody() {
+        removeAllChildren(this.tbodyEl);
+        let rows = [...this._rows];
+
+        // 1. Filter / Global Search
+        if (this._searchTerm) {
+          const term = this._searchTerm;
+          rows = rows.filter(row => {
+            return Object.values(row).some(v => v != null && String(v).toLowerCase().includes(term));
+          });
+        }
+        this._totalFilteredRows = rows.length;
+
+        // 2. Sorting
+        if (this._sortCriteria.length > 0) {
+          const crit = this._sortCriteria[0];
+          const col = this._columns.find(c => c.id === crit.columnId);
+          if (col && col.field) {
+            rows.sort((a, b) => {
+              const valA = resolveValue(a, col.field);
+              const valB = resolveValue(b, col.field);
+              if (valA === valB) return 0;
+              if (valA == null) return 1;
+              if (valB == null) return -1;
+              const compare = typeof valA === 'number' && typeof valB === 'number'
+                ? valA - valB
+                : String(valA).localeCompare(String(valB));
+              return crit.direction === 'asc' ? compare : -compare;
+            });
+          }
+        }
+
+        // 3. Pagination slicing
+        const totalPages = Math.max(1, Math.ceil(this._totalFilteredRows / this._pageSize));
+        if (this._currentPage > totalPages) this._currentPage = totalPages;
+        const startIndex = (this._currentPage - 1) * this._pageSize;
+        const pageRows = rows.slice(startIndex, startIndex + this._pageSize);
+
+        // Empty state
+        if (pageRows.length === 0) {
+          const tr = createElement('tr', 'st-row');
+          const td = createElement('td', 'st-td');
+          td.setAttribute('colspan', String(Math.max(1, this._columns.length)));
+          td.style.textAlign = 'center';
+          td.style.padding = '2rem 1rem';
+          td.style.color = 'var(--st-text-muted)';
+          td.textContent = this._searchTerm ? 'No records match your search filter.' : 'No records available.';
+          tr.appendChild(td);
+          this.tbodyEl.appendChild(tr);
+          return;
+        }
+
+        const isSticky = this._options.stickyFirstColumn !== false;
+
+        pageRows.forEach((row) => {
+          const tr = createElement('tr', 'st-row');
+          this._columns.forEach((col, idx) => {
+            const isThisSticky = isSticky && idx === 0;
+            const td = createElement('td', `st-td ${isThisSticky ? 'st-col-sticky' : ''}`);
+            if (col.width) td.style.width = col.width;
+            const val = resolveValue(row, col.field);
+            td.textContent = val == null ? '' : String(val);
+            tr.appendChild(td);
+          });
+          this.tbodyEl.appendChild(tr);
+        });
+      }
+
+      renderPagination() {
+        if (!this.paginationEl) return;
+        removeAllChildren(this.paginationEl);
+
+        const totalPages = Math.max(1, Math.ceil(this._totalFilteredRows / this._pageSize));
+        if (this.metaEl) {
+          this.metaEl.textContent = `${this._totalFilteredRows} item(s) found`;
+        }
+
+        // Page info label
+        const info = createElement('div');
+        const start = this._totalFilteredRows === 0 ? 0 : (this._currentPage - 1) * this._pageSize + 1;
+        const end = Math.min(this._totalFilteredRows, this._currentPage * this._pageSize);
+        info.innerHTML = `Showing <strong>${start}–${end}</strong> of <strong>${this._totalFilteredRows}</strong> records &bull; Page <strong>${this._currentPage}</strong> of <strong>${totalPages}</strong>`;
+        this.paginationEl.appendChild(info);
+
+        // Controls container
+        const controls = createElement('div', 'st-pagination-controls');
+
+        // Page Size Selector
+        const sizeSelect = createElement('select', 'st-page-select');
+        [5, 10, 15].forEach(size => {
+          const opt = createElement('option');
+          opt.value = String(size);
+          opt.textContent = `${size} / page`;
+          if (size === this._pageSize) opt.selected = true;
+          sizeSelect.appendChild(opt);
+        });
+        sizeSelect.addEventListener('change', (e) => {
+          this._pageSize = Number(e.target.value);
+          this._currentPage = 1;
+          this.render();
+        });
+        controls.appendChild(sizeSelect);
+
+        // Previous Button
+        const prevBtn = createElement('button', 'st-page-btn');
+        prevBtn.textContent = '‹ Prev';
+        if (this._currentPage <= 1) prevBtn.disabled = true;
+        prevBtn.addEventListener('click', () => {
+          if (this._currentPage > 1) {
+            this._currentPage--;
+            this.render();
+          }
+        });
+        controls.appendChild(prevBtn);
+
+        // Page Number Badges
+        for (let p = 1; p <= totalPages; p++) {
+          const pageBtn = createElement('button', `st-page-btn ${p === this._currentPage ? 'active' : ''}`);
+          pageBtn.textContent = String(p);
+          pageBtn.addEventListener('click', () => {
+            this._currentPage = p;
+            this.render();
+          });
+          controls.appendChild(pageBtn);
+        }
+
+        // Next Button
+        const nextBtn = createElement('button', 'st-page-btn');
+        nextBtn.textContent = 'Next ›';
+        if (this._currentPage >= totalPages) nextBtn.disabled = true;
+        nextBtn.addEventListener('click', () => {
+          if (this._currentPage < totalPages) {
+            this._currentPage++;
+            this.render();
+          }
+        });
+        controls.appendChild(nextBtn);
+
+        this.paginationEl.appendChild(controls);
+      }
+    }
+
+    if (!window.customElements.get('sticky-data-table')) {
+      window.customElements.define('sticky-data-table', StickyDataTable);
+    }
+
+    // App Initialization
+    const table = document.getElementById('inventory-table');
+
+    table.columns = [
+      { id: 'product', header: 'Product Name', field: 'name', width: '220px', sortable: true },
+      { id: 'sku', header: 'SKU Code', field: 'sku', width: '150px' },
+      { id: 'category', header: 'Category', field: 'category', width: '160px', sortable: true },
+      { id: 'price', header: 'Unit Price ($)', field: 'price', width: '130px', sortable: true },
+      { id: 'stock', header: 'Stock Units', field: 'stock', width: '130px', sortable: true },
+      { id: 'warehouse', header: 'Primary Warehouse', field: 'warehouse', width: '200px' },
+      { id: 'supplier', header: 'Supplier Vendor', field: 'supplier', width: '210px' },
+      { id: 'leadTime', header: 'Lead Time (Days)', field: 'leadTime', width: '150px' }
+    ];
+
+    table.rows = [
+      { name: 'Ultra-High Performance GPU 48GB', sku: 'GPU-48G-RTX', category: 'Hardware', price: 2999, stock: 45, warehouse: 'Facility North-A1', supplier: 'NVIDIA Global', leadTime: 7 },
+      { name: 'Quantum Core Processor X1', sku: 'CPU-QC-X1', category: 'Computing', price: 1450, stock: 120, warehouse: 'Facility Central-C2', supplier: 'Intel Tech', leadTime: 4 },
+      { name: 'DDR5 ECC Memory Module 64GB', sku: 'RAM-D5-64G', category: 'Memory', price: 340, stock: 350, warehouse: 'Facility West-W4', supplier: 'Samsung Semi', leadTime: 3 },
+      { name: 'NVMe Gen5 Enterprise SSD 8TB', sku: 'SSD-G5-8T', category: 'Storage', price: 890, stock: 95, warehouse: 'Facility North-A2', supplier: 'Crucial Micron', leadTime: 5 },
+      { name: 'Optic Fiber Transceiver 400G', sku: 'OPT-400G-QSFP', category: 'Networking', price: 620, stock: 210, warehouse: 'Facility East-E1', supplier: 'Cisco Systems', leadTime: 6 },
+      { name: 'Titanium Mechanical Switch V2', sku: 'SW-TITAN-V2', category: 'Peripherals', price: 120, stock: 450, warehouse: 'Facility South-S3', supplier: 'KeyTech Inc', leadTime: 2 },
+      { name: 'Liquid Cooling Radiator 360mm', sku: 'COOL-RAD-360', category: 'Hardware', price: 210, stock: 85, warehouse: 'Facility North-A1', supplier: 'AcroCorp', leadTime: 4 },
+      { name: 'Shielded CAT8 Patch Cable 10m', sku: 'CAB-CAT8-10M', category: 'Networking', price: 35, stock: 800, warehouse: 'Facility Central-C2', supplier: 'Cisco Systems', leadTime: 1 },
+      { name: 'Precision Power Supply 1200W', sku: 'PSU-ATX-1200', category: 'Hardware', price: 320, stock: 65, warehouse: 'Facility West-W4', supplier: 'Seasonic Global', leadTime: 5 },
+      { name: 'Ergonomic Dual Monitor Arm', sku: 'ARM-DUAL-PRO', category: 'Accessories', price: 185, stock: 140, warehouse: 'Facility East-E1', supplier: 'ErgoDesign', leadTime: 3 },
+      { name: 'Thunderbolt 4 Multi-Hub Dock', sku: 'DOCK-TB4-PRO', category: 'Peripherals', price: 290, stock: 110, warehouse: 'Facility North-A2', supplier: 'CalDigit Tech', leadTime: 4 },
+      { name: 'Managed 24-Port Gigabit Switch', sku: 'NET-SW24-POE', category: 'Networking', price: 780, stock: 40, warehouse: 'Facility Central-C2', supplier: 'Ubiquiti Networks', leadTime: 8 }
+    ];
+
+    // Toggle controls
+    const stickyBtn = document.getElementById('toggle-sticky-btn');
+    stickyBtn.addEventListener('click', () => {
+      const current = table.options.stickyFirstColumn !== false;
+      table.options = { stickyFirstColumn: !current };
+      stickyBtn.textContent = `Toggle Sticky Column: ${!current ? 'ON' : 'OFF'}`;
+    });
+
+    const rtlBtn = document.getElementById('toggle-rtl-btn');
+    rtlBtn.addEventListener('click', () => {
+      const isRtl = table.getAttribute('dir') === 'rtl';
+      table.setAttribute('dir', isRtl ? 'ltr' : 'rtl');
+      rtlBtn.textContent = `Toggle Direction: ${isRtl ? 'LTR' : 'RTL'}`;
+    });
+
+    const themeBtn = document.getElementById('toggle-theme-btn');
+    themeBtn.addEventListener('click', () => {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    });
+  </script>
+</body>
+</html>

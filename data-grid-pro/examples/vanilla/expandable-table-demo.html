@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Expandable Data Table Demo</title>
+  <style>
+    :root, [data-theme="light"] {
+      --xt-primary: #2563eb;
+      --xt-primary-hover: #1d4ed8;
+      --xt-bg-surface: #ffffff;
+      --xt-bg-header: #f8fafc;
+      --xt-bg-hover: #f1f5f9;
+      --xt-bg-expanded-row: #f8fafc;
+      --xt-bg-detail: #f8fafc;
+      --xt-text-main: #0f172a;
+      --xt-text-muted: #64748b;
+      --xt-border-color: #e2e8f0;
+      --xt-focus-ring: rgba(37, 99, 235, 0.35);
+      --xt-radius: 0.5rem;
+      --xt-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+      --xt-cell-py: 0.75rem;
+      --xt-cell-px: 1rem;
+    }
+
+    body {
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      padding: 2rem;
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 1.5rem;
+      border-radius: 0.75rem;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    }
+
+    .btn-toggle {
+      padding: 0.4rem 0.8rem;
+      border-radius: 0.375rem;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      font-size: 0.875rem;
+      cursor: pointer;
+      font-weight: 500;
+      margin-bottom: 1rem;
+    }
+    .btn-toggle:hover { background: #f8fafc; }
+
+    /* Search & Toolbar */
+    .xt-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.75rem 1rem;
+      background: var(--xt-bg-header);
+      border-bottom: 1px solid var(--xt-border-color);
+      flex-wrap: wrap;
+    }
+    .xt-search-input {
+      padding: 0.4rem 0.75rem;
+      border: 1px solid var(--xt-border-color);
+      border-radius: 0.375rem;
+      background: var(--xt-bg-surface);
+      color: var(--xt-text-main);
+      font-size: 0.875rem;
+      min-width: 260px;
+      outline: none;
+    }
+    .xt-search-input:focus {
+      border-color: var(--xt-primary);
+      box-shadow: 0 0 0 3px var(--xt-focus-ring);
+    }
+    .xt-meta {
+      font-size: 0.8125rem;
+      color: var(--xt-text-muted);
+      font-weight: 500;
+    }
+
+    /* Pagination Footer */
+    .xt-pagination-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.75rem 1rem;
+      background: var(--xt-bg-header);
+      border-top: 1px solid var(--xt-border-color);
+      font-size: 0.8125rem;
+      color: var(--xt-text-muted);
+      flex-wrap: wrap;
+    }
+    .xt-pagination-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .xt-page-btn {
+      padding: 0.25rem 0.6rem;
+      border: 1px solid var(--xt-border-color);
+      background: var(--xt-bg-surface);
+      color: var(--xt-text-main);
+      border-radius: 0.375rem;
+      font-size: 0.8125rem;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .xt-page-btn:hover:not(:disabled) { background: var(--xt-bg-hover); }
+    .xt-page-btn.active {
+      background: var(--xt-primary);
+      color: #ffffff;
+      border-color: var(--xt-primary);
+    }
+    .xt-page-btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+    .xt-page-select {
+      padding: 0.25rem 0.5rem;
+      border: 1px solid var(--xt-border-color);
+      border-radius: 0.375rem;
+      background: var(--xt-bg-surface);
+      color: var(--xt-text-main);
+      font-size: 0.8125rem;
+      outline: none;
+    }
+    .xt-th-sortable {
+      cursor: pointer;
+      user-select: none;
+    }
+    .xt-th-sortable:hover {
+      color: var(--xt-text-main);
+    }
+
+    expandable-data-table {
+      display: block;
+      color: var(--xt-text-main);
+      background-color: var(--xt-bg-surface);
+      border: 1px solid var(--xt-border-color);
+      border-radius: var(--xt-radius);
+      box-shadow: var(--xt-shadow);
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+    expandable-data-table * { box-sizing: border-box; }
+
+    .xt-table-container { width: 100%; overflow-x: auto; }
+    .xt-table { width: 100%; border-collapse: collapse; text-align: left; }
+    .xt-thead { background-color: var(--xt-bg-header); border-bottom: 2px solid var(--xt-border-color); }
+    .xt-th {
+      padding: var(--xt-cell-py) var(--xt-cell-px);
+      font-weight: 600;
+      color: var(--xt-text-muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+    }
+    .xt-tbody .xt-row {
+      border-bottom: 1px solid var(--xt-border-color);
+      transition: background-color 0.15s ease;
+      cursor: pointer;
+    }
+    .xt-tbody .xt-row:hover { background-color: var(--xt-bg-hover); }
+    .xt-tbody .xt-row.xt-row-expanded { background-color: var(--xt-bg-expanded-row); border-bottom: none; }
+    .xt-td { padding: var(--xt-cell-py) var(--xt-cell-px); color: var(--xt-text-main); vertical-align: middle; }
+
+    .xt-expand-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 0.25rem;
+      background: transparent;
+      border: none;
+      color: var(--xt-text-muted);
+      cursor: pointer;
+      transition: transform 0.2s ease, color 0.15s ease;
+    }
+    .xt-row-expanded .xt-expand-btn { transform: rotate(90deg); color: var(--xt-primary); }
+
+    .xt-detail-row { background-color: var(--xt-bg-detail); border-bottom: 1px solid var(--xt-border-color); }
+    .xt-detail-content {
+      padding: 1.25rem;
+      border-left: 3px solid var(--xt-primary);
+    }
+    .xt-spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid #cbd5e1;
+      border-top-color: var(--xt-primary);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin-right: 0.5rem;
+      vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; }
+    .stat-box { background: white; border: 1px solid #e2e8f0; border-radius: 0.375rem; padding: 0.75rem; }
+    .stat-label { font-size: 0.75rem; color: #64748b; text-transform: uppercase; font-weight: 600; }
+    .stat-val { font-size: 1.1rem; font-weight: 700; color: #0f172a; margin-top: 0.25rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Expandable Row Data Table Demo</h2>
+    <p style="color: #64748b; font-size: 0.875rem; margin-bottom: 1rem;">
+      Click any row or its expansion arrow (▶) to expand details directly beneath it. 
+      Supports asynchronous data loading (simulated 300ms network fetch), interactive nested buttons, keyboard navigation (Enter/Space), and single or multi-row expansion.
+    </p>
+
+    <button id="toggle-multi-btn" class="btn-toggle">Mode: Multi-Row Expansion</button>
+
+    <expandable-data-table id="cluster-table"></expandable-data-table>
+
+    <!-- Usage Guide Section -->
+    <section style="margin-top: 2rem; background: #f8fafc; border: 1px solid var(--xt-border-color); border-radius: 0.5rem; padding: 1.25rem;" aria-label="Expandable Row Usage Guide">
+      <h3 style="margin: 0 0 0.5rem 0; font-size: 1.1rem; font-weight: 700; color: var(--xt-text-main); display: flex; align-items: center; gap: 0.5rem;">
+        <span>💡 How to Use Expandable Rows</span>
+      </h3>
+      <p style="color: var(--xt-text-muted); font-size: 0.85rem; margin-bottom: 1rem; line-height: 1.5;">
+        Master-detail tables enable nesting rich sub-views, telemetry graphs, and secondary data grids beneath parent records.
+      </p>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem;">
+        <div style="background: #ffffff; border: 1px solid var(--xt-border-color); border-radius: 0.375rem; padding: 0.85rem;">
+          <h4 style="margin: 0 0 0.35rem 0; font-size: 0.85rem; font-weight: 700; color: var(--xt-primary);">1. Configure Expansion Options</h4>
+          <p style="margin: 0; font-size: 0.8rem; color: var(--xt-text-muted); line-height: 1.4;">
+            Control whether single or multiple rows can expand at once, and if clicking anywhere on the row triggers expansion.
+          </p>
+          <pre style="background: #0f172a; color: #38bdf8; padding: 0.5rem; border-radius: 0.25rem; font-size: 0.725rem; margin-top: 0.4rem; overflow-x: auto;"><code>table.options = {
+  multiExpand: true,
+  expandOnRowClick: true
+};</code></pre>
+        </div>
+
+        <div style="background: #ffffff; border: 1px solid var(--xt-border-color); border-radius: 0.375rem; padding: 0.85rem;">
+          <h4 style="margin: 0 0 0.35rem 0; font-size: 0.85rem; font-weight: 700; color: var(--xt-primary);">2. Async or Synchronous Details</h4>
+          <p style="margin: 0; font-size: 0.8rem; color: var(--xt-text-muted); line-height: 1.4;">
+            Supply an async function or HTML generator returning sub-tables, telemetry metrics, or action panels.
+          </p>
+          <pre style="background: #0f172a; color: #38bdf8; padding: 0.5rem; border-radius: 0.25rem; font-size: 0.725rem; margin-top: 0.4rem; overflow-x: auto;"><code>table.detailRenderer = async (row) => {
+  const data = await fetchSubData(row.id);
+  return `&lt;div&gt;Telemetry: ${data.temp}°C&lt;/div&gt;`;
+};</code></pre>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // Standalone implementation for zero-dependency file:// previewing
+    function resolveValue(row, path) {
+      if (!path) return undefined;
+      return String(path).split('.').reduce((acc, part) => (acc ? acc[part] : undefined), row);
+    }
+
+    function createElement(tag, cls, attrs) {
+      const el = document.createElement(tag);
+      if (cls) el.className = cls;
+      if (attrs) {
+        for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, String(v));
+      }
+      return el;
+    }
+
+    function removeAllChildren(p) {
+      while (p.firstChild) p.removeChild(p.firstChild);
+    }
+
+    class ExpandableDataTable extends HTMLElement {
+      constructor() {
+        super();
+        this._rows = [];
+        this._columns = [];
+        this._options = { multiExpand: true, expandOnRowClick: true };
+        this._expandedIds = new Set();
+        this._asyncCache = new Map();
+        this._asyncLoading = new Set();
+
+        // Search, Sort, Pagination
+        this._searchTerm = '';
+        this._sortCriteria = [];
+        this._currentPage = 1;
+        this._pageSize = 5;
+        this._totalFilteredRows = 0;
+      }
+
+      get rows() { return this._rows; }
+      set rows(v) { 
+        this._rows = Array.isArray(v) ? v : []; 
+        this._currentPage = 1;
+        this.render(); 
+      }
+
+      get columns() { return this._columns; }
+      set columns(v) { this._columns = Array.isArray(v) ? v : []; this.render(); }
+
+      get options() { return this._options; }
+      set options(opts) {
+        this._options = Object.assign({}, this._options, opts);
+        this.render();
+      }
+
+      connectedCallback() {
+        if (!this.tableContainerEl) {
+          // 1. Toolbar: Search & Meta
+          this.toolbarEl = createElement('div', 'xt-toolbar');
+          this.searchInput = createElement('input', 'xt-search-input', {
+            type: 'text',
+            placeholder: 'Search cluster nodes, regions, health...'
+          });
+          this.searchInput.addEventListener('input', (e) => {
+            this._searchTerm = e.target.value.trim().toLowerCase();
+            this._currentPage = 1;
+            this.render();
+          });
+          this.metaEl = createElement('span', 'xt-meta');
+          this.toolbarEl.appendChild(this.searchInput);
+          this.toolbarEl.appendChild(this.metaEl);
+          this.appendChild(this.toolbarEl);
+
+          // 2. Table Container
+          this.tableContainerEl = createElement('div', 'xt-table-container');
+          this.tableEl = createElement('table', 'xt-table');
+          this.theadEl = createElement('thead', 'xt-thead');
+          this.tbodyEl = createElement('tbody', 'xt-tbody');
+
+          this.tableEl.appendChild(this.theadEl);
+          this.tableEl.appendChild(this.tbodyEl);
+          this.tableContainerEl.appendChild(this.tableEl);
+          this.appendChild(this.tableContainerEl);
+
+          // 3. Pagination Footer
+          this.paginationEl = createElement('div', 'xt-pagination-footer');
+          this.appendChild(this.paginationEl);
+        }
+        this.render();
+      }
+
+      async toggleRow(id, row) {
+        if (this._expandedIds.has(id)) {
+          this._expandedIds.delete(id);
+          this.render();
+        } else {
+          if (!this._options.multiExpand) this._expandedIds.clear();
+          this._expandedIds.add(id);
+
+          if (this._options.asyncDetailRenderer && !this._asyncCache.has(id)) {
+            this._asyncLoading.add(id);
+            this.render();
+            const res = await this._options.asyncDetailRenderer(row);
+            this._asyncCache.set(id, res);
+            this._asyncLoading.delete(id);
+          }
+          this.render();
+        }
+      }
+
+      render() {
+        if (!this.tableContainerEl) return;
+        this.renderHeader();
+        this.renderBody();
+        this.renderPagination();
+      }
+
+      renderHeader() {
+        removeAllChildren(this.theadEl);
+        const tr = createElement('tr', 'xt-header-row');
+        const thExp = createElement('th', 'xt-th');
+        thExp.style.width = '48px';
+        tr.appendChild(thExp);
+
+        this._columns.forEach(c => {
+          const th = createElement('th', 'xt-th xt-th-sortable');
+          if (c.width) th.style.width = c.width;
+          
+          const title = createElement('span');
+          title.textContent = c.header;
+          th.appendChild(title);
+
+          const cur = this._sortCriteria.find(s => s.columnId === c.id);
+          const icon = createElement('span');
+          icon.textContent = cur?.direction === 'asc' ? ' ▲' : cur?.direction === 'desc' ? ' ▼' : ' ⇅';
+          th.appendChild(icon);
+
+          th.addEventListener('click', () => {
+            const active = this._sortCriteria.find(s => s.columnId === c.id);
+            let next = 'asc';
+            if (active && active.direction === 'asc') next = 'desc';
+            else if (active && active.direction === 'desc') next = null;
+            this._sortCriteria = next ? [{ columnId: c.id, direction: next }] : [];
+            this.render();
+          });
+
+          tr.appendChild(th);
+        });
+        this.theadEl.appendChild(tr);
+      }
+
+      renderBody() {
+        removeAllChildren(this.tbodyEl);
+        let list = [...this._rows];
+
+        // 1. Search Filter
+        if (this._searchTerm) {
+          const q = this._searchTerm;
+          list = list.filter(row => Object.values(row).some(v => v != null && String(v).toLowerCase().includes(q)));
+        }
+        this._totalFilteredRows = list.length;
+
+        // 2. Sorting
+        if (this._sortCriteria.length > 0) {
+          const crit = this._sortCriteria[0];
+          const col = this._columns.find(c => c.id === crit.columnId);
+          if (col && col.field) {
+            list.sort((a, b) => {
+              const valA = resolveValue(a, col.field);
+              const valB = resolveValue(b, col.field);
+              if (valA === valB) return 0;
+              if (valA == null) return 1;
+              if (valB == null) return -1;
+              const cmp = typeof valA === 'number' && typeof valB === 'number'
+                ? valA - valB
+                : String(valA).localeCompare(String(valB));
+              return crit.direction === 'asc' ? cmp : -cmp;
+            });
+          }
+        }
+
+        // 3. Pagination Slicing
+        const totalPages = Math.max(1, Math.ceil(this._totalFilteredRows / this._pageSize));
+        if (this._currentPage > totalPages) this._currentPage = totalPages;
+        const start = (this._currentPage - 1) * this._pageSize;
+        const pagedRows = list.slice(start, start + this._pageSize);
+
+        const totalCols = this._columns.length + 1;
+
+        if (pagedRows.length === 0) {
+          const tr = createElement('tr', 'xt-row');
+          const td = createElement('td', 'xt-td', { colspan: totalCols });
+          td.style.textAlign = 'center';
+          td.style.padding = '2rem 1rem';
+          td.style.color = 'var(--xt-text-muted)';
+          td.textContent = this._searchTerm ? 'No clusters match your search filter.' : 'No cluster records available.';
+          tr.appendChild(td);
+          this.tbodyEl.appendChild(tr);
+          return;
+        }
+
+        pagedRows.forEach(row => {
+          const rowId = row.id;
+          const isExpanded = this._expandedIds.has(rowId);
+          const tr = createElement('tr', `xt-row ${isExpanded ? 'xt-row-expanded' : ''}`, {
+            tabindex: '0',
+            'aria-expanded': isExpanded ? 'true' : 'false'
+          });
+
+          tr.addEventListener('click', (e) => {
+            if (e.target.closest('button, input, a, select')) return;
+            this.toggleRow(rowId, row);
+          });
+          tr.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              this.toggleRow(rowId, row);
+            }
+          });
+
+          const tdExp = createElement('td', 'xt-td');
+          tdExp.style.width = '48px';
+          tdExp.style.textAlign = 'center';
+          const btn = createElement('button', 'xt-expand-btn', { type: 'button' });
+          btn.innerHTML = '▶';
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.toggleRow(rowId, row);
+          });
+          tdExp.appendChild(btn);
+          tr.appendChild(tdExp);
+
+          this._columns.forEach(c => {
+            const td = createElement('td', 'xt-td');
+            const val = resolveValue(row, c.field);
+            if (c.formatter) td.textContent = c.formatter(val, row);
+            else td.textContent = val == null ? '' : String(val);
+            tr.appendChild(td);
+          });
+          this.tbodyEl.appendChild(tr);
+
+          if (isExpanded) {
+            const trDetail = createElement('tr', 'xt-detail-row');
+            const tdDetail = createElement('td', 'xt-detail-td', { colspan: totalCols });
+            const contentDiv = createElement('div', 'xt-detail-content');
+
+            if (this._asyncLoading.has(rowId)) {
+              contentDiv.innerHTML = '<span><span class="xt-spinner"></span>Fetching live cluster metrics...</span>';
+            } else {
+              const res = this._asyncCache.get(rowId) || (this._options.detailRenderer ? this._options.detailRenderer(row) : '');
+              if (typeof res === 'string') contentDiv.innerHTML = res;
+              else contentDiv.appendChild(res);
+            }
+
+            tdDetail.appendChild(contentDiv);
+            trDetail.appendChild(tdDetail);
+            this.tbodyEl.appendChild(trDetail);
+          }
+        });
+      }
+
+      renderPagination() {
+        if (!this.paginationEl) return;
+        removeAllChildren(this.paginationEl);
+
+        const totalPages = Math.max(1, Math.ceil(this._totalFilteredRows / this._pageSize));
+        if (this.metaEl) {
+          this.metaEl.textContent = `${this._totalFilteredRows} cluster(s) found`;
+        }
+
+        const info = createElement('div');
+        const start = this._totalFilteredRows === 0 ? 0 : (this._currentPage - 1) * this._pageSize + 1;
+        const end = Math.min(this._totalFilteredRows, this._currentPage * this._pageSize);
+        info.innerHTML = `Showing <strong>${start}–${end}</strong> of <strong>${this._totalFilteredRows}</strong> &bull; Page <strong>${this._currentPage}</strong> of <strong>${totalPages}</strong>`;
+        this.paginationEl.appendChild(info);
+
+        const controls = createElement('div', 'xt-pagination-controls');
+
+        const sizeSelect = createElement('select', 'xt-page-select');
+        [3, 5, 10].forEach(sz => {
+          const opt = createElement('option');
+          opt.value = String(sz);
+          opt.textContent = `${sz} / page`;
+          if (sz === this._pageSize) opt.selected = true;
+          sizeSelect.appendChild(opt);
+        });
+        sizeSelect.addEventListener('change', (e) => {
+          this._pageSize = Number(e.target.value);
+          this._currentPage = 1;
+          this.render();
+        });
+        controls.appendChild(sizeSelect);
+
+        const prevBtn = createElement('button', 'xt-page-btn');
+        prevBtn.textContent = '‹ Prev';
+        if (this._currentPage <= 1) prevBtn.disabled = true;
+        prevBtn.addEventListener('click', () => {
+          if (this._currentPage > 1) {
+            this._currentPage--;
+            this.render();
+          }
+        });
+        controls.appendChild(prevBtn);
+
+        for (let p = 1; p <= totalPages; p++) {
+          const pageBtn = createElement('button', `xt-page-btn ${p === this._currentPage ? 'active' : ''}`);
+          pageBtn.textContent = String(p);
+          pageBtn.addEventListener('click', () => {
+            this._currentPage = p;
+            this.render();
+          });
+          controls.appendChild(pageBtn);
+        }
+
+        const nextBtn = createElement('button', 'xt-page-btn');
+        nextBtn.textContent = 'Next ›';
+        if (this._currentPage >= totalPages) nextBtn.disabled = true;
+        nextBtn.addEventListener('click', () => {
+          if (this._currentPage < totalPages) {
+            this._currentPage++;
+            this.render();
+          }
+        });
+        controls.appendChild(nextBtn);
+
+        this.paginationEl.appendChild(controls);
+      }
+    }
+
+    if (!window.customElements.get('expandable-data-table')) {
+      window.customElements.define('expandable-data-table', ExpandableDataTable);
+    }
+
+    // App Initialization
+    const table = document.getElementById('cluster-table');
+
+    table.columns = [
+      { id: 'node', header: 'Node Cluster Name', field: 'name', width: '240px' },
+      { id: 'region', header: 'Cloud Region', field: 'region', width: '160px' },
+      { id: 'status', header: 'Health Status', field: 'status', width: '140px' },
+      { id: 'nodes', header: 'Active Replicas', field: 'replicas', width: '140px' }
+    ];
+
+    table.rows = [
+      { id: 'c-01', name: 'production-k8s-us-east', region: 'us-east-1 (N. Virginia)', status: 'Healthy', replicas: 36, cpu: 74, memory: 68, p99Latency: 12 },
+      { id: 'c-02', name: 'staging-microservices-eu', region: 'eu-central-1 (Frankfurt)', status: 'Degraded', replicas: 12, cpu: 91, memory: 88, p99Latency: 48 },
+      { id: 'c-03', name: 'analytics-streaming-ap', region: 'ap-southeast-1 (Singapore)', status: 'Healthy', replicas: 24, cpu: 52, memory: 61, p99Latency: 16 },
+      { id: 'c-04', name: 'payments-ledger-us-west', region: 'us-west-2 (Oregon)', status: 'Healthy', replicas: 48, cpu: 62, memory: 55, p99Latency: 9 },
+      { id: 'c-05', name: 'ml-inference-cluster-01', region: 'us-east-2 (Ohio)', status: 'Degraded', replicas: 64, cpu: 96, memory: 92, p99Latency: 65 },
+      { id: 'c-06', name: 'auth-vault-primary-eu', region: 'eu-west-1 (Ireland)', status: 'Healthy', replicas: 16, cpu: 38, memory: 42, p99Latency: 11 },
+      { id: 'c-07', name: 'cdn-edge-gateway-tokyo', region: 'ap-northeast-1 (Tokyo)', status: 'Healthy', replicas: 30, cpu: 45, memory: 50, p99Latency: 14 },
+      { id: 'c-08', name: 'reporting-data-warehouse', region: 'us-central-1 (Iowa)', status: 'Maintenance', replicas: 8, cpu: 22, memory: 35, p99Latency: 120 },
+      { id: 'c-09', name: 'vector-search-engine-02', region: 'us-west-1 (California)', status: 'Healthy', replicas: 32, cpu: 68, memory: 72, p99Latency: 15 },
+      { id: 'c-10', name: 'iot-telemetry-gateway', region: 'eu-north-1 (Stockholm)', status: 'Healthy', replicas: 20, cpu: 41, memory: 46, p99Latency: 18 },
+      { id: 'c-11', name: 'graph-db-recommender', region: 'ap-south-1 (Mumbai)', status: 'Degraded', replicas: 18, cpu: 89, memory: 84, p99Latency: 54 },
+      { id: 'c-12', name: 'disaster-recovery-backup', region: 'ca-central-1 (Montreal)', status: 'Healthy', replicas: 10, cpu: 15, memory: 28, p99Latency: 8 }
+    ];
+
+    table.options = {
+      multiExpand: true,
+      asyncDetailRenderer: async (row) => {
+        // Simulate async microservice telemetry call (300ms)
+        await new Promise(r => setTimeout(r, 300));
+
+        return `
+          <div style="font-size: 0.875rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+              <strong>Real-Time Cluster Telemetry & Resource Utilization:</strong>
+              <button onclick="alert('Triggering scale event on ${row.name}')" style="padding: 0.25rem 0.6rem; border-radius: 0.25rem; background: #2563eb; color: white; border: none; font-size: 0.75rem; cursor: pointer;">Scale Cluster</button>
+            </div>
+            <div class="grid-2">
+              <div class="stat-box">
+                <div class="stat-label">CPU Consumption</div>
+                <div class="stat-val">${row.cpu}%</div>
+              </div>
+              <div class="stat-box">
+                <div class="stat-label">Memory Utilization</div>
+                <div class="stat-val">${row.memory}%</div>
+              </div>
+              <div class="stat-box">
+                <div class="stat-label">p99 Network Latency</div>
+                <div class="stat-val">${row.p99Latency} ms</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    };
+
+    const multiBtn = document.getElementById('toggle-multi-btn');
+    multiBtn.addEventListener('click', () => {
+      const cur = table.options.multiExpand;
+      table.options = { multiExpand: !cur };
+      multiBtn.textContent = `Mode: ${!cur ? 'Multi-Row Expansion' : 'Single-Row Accordion'}`;
+    });
+  </script>
+</body>
+</html>

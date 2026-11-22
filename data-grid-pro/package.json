@@ -1,0 +1,98 @@
+{
+  "name": "arame-data-grid-pro",
+  "version": "1.0.0",
+  "description": "Enterprise-grade, framework-agnostic Web Component data grid built with TypeScript.",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./styles.css": "./dist/styles.css",
+    "./sticky-table": {
+      "types": "./dist/sticky-table/index.d.ts",
+      "import": "./dist/sticky-table/index.js"
+    },
+    "./expandable-table": {
+      "types": "./dist/expandable-table/index.d.ts",
+      "import": "./dist/expandable-table/index.js"
+    },
+    "./column-visibility-table": {
+      "types": "./dist/column-visibility-table/index.d.ts",
+      "import": "./dist/column-visibility-table/index.js"
+    },
+    "./filterable-table": {
+      "types": "./dist/filterable-table/index.d.ts",
+      "import": "./dist/filterable-table/index.js"
+    },
+    "./editable-table": {
+      "types": "./dist/editable-table/index.d.ts",
+      "import": "./dist/editable-table/index.js"
+    },
+    "./grouped-table": {
+      "types": "./dist/grouped-table/index.d.ts",
+      "import": "./dist/grouped-table/index.js"
+    },
+    "./context-menu-table": {
+      "types": "./dist/context-menu-table/index.d.ts",
+      "import": "./dist/context-menu-table/index.js"
+    },
+    "./infinite-table": {
+      "types": "./dist/infinite-table/index.d.ts",
+      "import": "./dist/infinite-table/index.js"
+    },
+    "./calculated-table": {
+      "types": "./dist/calculated-table/index.d.ts",
+      "import": "./dist/calculated-table/index.js"
+    },
+    "./header-filter-table": {
+      "types": "./dist/header-filter-table/index.d.ts",
+      "import": "./dist/header-filter-table/index.js"
+    },
+    "./tree-table": {
+      "types": "./dist/tree-table/index.d.ts",
+      "import": "./dist/tree-table/index.js"
+    },
+    "./advanced-filter-table": {
+      "types": "./dist/advanced-filter-table/index.d.ts",
+      "import": "./dist/advanced-filter-table/index.js"
+    },
+    "./common": {
+      "types": "./dist/common/index.d.ts",
+      "import": "./dist/common/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "vite build",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "data-grid",
+    "table",
+    "web-components",
+    "custom-elements",
+    "typescript",
+    "framework-agnostic",
+    "nextjs",
+    "tailwind"
+  ],
+  "author": "Arame Global (https://github.com/arameglobal)",
+  "license": "MIT",
+  "devDependencies": {
+    "happy-dom": "^21.0.4",
+    "typescript": "^5.5.4",
+    "vite": "^5.4.0",
+    "vite-plugin-dts": "^4.0.0",
+    "vitest": "^2.0.5"
+  }
+}

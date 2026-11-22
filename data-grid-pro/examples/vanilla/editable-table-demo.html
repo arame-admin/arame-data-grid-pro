@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Editable Data Table Demo</title>
+  <style>
+    :root, [data-theme="light"] {
+      --et-primary: #2563eb;
+      --et-primary-hover: #1d4ed8;
+      --et-danger: #ef4444;
+      --et-bg-surface: #ffffff;
+      --et-bg-header: #f8fafc;
+      --et-bg-hover: #f1f5f9;
+      --et-bg-editing: #eff6ff;
+      --et-text-main: #0f172a;
+      --et-text-muted: #64748b;
+      --et-border-color: #e2e8f0;
+      --et-focus-ring: rgba(37, 99, 235, 0.35);
+      --et-radius: 0.5rem;
+      --et-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+      --et-cell-py: 0.65rem;
+      --et-cell-px: 0.85rem;
+    }
+
+    body {
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      padding: 2rem;
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+
+    .container {
+      max-width: 980px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 1.5rem;
+      border-radius: 0.75rem;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    }
+
+    .log-box {
+      font-family: monospace;
+      font-size: 0.8rem;
+      padding: 0.5rem 0.75rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 0.375rem;
+      color: #2563eb;
+      margin-bottom: 1rem;
+    }
+
+    editable-data-table {
+      display: block;
+      color: var(--et-text-main);
+      background-color: var(--et-bg-surface);
+      border: 1px solid var(--et-border-color);
+      border-radius: var(--et-radius);
+      box-shadow: var(--et-shadow);
+      position: relative;
+    }
+    editable-data-table * { box-sizing: border-box; }
+
+    .et-toolbar {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.75rem 1rem;
+      background-color: var(--et-bg-header);
+      border-bottom: 1px solid var(--et-border-color);
+    }
+    .et-search-input {
+      border: 1px solid var(--et-border-color);
+      background-color: var(--et-bg-surface);
+      color: var(--et-text-main);
+      border-radius: 0.375rem;
+      padding: 0.45rem 0.75rem;
+      font-size: 0.875rem;
+      min-width: 260px;
+      outline: none;
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+      transition: all 0.15s ease-in-out;
+    }
+    .et-search-input:hover {
+      border-color: #94a3b8;
+    }
+    .et-search-input:focus {
+      border-color: var(--et-primary);
+      box-shadow: 0 0 0 3px var(--et-focus-ring);
+    }
+
+    .et-table-container { width: 100%; overflow-x: auto; max-height: 520px; }
+    .et-table { width: 100%; border-collapse: collapse; text-align: left; }
+    .et-thead { position: sticky; top: 0; z-index: 10; background-color: var(--et-bg-header); border-bottom: 2px solid var(--et-border-color); }
+    .et-th {
+      padding: var(--et-cell-py) var(--et-cell-px);
+      font-weight: 600;
+      color: var(--et-text-muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+    }
+    .et-tbody .et-row { border-bottom: 1px solid var(--et-border-color); }
+    .et-tbody .et-row:hover { background-color: var(--et-bg-hover); }
+    .et-td { padding: var(--et-cell-py) var(--et-cell-px); color: var(--et-text-main); vertical-align: middle; position: relative; }
+
+    .et-cell-editable { cursor: pointer; }
+    .et-cell-editable:hover { background-color: rgba(37, 99, 235, 0.05); }
+    .et-cell-editing { padding: 0.25rem 0.5rem !important; background-color: var(--et-bg-editing) !important; }
+    .et-editor-wrapper { display: flex; align-items: center; gap: 0.25rem; width: 100%; position: relative; }
+    .et-input, .et-select {
+      width: 100%;
+      height: 2.1rem;
+      padding: 0.35rem 0.6rem;
+      font-size: 0.8125rem;
+      border: 1px solid var(--et-primary);
+      border-radius: 0.375rem;
+      background-color: #ffffff;
+      color: var(--et-text-main);
+      outline: none;
+      box-shadow: 0 0 0 3px var(--et-focus-ring);
+    }
+    .et-checkbox {
+      width: 1.125rem;
+      height: 1.125rem;
+      cursor: pointer;
+      accent-color: var(--et-primary);
+    }
+    .et-btn-save { color: #16a34a; background: transparent; border: none; cursor: pointer; font-size: 0.9rem; }
+    .et-btn-cancel { color: #dc2626; background: transparent; border: none; cursor: pointer; font-size: 0.9rem; }
+
+    .et-validation-error-bubble {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      background: #ffffff;
+      color: #b91c1c;
+      border: 1px solid #fca5a5;
+      border-radius: 0.25rem;
+      padding: 0.2rem 0.4rem;
+      font-size: 0.75rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      z-index: 30;
+      white-space: nowrap;
+    }
+
+    .et-pagination-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      background: var(--et-bg-header);
+      border-top: 1px solid var(--et-border-color);
+      font-size: 0.875rem;
+    }
+    .tbl-btn {
+      padding: 0.25rem 0.5rem;
+      border: 1px solid var(--et-border-color);
+      border-radius: 0.25rem;
+      background: #ffffff;
+      cursor: pointer;
+      font-size: 0.8125rem;
+      margin: 0 0.15rem;
+    }
+    .tbl-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Interactive In-Place Editable Data Table Demo</h2>
+    <p style="color: #64748b; font-size: 0.875rem; margin-bottom: 1rem;">
+      Double-click or press <kbd>Enter</kbd> on any editable cell (Product, Category, Price, or Available) to edit directly in the table. 
+      Supports validation (Product &gt; 3 chars, Price &ge; 0), keyboard save (<kbd>Enter</kbd>) and cancel (<kbd>Esc</kbd>), optimistic updates with error rollback, 
+      plus universal pagination (10/page), sorting, and search.
+    </p>
+
+    <div id="event-log" class="log-box">Ready. Double click a cell to edit.</div>
+
+    <editable-data-table id="inventory-table"></editable-data-table>
+
+    <!-- Usage Guide Section -->
+    <section style="margin-top: 2rem; background: #f8fafc; border: 1px solid var(--et-border-color); border-radius: 0.5rem; padding: 1.25rem;" aria-label="Editable Table Usage Guide">
+      <h3 style="margin: 0 0 0.5rem 0; font-size: 1.1rem; font-weight: 700; color: var(--et-text-main); display: flex; align-items: center; gap: 0.5rem;">
+        <span>💡 How to Use In-Place Cell Editing</span>
+      </h3>
+      <p style="color: var(--et-text-muted); font-size: 0.85rem; margin-bottom: 1rem; line-height: 1.5;">
+        Allows users to update table values directly without modals. Supports input editors (text, number, select, checkbox), synchronous field validation, and keyboard shortcuts.
+      </p>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem;">
+        <div style="background: #ffffff; border: 1px solid var(--et-border-color); border-radius: 0.375rem; padding: 0.85rem;">
+          <h4 style="margin: 0 0 0.35rem 0; font-size: 0.85rem; font-weight: 700; color: var(--et-primary);">1. Configure Editors &amp; Validators</h4>
+          <p style="margin: 0; font-size: 0.8rem; color: var(--et-text-muted); line-height: 1.4;">
+            Specify <code>editable: true</code>, choose an editor type, and optionally supply a custom <code>validator(val)</code> function returning an error string.
+          </p>
+          <pre style="background: #0f172a; color: #38bdf8; padding: 0.5rem; border-radius: 0.25rem; font-size: 0.725rem; margin-top: 0.4rem; overflow-x: auto;"><code>{
+  id: 'price',
+  editable: true,
+  editor: { type: 'number', min: 0 },
+  validator: (v) => (v &lt; 0 ? 'Cannot be negative' : null)
+}</code></pre>
+        </div>
+
+        <div style="background: #ffffff; border: 1px solid var(--et-border-color); border-radius: 0.375rem; padding: 0.85rem;">
+          <h4 style="margin: 0 0 0.35rem 0; font-size: 0.85rem; font-weight: 700; color: var(--et-primary);">2. Save Events &amp; Keyboard Controls</h4>
+          <p style="margin: 0; font-size: 0.8rem; color: var(--et-text-muted); line-height: 1.4;">
+            Press <kbd>Enter</kbd> to save or <kbd>Esc</kbd> to cancel. Listen to the <code>et:save</code> CustomEvent to sync changes back to your backend.
+          </p>
+          <pre style="background: #0f172a; color: #38bdf8; padding: 0.5rem; border-radius: 0.25rem; font-size: 0.725rem; margin-top: 0.4rem; overflow-x: auto;"><code>table.addEventListener('et:save', (e) => {
+  const { rowId, columnId, newValue } = e.detail;
+});</code></pre>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // Standalone implementation for zero-dependency file:// previewing
+    function resolveValue(row, path) {
+      if (!path) return undefined;
+      return String(path).split('.').reduce((acc, part) => (acc ? acc[part] : undefined), row);
+    }
+
+    function createElement(tag, cls, attrs) {
+      const el = document.createElement(tag);
+      if (cls) el.className = cls;
+      if (attrs) {
+        for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, String(v));
+      }
+      return el;
+    }
+
+    function removeAllChildren(p) {
+      while (p.firstChild) p.removeChild(p.firstChild);
+    }
+
+    class EditableDataTable extends HTMLElement {
+      constructor() {
+        super();
+        this._rows = [];
+        this._columns = [];
+        this._options = { optimisticUpdates: true };
+        this._pageIndex = 0;
+        this._pageSize = 5;
+        this._globalSearch = '';
+        this._sortCriteria = [];
+        this._editing = null;
+        this._validationError = null;
+      }
+
+      get rows() { return this._rows; }
+      set rows(v) { this._rows = Array.isArray(v) ? v : []; this.render(); }
+
+      get columns() { return this._columns; }
+      set columns(v) { this._columns = Array.isArray(v) ? v : []; this.render(); }
+
+      get options() { return this._options; }
+      set options(opts) {
+        this._options = Object.assign({}, this._options, opts);
+        this.render();
+      }
+
+      connectedCallback() {
+        if (!this.containerEl) {
+          this.containerEl = createElement('div', 'et-wrapper');
+          this.toolbarEl = createElement('div', 'et-toolbar');
+          this.tableContainerEl = createElement('div', 'et-table-container');
+          this.tableEl = createElement('table', 'et-table');
+          this.theadEl = createElement('thead', 'et-thead');
+          this.tbodyEl = createElement('tbody', 'et-tbody');
+          this.footerEl = createElement('div', 'et-pagination-footer');
+
+          this.tableEl.appendChild(this.theadEl);
+          this.tableEl.appendChild(this.tbodyEl);
+          this.tableContainerEl.appendChild(this.tableEl);
+          this.containerEl.appendChild(this.toolbarEl);
+          this.containerEl.appendChild(this.tableContainerEl);
+          this.containerEl.appendChild(this.footerEl);
+          this.appendChild(this.containerEl);
+        }
+        this.render();
+      }
+
+      render() {
+        if (!this.containerEl) return;
+        this.renderToolbar();
+        this.renderHeader();
+        this.renderBody();
+        this.renderFooter();
+      }
+
+      renderToolbar() {
+        removeAllChildren(this.toolbarEl);
+        const search = createElement('input', 'et-search-input', {
+          type: 'search',
+          placeholder: 'Search records...',
+          value: this._globalSearch
+        });
+        search.addEventListener('input', () => {
+          this._globalSearch = search.value;
+          this._pageIndex = 0;
+          this.render();
+        });
+        this.toolbarEl.appendChild(search);
+      }
+
+      renderHeader() {
+        removeAllChildren(this.theadEl);
+        const tr = createElement('tr', 'et-header-row');
+        this._columns.forEach(col => {
+          const th = createElement('th', 'et-th');
+          if (col.width) th.style.width = col.width;
+          const active = this._sortCriteria.find(c => c.columnId === col.id);
+          const icon = active?.direction === 'asc' ? ' ▲' : active?.direction === 'desc' ? ' ▼' : ' ⇅';
+          th.textContent = `${col.header} ${icon}`;
+          th.addEventListener('click', () => {
+            const cur = this._sortCriteria.find(c => c.columnId === col.id);
+            let next = 'asc';
+            if (cur && cur.direction === 'asc') next = 'desc';
+            else if (cur && cur.direction === 'desc') next = null;
+            this._sortCriteria = next ? [{ columnId: col.id, direction: next }] : [];
+            this.render();
+          });
+          tr.appendChild(th);
+        });
+        this.theadEl.appendChild(tr);
+      }
+
+      renderBody() {
+        removeAllChildren(this.tbodyEl);
+        let items = [...this._rows];
+
+        // Search
+        if (this._globalSearch) {
+          const q = this._globalSearch.toLowerCase();
+          items = items.filter(r => this._columns.some(c => String(r[c.field] || '').toLowerCase().includes(q)));
+        }
+
+        // Sort
+        if (this._sortCriteria.length > 0) {
+          const crit = this._sortCriteria[0];
+          const col = this._columns.find(c => c.id === crit.columnId);
+          if (col && col.field) {
+            items.sort((a, b) => {
+              const valA = a[col.field];
+              const valB = b[col.field];
+              if (valA < valB) return crit.direction === 'asc' ? -1 : 1;
+              if (valA > valB) return crit.direction === 'asc' ? 1 : -1;
+              return 0;
+            });
+          }
+        }
+
+        this._totalRows = items.length;
+        this._totalPages = Math.max(1, Math.ceil(this._totalRows / this._pageSize));
+        const paged = items.slice(this._pageIndex * this._pageSize, (this._pageIndex + 1) * this._pageSize);
+
+        paged.forEach((row, i) => {
+          const rowId = row.id;
+          const tr = createElement('tr', 'et-row');
+
+          this._columns.forEach(col => {
+            const td = createElement('td', 'et-td');
+            if (col.width) td.style.width = col.width;
+            const val = resolveValue(row, col.field);
+
+            const isEditing = this._editing && this._editing.rowId === rowId && this._editing.columnId === col.id;
+
+            if (isEditing) {
+              td.classList.add('et-cell-editing');
+              const wrapper = createElement('div', 'et-editor-wrapper');
+
+              if (this._validationError) {
+                const bubble = createElement('div', 'et-validation-error-bubble');
+                bubble.textContent = this._validationError;
+                wrapper.appendChild(bubble);
+              }
+
+              let input;
+              if (col.editor?.type === 'select') {
+                input = createElement('select', 'et-select');
+                input.innerHTML = col.editor.options.map(o => `<option value="${o.value}" ${val === o.value ? 'selected' : ''}>${o.label}</option>`).join('');
+              } else if (col.editor?.type === 'number') {
+                input = createElement('input', 'et-input', { type: 'number', value: val == null ? '' : val });
+              } else if (col.editor?.type === 'checkbox') {
+                input = createElement('input', 'et-checkbox', { type: 'checkbox' });
+                input.checked = Boolean(val);
+              } else {
+                input = createElement('input', 'et-input', { type: 'text', value: val == null ? '' : val });
+              }
+
+              const commit = async () => {
+                const newVal = col.editor?.type === 'checkbox' ? input.checked : (col.editor?.type === 'number' ? Number(input.value) : input.value);
+                if (col.validator) {
+                  const err = await col.validator(newVal, val, row, col);
+                  if (err) {
+                    this._validationError = err;
+                    this.renderBody();
+                    return;
+                  }
+                }
+                const oldVal = row[col.field];
+                row[col.field] = newVal;
+                this._editing = null;
+                this._validationError = null;
+
+                const log = document.getElementById('event-log');
+                if (log) log.textContent = `[Saved] Row ${rowId}, Column: ${col.id}, New Value: ${newVal}`;
+
+                if (this._options.onSave) {
+                  try {
+                    await this._options.onSave({ rowId, columnId: col.id, oldValue: oldVal, newValue: newVal, row });
+                  } catch (err) {
+                    row[col.field] = oldVal; // rollback
+                    if (log) log.textContent = `[Rollback] Save failed: ${err.message}`;
+                  }
+                }
+                this.renderBody();
+              };
+
+              input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') { e.preventDefault(); commit(); }
+                else if (e.key === 'Escape') { this._editing = null; this._validationError = null; this.renderBody(); }
+              });
+
+              wrapper.appendChild(input);
+
+              const saveBtn = createElement('button', 'et-btn-save', { type: 'button' });
+              saveBtn.innerHTML = '✓';
+              saveBtn.onclick = commit;
+
+              const cancelBtn = createElement('button', 'et-btn-cancel', { type: 'button' });
+              cancelBtn.innerHTML = '✕';
+              cancelBtn.onclick = () => { this._editing = null; this._validationError = null; this.renderBody(); };
+
+              wrapper.appendChild(saveBtn);
+              wrapper.appendChild(cancelBtn);
+              td.appendChild(wrapper);
+
+              setTimeout(() => input.focus(), 10);
+            } else {
+              if (col.editable) {
+                td.classList.add('et-cell-editable');
+                td.title = 'Double-click to edit';
+                td.addEventListener('dblclick', () => {
+                  this._editing = { rowId, columnId: col.id };
+                  this._validationError = null;
+                  this.renderBody();
+                });
+              }
+
+              if (col.editor?.type === 'checkbox') {
+                td.textContent = val ? 'Yes' : 'No';
+              } else if (col.formatter) {
+                td.textContent = col.formatter(val, row);
+              } else {
+                td.textContent = val == null ? '' : String(val);
+              }
+            }
+            tr.appendChild(td);
+          });
+          this.tbodyEl.appendChild(tr);
+        });
+      }
+
+      renderFooter() {
+        removeAllChildren(this.footerEl);
+        const total = this._totalRows || 0;
+        const totalPages = this._totalPages || 1;
+        const currentPage = this._pageIndex + 1;
+        const start = total === 0 ? 0 : this._pageIndex * this._pageSize + 1;
+        const end = Math.min((this._pageIndex + 1) * this._pageSize, total);
+
+        const left = createElement('div', 'et-pagination-left');
+        left.style.display = 'flex';
+        left.style.alignItems = 'center';
+        left.style.gap = '0.5rem';
+
+        const sizeLabel = createElement('label');
+        sizeLabel.textContent = 'Rows per page: ';
+        const sizeSel = createElement('select', 'et-page-size-select');
+        sizeSel.style.padding = '0.25rem 0.5rem';
+        sizeSel.style.borderRadius = '0.375rem';
+        sizeSel.style.border = '1px solid var(--et-border-color)';
+        [5, 10, 20].forEach(sz => {
+          const opt = createElement('option', '', { value: sz });
+          opt.textContent = String(sz);
+          if (sz === this._pageSize) opt.selected = true;
+          sizeSel.appendChild(opt);
+        });
+        sizeSel.addEventListener('change', () => {
+          this._pageSize = Number(sizeSel.value);
+          this._pageIndex = 0;
+          this.render();
+        });
+        left.appendChild(sizeLabel);
+        left.appendChild(sizeSel);
+
+        const countInfo = createElement('span');
+        countInfo.style.marginLeft = '0.5rem';
+        countInfo.textContent = `Showing ${start}–${end} of ${total} entries (Page ${currentPage} of ${totalPages})`;
+        left.appendChild(countInfo);
+
+        const controls = createElement('div');
+        controls.style.display = 'flex';
+        controls.style.alignItems = 'center';
+        controls.style.gap = '0.25rem';
+
+        const prev = createElement('button', 'tbl-btn', { type: 'button', disabled: this._pageIndex === 0 });
+        prev.textContent = '‹ Prev';
+        prev.onclick = () => { if (this._pageIndex > 0) { this._pageIndex--; this.render(); } };
+
+        controls.appendChild(prev);
+
+        for (let p = 1; p <= totalPages; p++) {
+          const pBtn = createElement('button', `tbl-btn ${p === currentPage ? 'active' : ''}`, { type: 'button' });
+          pBtn.textContent = String(p);
+          if (p === currentPage) {
+            pBtn.style.background = 'var(--et-primary)';
+            pBtn.style.color = '#ffffff';
+            pBtn.style.borderColor = 'var(--et-primary)';
+          }
+          pBtn.onclick = () => { this._pageIndex = p - 1; this.render(); };
+          controls.appendChild(pBtn);
+        }
+
+        const next = createElement('button', 'tbl-btn', { type: 'button', disabled: this._pageIndex >= this._totalPages - 1 });
+        next.textContent = 'Next ›';
+        next.onclick = () => { if (this._pageIndex < this._totalPages - 1) { this._pageIndex++; this.render(); } };
+
+        controls.appendChild(next);
+        this.footerEl.appendChild(left);
+        this.footerEl.appendChild(controls);
+      }
+    }
+
+    if (!window.customElements.get('editable-data-table')) {
+      window.customElements.define('editable-data-table', EditableDataTable);
+    }
+
+    // App Initialization
+    const table = document.getElementById('inventory-table');
+
+    table.columns = [
+      {
+        id: 'name',
+        header: 'Product Name',
+        field: 'name',
+        width: '260px',
+        editable: true,
+        validator: (v) => (!v || v.trim().length < 3 ? 'Name must be at least 3 characters' : null)
+      },
+      {
+        id: 'category',
+        header: 'Category',
+        field: 'category',
+        width: '180px',
+        editable: true,
+        editor: {
+          type: 'select',
+          options: [
+            { label: 'Workstations', value: 'Workstations' },
+            { label: 'Peripherals', value: 'Peripherals' },
+            { label: 'Networking', value: 'Networking' },
+            { label: 'Storage', value: 'Storage' }
+          ]
+        }
+      },
+      {
+        id: 'price',
+        header: 'Unit Price ($)',
+        field: 'price',
+        width: '150px',
+        editable: true,
+        editor: { type: 'number', min: 0 },
+        validator: (v) => (v < 0 ? 'Price cannot be negative' : null),
+        formatter: (v) => `$${Number(v).toFixed(2)}`
+      },
+      {
+        id: 'inStock',
+        header: 'In Stock',
+        field: 'inStock',
+        width: '120px',
+        editable: true,
+        editor: { type: 'checkbox' }
+      }
+    ];
+
+    table.rows = [
+      { id: 'item-1', name: 'Precision Workstation Tower 7920', category: 'Workstations', price: 3499.00, inStock: true },
+      { id: 'item-2', name: 'UltraSharp 32-inch 4K USB-C Monitor', category: 'Peripherals', price: 799.50, inStock: true },
+      { id: 'item-3', name: 'Gigabit Managed Switch 24-Port', category: 'Networking', price: 420.00, inStock: false },
+      { id: 'item-4', name: 'Thunderbolt 4 Docking Station 180W', category: 'Peripherals', price: 289.00, inStock: true },
+      { id: 'item-5', name: 'Enterprise NVMe Expansion Array 16TB', category: 'Storage', price: 2150.00, inStock: true },
+      { id: 'item-6', name: 'Wireless Ergonomic Mechanical Keyboard', category: 'Peripherals', price: 179.99, inStock: true },
+      { id: 'item-7', name: 'Cat6A Shielded Ethernet Cable 50ft', category: 'Networking', price: 24.50, inStock: false },
+      { id: 'item-8', name: 'Dual Monitor Arm Mount (Gas Spring)', category: 'Peripherals', price: 119.00, inStock: true },
+      { id: 'item-9', name: 'Rackmount UPS 1500VA Battery Backup', category: 'Networking', price: 549.00, inStock: true },
+      { id: 'item-10', name: 'USB-C Portable SSD 2TB Rugged', category: 'Storage', price: 189.95, inStock: true }
+    ];
+  </script>
+</body>
+</html>

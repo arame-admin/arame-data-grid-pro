@@ -1,0 +1,3848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Configurable Data Table Demo &amp; Feature Playground</title>
+  <style>
+    :root, [data-theme="light"] {
+      --bg: #0f172a;
+      --panel-bg: #1e293b;
+      --card-bg: #ffffff;
+      --border: #334155;
+      --border-subtle: #e2e8f0;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --transition: 0.15s ease;
+      --pdg-primary: #2563eb;
+      --pdg-primary-hover: #1d4ed8;
+      --pdg-bg-surface: #ffffff;
+      --pdg-bg-subtle: #f8fafc;
+      --pdg-bg-hover: #f1f5f9;
+      --pdg-text-main: #0f172a;
+      --pdg-text-muted: #64748b;
+      --pdg-border-color: #e2e8f0;
+      --pdg-focus-ring: rgba(37, 99, 235, 0.35);
+      --pdg-radius: 0.5rem;
+      --pdg-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+      --pdg-cell-py: 0.75rem;
+      --pdg-cell-px: 1rem;
+    }
+
+    [data-theme="dark"] {
+      --card-bg: #0f172a;
+      --border-subtle: #334155;
+      --pdg-primary: #3b82f6;
+      --pdg-primary-hover: #60a5fa;
+      --pdg-bg-surface: #0f172a;
+      --pdg-bg-subtle: #1e293b;
+      --pdg-bg-hover: #334155;
+      --pdg-text-main: #f8fafc;
+      --pdg-text-muted: #94a3b8;
+      --pdg-border-color: #334155;
+      --pdg-focus-ring: rgba(59, 130, 246, 0.4);
+      --pdg-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-family);
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding: 2rem 1.25rem;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    header.demo-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 1rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+
+    h1 { font-size: 1.75rem; font-weight: 800; color: #ffffff; margin-bottom: 0.25rem; }
+    p.subtitle { color: var(--text-muted); font-size: 0.95rem; max-width: 800px; }
+
+    .header-links {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.45rem 0.9rem;
+      border-radius: 0.375rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: #334155;
+      color: #ffffff;
+      text-decoration: none;
+      transition: background var(--transition);
+    }
+    .btn:hover { background: #475569; }
+    .btn-reset { background: #dc2626; border-color: #ef4444; }
+    .btn-reset:hover { background: #b91c1c; }
+
+    /* Playground Split Layout */
+    .playground-layout {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    @media (max-width: 1024px) {
+      .playground-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Settings Panel */
+    aside.settings-panel {
+      background: var(--panel-bg);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .settings-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #ffffff;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .settings-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .settings-group-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #93c5fd;
+    }
+
+    .setting-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      cursor: pointer;
+      color: #cbd5e1;
+      user-select: none;
+    }
+
+    .setting-toggle:hover {
+      color: #ffffff;
+    }
+
+    .setting-select {
+      width: 100%;
+      padding: 0.35rem 0.5rem;
+      font-size: 0.85rem;
+      border: 1px solid var(--border);
+      border-radius: 0.375rem;
+      background: #0f172a;
+      color: #ffffff;
+      outline: none;
+    }
+
+    /* Active Summary Bar */
+    .summary-badge-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      padding: 0.75rem 1rem;
+      background: var(--panel-bg);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      font-size: 0.75rem;
+      align-items: center;
+    }
+
+    .summary-badge {
+      background: #334155;
+      color: #93c5fd;
+      padding: 0.2rem 0.5rem;
+      border-radius: 0.25rem;
+      font-weight: 600;
+    }
+
+    /* Preview Wrapper */
+    .preview-container {
+      background: var(--card-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: 0.75rem;
+      overflow: hidden;
+      min-height: 480px;
+      color: #0f172a;
+    }
+
+    [data-theme="dark"] .preview-container {
+      color: #f8fafc;
+    }
+
+    /* Event Audit Panel */
+    .audit-panel {
+      background: #090d16;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      font-family: ui-monospace, monospace;
+      font-size: 0.8rem;
+      color: #38bdf8;
+      max-height: 140px;
+      overflow-y: auto;
+    }
+
+    .audit-title {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    /* Embedded ProDataGrid Web Component Styles */
+    pro-data-grid {
+      display: block;
+      color: var(--pdg-text-main);
+      background-color: var(--pdg-bg-surface);
+      border-radius: var(--pdg-radius);
+      overflow: hidden;
+      box-sizing: border-box;
+      position: relative;
+    }
+    pro-data-grid * { box-sizing: border-box; }
+
+    pro-data-grid[density="compact"] {
+      --pdg-cell-py: 0.4rem;
+      --pdg-cell-px: 0.75rem;
+      font-size: 0.8125rem;
+    }
+    pro-data-grid[density="comfortable"] {
+      --pdg-cell-py: 0.7rem;
+      --pdg-cell-px: 1rem;
+      font-size: 0.875rem;
+    }
+    pro-data-grid[density="spacious"] {
+      --pdg-cell-py: 1.1rem;
+      --pdg-cell-px: 1.25rem;
+      font-size: 1rem;
+    }
+
+    .pdg-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      background-color: var(--pdg-bg-subtle);
+      border-bottom: 1px solid var(--pdg-border-color);
+    }
+    .pdg-toolbar-left, .pdg-toolbar-right { display: flex; align-items: center; gap: 0.5rem; }
+    .pdg-search-input {
+      border: 1px solid var(--pdg-border-color);
+      background-color: var(--pdg-bg-surface);
+      color: var(--pdg-text-main);
+      border-radius: 0.375rem;
+      padding: 0.4rem 0.75rem;
+      font-size: 0.875rem;
+      min-width: 240px;
+      outline: none;
+    }
+    .pdg-search-input:focus {
+      border-color: var(--pdg-primary);
+      box-shadow: 0 0 0 3px var(--pdg-focus-ring);
+    }
+
+    .pdg-table-container { width: 100%; overflow-x: auto; max-height: 520px; position: relative; }
+    .pdg-table { width: 100%; border-collapse: separate; border-spacing: 0; text-align: left; }
+    .pdg-thead { position: sticky; top: 0; z-index: 10; background-color: var(--pdg-bg-subtle); border-bottom: 2px solid var(--pdg-border-color); }
+    .pdg-th {
+      background-color: var(--pdg-bg-subtle);
+      padding: var(--pdg-cell-py) var(--pdg-cell-px);
+      font-weight: 600;
+      color: var(--pdg-text-muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+      user-select: none;
+      border-bottom: 2px solid var(--pdg-border-color);
+    }
+    .pdg-th.pdg-sortable { cursor: pointer; }
+    .pdg-th.pdg-sortable:hover { background-color: var(--pdg-bg-hover); color: var(--pdg-text-main); }
+    .pdg-th-inner { display: flex; align-items: center; gap: 0.35rem; }
+
+    .pdg-tbody .pdg-row { border-bottom: 1px solid var(--pdg-border-color); transition: background-color 0.15s ease; }
+    .pdg-tbody .pdg-row:hover { background-color: var(--pdg-bg-hover); }
+    .pdg-tbody .pdg-row-selected { background-color: rgba(37, 99, 235, 0.08); }
+    .pdg-td {
+      background-color: var(--pdg-bg-surface);
+      padding: var(--pdg-cell-py) var(--pdg-cell-px);
+      color: var(--pdg-text-main);
+      vertical-align: middle;
+      border-bottom: 1px solid var(--pdg-border-color);
+    }
+    .pdg-checkbox { width: 1rem; height: 1rem; cursor: pointer; }
+
+    /* Sticky First Column Styles */
+    pro-data-grid[sticky-first-column="true"] .pdg-col-sticky {
+      position: sticky;
+      left: 0;
+      z-index: 5;
+      background-color: var(--pdg-bg-surface) !important;
+    }
+    pro-data-grid[sticky-first-column="true"] th.pdg-col-sticky {
+      z-index: 25;
+      background-color: var(--pdg-bg-subtle) !important;
+    }
+    pro-data-grid[sticky-first-column="true"] .pdg-row:hover .pdg-col-sticky {
+      background-color: var(--pdg-bg-hover) !important;
+    }
+    pro-data-grid[sticky-first-column="true"] .pdg-row.pdg-row-selected .pdg-col-sticky {
+      background-color: rgba(37, 99, 235, 0.12) !important;
+    }
+    pro-data-grid[sticky-first-column="true"] .pdg-table-container.pdg-is-scrolled .pdg-col-sticky {
+      box-shadow: 4px 0 8px -2px rgba(0, 0, 0, 0.15);
+      border-right: 1px solid var(--pdg-border-color);
+    }
+    [data-theme="dark"] pro-data-grid[sticky-first-column="true"] .pdg-table-container.pdg-is-scrolled .pdg-col-sticky {
+      box-shadow: 4px 0 10px -2px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Sticky Right Column (Actions) Styles */
+    pro-data-grid[sticky-actions="true"] .pdg-col-sticky-right {
+      position: sticky;
+      right: 0;
+      z-index: 5;
+      background-color: var(--pdg-bg-surface) !important;
+      border-left: 1px solid var(--pdg-border-color);
+      box-shadow: -4px 0 8px -2px rgba(0, 0, 0, 0.1);
+    }
+    pro-data-grid[sticky-actions="true"] th.pdg-col-sticky-right {
+      z-index: 25;
+      background-color: var(--pdg-bg-subtle) !important;
+    }
+    pro-data-grid[sticky-actions="true"] .pdg-row:hover .pdg-col-sticky-right {
+      background-color: var(--pdg-bg-hover) !important;
+    }
+    pro-data-grid[sticky-actions="true"] .pdg-row.pdg-row-selected .pdg-col-sticky-right {
+      background-color: rgba(37, 99, 235, 0.12) !important;
+    }
+    [data-theme="dark"] pro-data-grid[sticky-actions="true"] .pdg-col-sticky-right {
+      box-shadow: -4px 0 10px -2px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Batch Edit Modal Styles */
+    .pdg-modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(2px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .pdg-modal-card {
+      background: var(--pdg-bg-surface);
+      border: 1px solid var(--pdg-border-color);
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      width: 90%;
+      max-width: 440px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+      color: var(--pdg-text-main);
+    }
+    .pdg-modal-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .pdg-modal-field {
+      margin: 1rem 0;
+    }
+    .pdg-modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      margin-top: 1.25rem;
+    }
+
+    .pdg-footer {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1rem;
+      border-top: 1px solid var(--pdg-border-color);
+      background-color: var(--pdg-bg-subtle);
+      gap: 0.5rem;
+      font-size: 0.875rem;
+    }
+    .pdg-pagination-info { font-size: 0.85rem; color: var(--pdg-text-muted); }
+    .pdg-pagination-controls { display: flex; align-items: center; gap: 0.25rem; }
+    .pdg-btn {
+      padding: 0.3rem 0.65rem;
+      border: 1px solid var(--pdg-border-color);
+      border-radius: 0.375rem;
+      background: var(--pdg-bg-surface);
+      color: var(--pdg-text-main);
+      font-size: 0.8125rem;
+      cursor: pointer;
+    }
+    .pdg-btn:hover:not(:disabled) { background: var(--pdg-bg-hover); }
+    .pdg-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .pdg-btn-active {
+      background: var(--pdg-primary) !important;
+      color: #ffffff !important;
+      border-color: var(--pdg-primary) !important;
+    }
+
+    .pdg-cell-editable {
+      cursor: pointer;
+      border-radius: 0.25rem;
+      padding: 0.2rem 0.4rem;
+      display: inline-block;
+      width: 100%;
+    }
+    .pdg-cell-editable:hover {
+      background-color: rgba(37, 99, 235, 0.1);
+    }
+
+    /* Drag and Drop Visual Feedback Styles */
+    .pdg-drag-handle {
+      cursor: grab;
+      user-select: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.5rem;
+      height: 1.5rem;
+      color: var(--pdg-text-muted);
+      border-radius: 0.25rem;
+      transition: background-color 0.15s ease, color 0.15s ease;
+      font-size: 1rem;
+      line-height: 1;
+    }
+    .pdg-drag-handle:hover {
+      background-color: var(--pdg-bg-hover);
+      color: var(--pdg-text-main);
+    }
+    .pdg-drag-handle:active,
+    .pdg-drag-handle.is-grabbing {
+      cursor: grabbing;
+    }
+    .pdg-drag-handle:focus-visible {
+      outline: 2px solid var(--pdg-primary);
+      outline-offset: 1px;
+    }
+
+    .pdg-th-draggable {
+      cursor: grab;
+      transition: background-color 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+    }
+    .pdg-th-draggable:active {
+      cursor: grabbing;
+    }
+    .pdg-th-draggable:focus-visible {
+      outline: 2px solid var(--pdg-primary);
+      outline-offset: -2px;
+    }
+
+    .pdg-row.pdg-row-dragging {
+      opacity: 0.65;
+      background-color: var(--pdg-bg-hover) !important;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 0 0 1px var(--pdg-primary);
+      transform: scale(0.998);
+    }
+    .pdg-th.pdg-th-dragging {
+      opacity: 0.65;
+      background-color: var(--pdg-bg-hover) !important;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 0 0 1px var(--pdg-primary);
+      transform: translateY(-2px);
+    }
+
+    .pdg-row.pdg-drag-over-top {
+      position: relative;
+      background-color: rgba(37, 99, 235, 0.04);
+    }
+    .pdg-row.pdg-drag-over-top::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background-color: var(--pdg-primary);
+      box-shadow: 0 0 6px var(--pdg-primary);
+      z-index: 15;
+      pointer-events: none;
+      border-radius: 2px;
+    }
+    .pdg-row.pdg-drag-over-bottom {
+      position: relative;
+      background-color: rgba(37, 99, 235, 0.04);
+    }
+    .pdg-row.pdg-drag-over-bottom::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background-color: var(--pdg-primary);
+      box-shadow: 0 0 6px var(--pdg-primary);
+      z-index: 15;
+      pointer-events: none;
+      border-radius: 2px;
+    }
+
+    .pdg-th.pdg-drag-over-left {
+      position: relative;
+      background-color: rgba(37, 99, 235, 0.05);
+    }
+    .pdg-th.pdg-drag-over-left::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: -2px;
+      width: 3px;
+      background-color: var(--pdg-primary);
+      box-shadow: 0 0 6px var(--pdg-primary);
+      z-index: 15;
+      pointer-events: none;
+      border-radius: 2px;
+    }
+    .pdg-th.pdg-drag-over-right {
+      position: relative;
+      background-color: rgba(37, 99, 235, 0.05);
+    }
+    .pdg-th.pdg-drag-over-right::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      right: -2px;
+      width: 3px;
+      background-color: var(--pdg-primary);
+      box-shadow: 0 0 6px var(--pdg-primary);
+      z-index: 15;
+      pointer-events: none;
+      border-radius: 2px;
+    }
+
+    .pdg-drag-not-allowed {
+      cursor: not-allowed !important;
+      background-color: rgba(239, 68, 68, 0.08) !important;
+      outline: 1px dashed #ef4444 !important;
+    }
+
+    @keyframes pdg-drop-success {
+      0% {
+        background-color: rgba(16, 185, 129, 0.25);
+        box-shadow: inset 0 0 0 2px #10b981;
+      }
+      100% {
+        background-color: transparent;
+        box-shadow: none;
+      }
+    }
+    .pdg-drop-success {
+      animation: pdg-drop-success 0.6s ease-out forwards;
+    }
+
+    .pdg-sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border-width: 0;
+    }
+
+    /* Advanced Filtering Panel & Chips */
+    .pdg-adv-filter-section {
+      background-color: var(--pdg-bg-subtle);
+      border-bottom: 1px solid var(--pdg-border-color);
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    /* Column Resizing Styles */
+    .pdg-th {
+      position: relative;
+    }
+    .pdg-col-resizer {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 6px;
+      height: 100%;
+      cursor: col-resize;
+      user-select: none;
+      z-index: 10;
+      transition: background-color 0.15s ease;
+    }
+    .pdg-col-resizer:hover,
+    .pdg-col-resizer.is-resizing {
+      background-color: var(--pdg-primary);
+    }
+
+    /* Pinned Footer Aggregations */
+    .pdg-tfoot {
+      background: var(--pdg-bg-header);
+      border-top: 2px solid var(--pdg-border-color);
+      font-weight: 700;
+      color: var(--pdg-text-main);
+    }
+    .pdg-tfoot .pdg-td {
+      background: var(--pdg-bg-header);
+      padding: 0.65rem 1rem;
+      border-bottom: none;
+    }
+    .pdg-agg-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      color: var(--pdg-text-muted);
+      display: block;
+      margin-bottom: 0.15rem;
+    }
+    .pdg-agg-value {
+      font-size: 0.85rem;
+      color: #38bdf8;
+    }
+    .pdg-filter-presets-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-bottom: 1px dashed var(--pdg-border-color);
+      flex-wrap: wrap;
+    }
+    .pdg-preset-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.65rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      background: var(--pdg-bg-surface);
+      color: var(--pdg-text-muted);
+      border: 1px solid var(--pdg-border-color);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .pdg-preset-pill:hover, .pdg-preset-pill.is-active {
+      background: rgba(37, 99, 235, 0.1);
+      border-color: var(--pdg-primary);
+      color: var(--pdg-primary);
+      font-weight: 600;
+    }
+    .pdg-filter-chips-bar {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      padding: 0.5rem 1rem;
+      background: var(--pdg-bg-surface);
+      border-bottom: 1px solid var(--pdg-border-color);
+    }
+    .pdg-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.2rem 0.55rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      border-radius: 0.375rem;
+      background: var(--pdg-bg-subtle);
+      border: 1px solid var(--pdg-border-color);
+      color: var(--pdg-text-main);
+    }
+    .pdg-chip-remove {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--pdg-text-muted);
+      font-size: 0.9rem;
+      line-height: 1;
+      padding: 0;
+    }
+    .pdg-chip-remove:hover {
+      color: #ef4444;
+    }
+    .pdg-builder-panel {
+      padding: 0.75rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      background-color: var(--pdg-bg-subtle);
+      border-bottom: 1px solid var(--pdg-border-color);
+    }
+    .pdg-rule-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      background: var(--pdg-bg-surface);
+      padding: 0.45rem 0.75rem;
+      border-radius: 0.375rem;
+      border: 1px solid var(--pdg-border-color);
+    }
+    .pdg-rule-select, .pdg-rule-input {
+      height: 2rem;
+      padding: 0.2rem 0.5rem;
+      font-size: 0.8125rem;
+      font-family: inherit;
+      border: 1px solid var(--pdg-border-color);
+      border-radius: 0.25rem;
+      background: var(--pdg-bg-surface);
+      color: var(--pdg-text-main);
+      outline: none;
+    }
+    .pdg-rule-input {
+      flex: 1;
+      min-width: 140px;
+    }
+    .pdg-rule-select:focus, .pdg-rule-input:focus {
+      border-color: var(--pdg-primary);
+    }
+
+    /* Column Header Menu & Row Context Menu Styles */
+    .pdg-th-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.35rem;
+    }
+    .pdg-th-header-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      cursor: pointer;
+      user-select: none;
+    }
+    .pdg-th-menu-trigger {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      padding: 0;
+      border-radius: 0.25rem;
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--pdg-text-muted);
+      cursor: pointer;
+      font-size: 0.875rem;
+      line-height: 1;
+      transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    }
+    .pdg-th-menu-trigger:hover, .pdg-th-menu-trigger:focus-visible {
+      background-color: var(--pdg-bg-hover);
+      border-color: var(--pdg-border-color);
+      color: var(--pdg-text-main);
+      outline: none;
+    }
+
+    .pdg-row-action-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      padding: 0;
+      border-radius: 0.25rem;
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--pdg-text-muted);
+      cursor: pointer;
+      font-size: 0.875rem;
+      line-height: 1;
+      transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    }
+    .pdg-row-action-btn:hover, .pdg-row-action-btn:focus-visible {
+      background-color: var(--pdg-bg-hover);
+      border-color: var(--pdg-border-color);
+      color: var(--pdg-text-main);
+      outline: none;
+    }
+
+    /* Floating Context Menus */
+    .pdg-menu-popup {
+      position: fixed;
+      background-color: var(--pdg-bg-surface);
+      border: 1px solid var(--pdg-border-color);
+      border-radius: var(--pdg-radius);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.18), 0 4px 6px -4px rgba(0, 0, 0, 0.12);
+      padding: 0.35rem 0;
+      z-index: 1000;
+      min-width: 200px;
+      max-width: 280px;
+      display: none;
+      animation: pdg-menu-in 0.12s ease-out;
+    }
+    @keyframes pdg-menu-in {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .pdg-menu-popup.pdg-open {
+      display: block;
+    }
+    .pdg-menu-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.45rem 0.85rem;
+      font-size: 0.8125rem;
+      font-family: inherit;
+      color: var(--pdg-text-main);
+      cursor: pointer;
+      background: transparent;
+      width: 100%;
+      border: none;
+      text-align: left;
+      outline: none;
+      transition: background-color 0.12s ease;
+    }
+    .pdg-menu-item:hover, .pdg-menu-item:focus-visible {
+      background-color: var(--pdg-bg-hover);
+      color: var(--pdg-primary);
+    }
+    .pdg-menu-item-destructive {
+      color: #ef4444;
+    }
+    .pdg-menu-item-destructive:hover, .pdg-menu-item-destructive:focus-visible {
+      background-color: #fee2e2;
+      color: #b91c1c;
+    }
+    .pdg-menu-separator {
+      height: 1px;
+      background-color: var(--pdg-border-color);
+      margin: 0.35rem 0;
+    }
+    .pdg-menu-subhead {
+      padding: 0.35rem 0.85rem 0.2rem;
+      font-size: 0.6875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--pdg-text-muted);
+    }
+    .pdg-menu-chk-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 0.85rem;
+      font-size: 0.8125rem;
+      cursor: pointer;
+      color: var(--pdg-text-main);
+      user-select: none;
+      transition: background-color 0.12s ease;
+    }
+    .pdg-menu-chk-item:hover {
+      background-color: var(--pdg-bg-hover);
+    }
+    .pdg-badge-req {
+      margin-left: auto;
+      font-size: 0.65rem;
+      font-weight: 600;
+      background: var(--pdg-bg-subtle);
+      color: var(--pdg-text-muted);
+      padding: 0.1rem 0.35rem;
+      border-radius: 0.2rem;
+    }
+
+    /* Usage & Integration Guide Section */
+    .usage-guide-section {
+      background: var(--panel-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--pdg-radius);
+      padding: 1.5rem;
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    .usage-guide-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.75rem;
+    }
+    .usage-guide-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .usage-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
+    }
+    .usage-card {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border);
+      border-radius: 0.375rem;
+      padding: 1rem;
+    }
+    .usage-card-title {
+      font-size: 0.875rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .usage-card p, .usage-card ul {
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    .usage-card ul {
+      padding-left: 1.2rem;
+      margin-top: 0.35rem;
+    }
+    .usage-card li {
+      margin-bottom: 0.25rem;
+    }
+    .code-block-container {
+      position: relative;
+      margin-top: 0.5rem;
+    }
+    .btn-copy-code {
+      position: absolute;
+      top: 0.35rem;
+      right: 0.35rem;
+      background: rgba(30, 41, 59, 0.85);
+      border: 1px solid #334155;
+      color: #94a3b8;
+      font-size: 0.7rem;
+      padding: 0.2rem 0.45rem;
+      border-radius: 0.25rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      transition: all 0.15s ease;
+      z-index: 2;
+    }
+    .btn-copy-code:hover {
+      background: #2563eb;
+      color: #ffffff;
+      border-color: #3b82f6;
+    }
+    .btn-copy-code.copied {
+      background: #16a34a;
+      color: #ffffff;
+      border-color: #22c55e;
+    }
+    .usage-code-snippet {
+      background: #090d16;
+      border: 1px solid #1e293b;
+      border-radius: 0.25rem;
+      padding: 0.65rem 0.85rem;
+      padding-top: 1.6rem;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.75rem;
+      color: #38bdf8;
+      overflow-x: auto;
+      white-space: pre;
+      margin-top: 0;
+      line-height: 1.45;
+    }
+    /* Selected Items Action Bar in Demo */
+    .selection-action-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      border-left: 3px solid #2563eb;
+      border-radius: 0.375rem;
+      padding: 0.65rem 0.85rem;
+      font-size: 0.8125rem;
+      color: var(--text-color);
+    }
+    .selection-actions-btns {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header class="demo-header" role="banner">
+      <div>
+        <h1>Configurable Data Table Demo</h1>
+        <p class="subtitle">
+          Interactive live playground unifying all supported library capabilities (Core Grid foundation &amp; Fleet telemetry, Multi-Column Sorting with Priority Badges, Windowed Pagination with « » controls, Custom Cell Renderers &amp; Badges, Sticky First Column, SaaS Accounts vs. Calculated Payroll, Column Header &amp; Row Context Menus, Advanced Rule Filtering, Drag &amp; Drop Reordering, Inline Editing, and Row Expansion). Toggle features on/off in the settings panel to preview real-time behavior without CORS errors.
+        </p>
+      </div>
+      <div class="header-links">
+        <a href="index.html" class="btn">&larr; Demo Gallery</a>
+        <a href="docs.html" class="btn">Developer Docs</a>
+        <button class="btn btn-reset" id="btnResetSettings">Reset Defaults</button>
+      </div>
+    </header>
+
+    <!-- Active Summary -->
+    <div class="summary-badge-bar" id="summaryBar">
+      <span style="color:var(--text-muted);margin-right:0.35rem;">Active Features:</span>
+      <span class="summary-badge">Loading settings...</span>
+    </div>
+
+    <!-- Playground -->
+    <div class="playground-layout">
+      <!-- Settings Panel -->
+      <aside class="settings-panel" role="region" aria-label="Feature Configuration Settings">
+        <div class="settings-title">
+          <span>Feature Settings</span>
+          <span style="font-size:0.75rem;color:var(--text-muted);">Real-time</span>
+        </div>
+
+        <!-- Group 1: Dataset Mode -->
+        <div class="settings-group">
+          <div class="settings-group-title">Table Dataset &amp; Mode</div>
+          <div style="margin-top:0.25rem;">
+            <label style="font-size:0.75rem;color:var(--text-muted);display:block;margin-bottom:0.2rem;">Dataset Model</label>
+            <select class="setting-select" id="cfgDataModel">
+              <option value="accounts" selected>SaaS Client Accounts</option>
+              <option value="payroll">Calculated Payroll &amp; Compensation</option>
+              <option value="fleet">Core Grid: Enterprise Fleet &amp; Telemetry</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Group 2: Core Navigation -->
+        <div class="settings-group">
+          <div class="settings-group-title">Core Navigation</div>
+          <label class="setting-toggle">
+            <span>Pagination</span>
+            <input type="checkbox" id="cfgPagination" checked />
+          </label>
+          <label class="setting-toggle">
+            <span>Global Search</span>
+            <input type="checkbox" id="cfgSearch" checked />
+          </label>
+          <label class="setting-toggle">
+            <span>Column Sorting</span>
+            <input type="checkbox" id="cfgSorting" checked />
+          </label>
+          <label class="setting-toggle">
+            <span>Multi-Column Sort</span>
+            <input type="checkbox" id="cfgMultiSort" />
+          </label>
+        </div>
+
+        <!-- Group 2: Selection & Editing -->
+        <div class="settings-group">
+          <div class="settings-group-title">Data Manipulation</div>
+          <label class="setting-toggle">
+            <span>Row Selection</span>
+            <input type="checkbox" id="cfgSelectable" checked />
+          </label>
+          <label class="setting-toggle">
+            <span>Multi-Row Select</span>
+            <input type="checkbox" id="cfgMultiSelect" checked />
+          </label>
+          <label class="setting-toggle">
+            <span>Inline Cell Editing</span>
+            <input type="checkbox" id="cfgEditable" checked />
+          </label>
+          <label class="setting-toggle">
+            <span>Delete Row Action</span>
+            <input type="checkbox" id="cfgDeletable" checked />
+          </label>
+        </div>
+
+        <!-- Group 3: Advanced Filtering -->
+        <div class="settings-group">
+          <div class="settings-group-title">Advanced Filtering</div>
+          <label class="setting-toggle">
+            <span>Advanced Filter Suite</span>
+            <input type="checkbox" id="cfgAdvancedFilter" checked />
+          </label>
+          <label class="setting-toggle">
+            <span>Filter Presets Bar</span>
+            <input type="checkbox" id="cfgFilterPresets" checked />
+          </label>
+        </div>
+
+        <!-- Group 4: Drag & Drop & Resizing -->
+        <div class="settings-group">
+          <div class="settings-group-title">Structure &amp; Sizing</div>
+          <label class="setting-toggle">
+            <span>Column Resizing</span>
+            <input type="checkbox" id="cfgColResize" checked />
+          </label>
+          <label class="setting-toggle">
+            <span>Row Drag &amp; Drop</span>
+            <input type="checkbox" id="cfgRowReorder" checked />
+          </label>
+          <label class="setting-toggle">
+            <span>Column Drag &amp; Drop</span>
+            <input type="checkbox" id="cfgColumnReorder" checked />
+          </label>
+        </div>
+
+        <!-- Group 5: Menus & Context Controls -->
+        <div class="settings-group">
+          <div class="settings-group-title">Menus &amp; Context Controls</div>
+          <label class="setting-toggle">
+            <span>Column Header Menu (⋮)</span>
+            <input type="checkbox" id="cfgHeaderMenu" checked />
+          </label>
+          <label class="setting-toggle">
+            <span>Row Context Menu (Right-Click)</span>
+            <input type="checkbox" id="cfgContextMenu" checked />
+          </label>
+        </div>
+
+        <!-- Group 6: Sub-views & Visuals -->
+        <div class="settings-group">
+          <div class="settings-group-title">Sub-views &amp; Layout</div>
+          <label class="setting-toggle">
+            <span>Sticky First Column (Left)</span>
+            <input type="checkbox" id="cfgStickyFirst" checked />
+          </label>
+          <label class="setting-toggle">
+            <span>Sticky Actions (Freeze Right)</span>
+            <input type="checkbox" id="cfgStickyRight" checked />
+          </label>
+          <label class="setting-toggle">
+            <span>Footer Aggregations (SUM/AVG)</span>
+            <input type="checkbox" id="cfgFooterAgg" checked />
+          </label>
+          <label class="setting-toggle">
+            <span>State Persistence (localStorage)</span>
+            <input type="checkbox" id="cfgStatePersistence" checked />
+          </label>
+          <label class="setting-toggle">
+            <span>Row Detail Expansion</span>
+            <input type="checkbox" id="cfgExpandable" checked />
+          </label>
+          <div style="margin-top:0.25rem;">
+            <label style="font-size:0.75rem;color:var(--text-muted);display:block;margin-bottom:0.2rem;">Row Density</label>
+            <select class="setting-select" id="cfgDensity">
+              <option value="compact">Compact (32px)</option>
+              <option value="comfortable" selected>Comfortable (48px)</option>
+              <option value="spacious">Spacious (60px)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Group 5: Server Mode & Theme -->
+        <div class="settings-group">
+          <div class="settings-group-title">Server &amp; Theming</div>
+          <label class="setting-toggle">
+            <span>Simulate Server Data Loading</span>
+            <input type="checkbox" id="cfgServerSide" />
+          </label>
+          <div style="margin-top:0.25rem;">
+            <label style="font-size:0.75rem;color:var(--text-muted);display:block;margin-bottom:0.2rem;">Color Theme</label>
+            <select class="setting-select" id="cfgTheme">
+              <option value="light" selected>Light Theme</option>
+              <option value="dark">Dark Theme</option>
+            </select>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Live Preview Area -->
+      <section style="display:flex;flex-direction:column;gap:1rem;">
+        <!-- Selection Action Bar (How to Use Selected Items in UI) -->
+        <div class="selection-action-bar" id="selectionActionBar" style="display:none;" aria-live="polite">
+          <div style="display:flex;align-items:center;gap:0.5rem;">
+            <span style="font-weight:700;color:#60a5fa;" id="selectionCountLabel">0 rows selected</span>
+            <span style="color:var(--text-muted);font-size:0.75rem;">(Real-time selection state)</span>
+          </div>
+          <div class="selection-actions-btns">
+            <button type="button" class="btn" id="btnCopySelectionTSV" style="background:#0ea5e9;color:#fff;padding:0.3rem 0.6rem;font-size:0.75rem;font-weight:600;">📋 Copy TSV (Excel)</button>
+            <button type="button" class="btn" id="btnBatchEditSelection" style="background:#8b5cf6;color:#fff;padding:0.3rem 0.6rem;font-size:0.75rem;font-weight:600;">✏️ Batch Edit</button>
+            <button type="button" class="btn" id="btnLogSelection" style="background:#1e293b;border:1px solid #334155;color:#f8fafc;padding:0.3rem 0.6rem;font-size:0.75rem;">Get Objects</button>
+            <button type="button" class="btn" id="btnExportSelection" style="background:#2563eb;color:#fff;padding:0.3rem 0.6rem;font-size:0.75rem;">📥 Export CSV</button>
+            <button type="button" class="btn" id="btnDeleteSelection" style="background:#ef4444;color:#fff;padding:0.3rem 0.6rem;font-size:0.75rem;">🗑 Delete</button>
+            <button type="button" class="btn" id="btnClearSelection" style="background:transparent;border:1px solid #475569;color:#cbd5e1;padding:0.3rem 0.6rem;font-size:0.75rem;">✕ Deselect</button>
+          </div>
+        </div>
+
+        <div class="preview-container">
+          <pro-data-grid id="liveGrid"></pro-data-grid>
+        </div>
+
+        <!-- Event Log -->
+        <div class="audit-panel" id="auditPanel">
+          <div class="audit-title">Live Grid Event Stream:</div>
+          <div id="auditList">&gt; Table initialized with default configuration.</div>
+        </div>
+
+        <!-- How Each Feature Can Be Used Guide -->
+        <section class="usage-guide-section" aria-label="Feature Usage and Developer Integration Guide">
+          <div class="usage-guide-header">
+            <div class="usage-guide-title">
+              <span>📚 How Each Feature &amp; Selection Can Be Used &amp; Configured</span>
+            </div>
+            <span style="font-size:0.75rem; color:var(--text-muted);">Quick Reference &amp; Copiable Code Snippets</span>
+          </div>
+
+          <div class="usage-grid">
+            <!-- Feature 0: Selected Items Usage (User Requested Focus) -->
+            <div class="usage-card" style="border-left: 3px solid #38bdf8; grid-column: 1 / -1;">
+              <div class="usage-card-title">⭐ How to Use Selected Items &amp; Execute Batch Actions</div>
+              <p>When rows are selected using the table checkboxes, you can capture selection changes in real-time or retrieve selected rows at any time to perform bulk updates, CSV exports, API batch syncs, or deletions.</p>
+              <ul>
+                <li><strong>Event Listener:</strong> Listen to <code>'pdg:select'</code> to get an array of selected primary keys (e.g. <code>e.detail.selectedIds</code>).</li>
+                <li><strong>Get Selected Objects:</strong> Call <code>grid.getSelectedRows()</code> or inspect <code>grid.selectedIds</code> to get the full records.</li>
+                <li><strong>Bulk Operations:</strong> Call <code>grid.selectAll()</code>, <code>grid.clearSelection()</code>, or <code>grid.deleteSelectedRows()</code>.</li>
+              </ul>
+              <div class="code-block-container">
+                <button type="button" class="btn-copy-code" title="Copy code to clipboard">Copy</button>
+                <pre class="usage-code-snippet"><code>// 1. Listen to selection changes in real time
+const grid = document.querySelector('pro-data-grid');
+
+grid.addEventListener('pdg:select', (event) => {
+  const selectedIds = event.detail.selectedIds; // e.g. ['REC-101', 'REC-104']
+  console.log(`User selected ${selectedIds.length} items:`, selectedIds);
+  
+  // Update external UI (e.g., enable/disable batch delete buttons)
+  const bulkBtn = document.getElementById('myBulkActionButton');
+  if (bulkBtn) bulkBtn.disabled = selectedIds.length === 0;
+});
+
+// 2. Retrieve the full row data objects for all selected items
+const selectedRecords = grid.getSelectedRows();
+console.log('Full selected objects:', selectedRecords);
+
+// 3. Batch Action Example: Send selected items to a backend REST API
+async function batchProcessSelected() {
+  const selectedItems = grid.getSelectedRows();
+  if (selectedItems.length === 0) {
+    alert('Please select at least one item first.');
+    return;
+  }
+  
+  await fetch('/api/batch-update', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ids: grid.selectedIds, items: selectedItems })
+  });
+}
+
+// 4. Batch Delete / Deselect programmatically
+grid.deleteSelectedRows(); // Removes selected rows and updates UI
+grid.clearSelection();     // Deselects all rows
+grid.selectAll();          // Selects all currently filtered rows</code></pre>
+              </div>
+            </div>
+
+            <!-- 1. Dataset Switching -->
+            <div class="usage-card">
+              <div class="usage-card-title">1. Dataset Models &amp; Reactive Formulas</div>
+              <p>Switch between <strong>SaaS Accounts</strong>, <strong>Core Grid Fleet Telemetry</strong>, and <strong>Calculated Payroll</strong>. Calculated columns define a custom <code>calculate(row)</code> function that recalculates automatically whenever dependent editable fields change.</p>
+              <div class="code-block-container">
+                <button type="button" class="btn-copy-code" title="Copy code to clipboard">Copy</button>
+                <pre class="usage-code-snippet"><code>// Calculated Column Definition
+{
+  id: 'bonusAmount',
+  header: 'Bonus Pay',
+  calculate: (row) => (row.baseSalary * (row.bonusPct / 100)),
+  formatter: (v) => `$${Number(v).toLocaleString()}`
+}</code></pre>
+              </div>
+            </div>
+
+            <!-- 2. Sticky First Column -->
+            <div class="usage-card">
+              <div class="usage-card-title">2. Sticky First Column &amp; Scroll Shadows</div>
+              <p>Pins the primary identifier column to <code>left: 0</code> with guaranteed solid opaque layering. When the horizontal scroll offset exceeds 2px, a smooth right-edge elevation drop-shadow appears automatically.</p>
+              <div class="code-block-container">
+                <button type="button" class="btn-copy-code" title="Copy code to clipboard">Copy</button>
+                <pre class="usage-code-snippet"><code>&lt;!-- Enable via HTML attribute or JS option --&gt;
+&lt;pro-data-grid sticky-first-column="true"&gt;&lt;/pro-data-grid&gt;
+grid.options = { stickyFirstColumn: true };</code></pre>
+              </div>
+            </div>
+
+            <!-- 3. Header & Row Context Menus -->
+            <div class="usage-card">
+              <div class="usage-card-title">3. Header Dropdowns &amp; Row Context Menus</div>
+              <p>Column headers feature <code>⋮</code> menus for quick sorting, pinning, and hiding. Rows support both a visible <code>⋮</code> action button and <strong>native right-click context menu</strong> with options to duplicate, edit, or delete records.</p>
+              <div class="code-block-container">
+                <button type="button" class="btn-copy-code" title="Copy code to clipboard">Copy</button>
+                <pre class="usage-code-snippet"><code>grid.options = {
+  headerMenu: true,
+  contextMenu: true // Right-click or ⋮ button
+};</code></pre>
+              </div>
+            </div>
+
+            <!-- 4. Advanced Filter Engine -->
+            <div class="usage-card">
+              <div class="usage-card-title">4. Advanced Filter Rule Builder &amp; Presets</div>
+              <p>Click <strong>⚙️ Filter Builder</strong> to compose complex nested criteria with <code>AND</code> / <code>OR</code> match logic. Presets bar offers one-click filtered subsets with removable active chip tags.</p>
+              <div class="code-block-container">
+                <button type="button" class="btn-copy-code" title="Copy code to clipboard">Copy</button>
+                <pre class="usage-code-snippet"><code>grid.filterExpression = {
+  logic: 'AND',
+  rules: [{ field: 'status', operator: 'equals', value: 'Active' }]
+};</code></pre>
+              </div>
+            </div>
+
+            <!-- 5. Drag & Drop Reordering -->
+            <div class="usage-card">
+              <div class="usage-card-title">5. Drag &amp; Drop (Rows &amp; Columns)</div>
+              <p>Grab column headers to rearrange horizontal column sequence, or drag rows using the <code>⠿</code> grip handle. Features accessible keyboard controls (<strong>Up/Down</strong> for rows, <strong>Left/Right</strong> for columns).</p>
+              <div class="code-block-container">
+                <button type="button" class="btn-copy-code" title="Copy code to clipboard">Copy</button>
+                <pre class="usage-code-snippet"><code>grid.options = {
+  rowReordering: true,
+  columnReordering: true
+};</code></pre>
+              </div>
+            </div>
+
+            <!-- 6. Master-Detail & Telemetry -->
+            <div class="usage-card">
+              <div class="usage-card-title">6. Master-Detail Row Expansion</div>
+              <p>Toggle <code>▶ / ▼</code> buttons on any row to inspect nested dossiers, vehicle diagnostics, or compensation breakdowns rendered via custom <code>rowDetailRenderer(row)</code>.</p>
+              <div class="code-block-container">
+                <button type="button" class="btn-copy-code" title="Copy code to clipboard">Copy</button>
+                <pre class="usage-code-snippet"><code>grid.options = {
+  expandable: true,
+  rowDetailRenderer: (row) => `&lt;div&gt;VIN: ${row.vin}&lt;/div&gt;`
+};</code></pre>
+              </div>
+            </div>
+
+            <!-- 7. Interactive Column Resizing -->
+            <div class="usage-card">
+              <div class="usage-card-title">7. Interactive Column Resizing &amp; Auto-Fit</div>
+              <p>Drag the vertical resize bar on any column header edge to expand or shrink its width dynamically. <strong>Double-click the divider</strong> to auto-fit the column to its longest content length.</p>
+              <div class="code-block-container">
+                <button type="button" class="btn-copy-code" title="Copy code to clipboard">Copy</button>
+                <pre class="usage-code-snippet"><code>grid.options = {
+  columnResizing: true // Draggable header borders + double-click auto-fit
+};</code></pre>
+              </div>
+            </div>
+
+            <!-- 8. Pinned Footer Aggregations -->
+            <div class="usage-card">
+              <div class="usage-card-title">8. Pinned Footer Aggregations (SUM/AVG/COUNT)</div>
+              <p>Calculate live summary totals pinned to the bottom of the table. Updates automatically whenever user filters, searches, or inline-edits cell values.</p>
+              <div class="code-block-container">
+                <button type="button" class="btn-copy-code" title="Copy code to clipboard">Copy</button>
+                <pre class="usage-code-snippet"><code>// Define aggregation in column definition
+{
+  id: 'arr',
+  header: 'Annual Revenue',
+  aggregation: 'sum', // 'sum' | 'avg' | 'min' | 'max' | 'count'
+  formatter: (v) => `$${Number(v).toLocaleString()}`
+}
+
+grid.options = { footerAggregations: true };</code></pre>
+              </div>
+            </div>
+
+            <!-- 9. State Persistence -->
+            <div class="usage-card">
+              <div class="usage-card-title">9. Grid State Persistence (localStorage)</div>
+              <p>Persists user customizations (column widths, column order, column visibility, active sorts, and search terms) across page reloads and browser sessions.</p>
+              <div class="code-block-container">
+                <button type="button" class="btn-copy-code" title="Copy code to clipboard">Copy</button>
+                <pre class="usage-code-snippet"><code>grid.options = {
+  statePersistence: true // Automatically syncs to localStorage
+};</code></pre>
+              </div>
+            </div>
+
+            <!-- 10. Clipboard TSV Copy (Excel / Google Sheets) -->
+            <div class="usage-card">
+              <div class="usage-card-title">10. Clipboard TSV Copy (Excel &amp; Google Sheets)</div>
+              <p>Copies selected rows directly to clipboard formatted with tab separators (<kbd>Ctrl</kbd>+<kbd>C</kbd> or action bar) for instant pasting into spreadsheet software.</p>
+              <div class="code-block-container">
+                <button type="button" class="btn-copy-code" title="Copy code to clipboard">Copy</button>
+                <pre class="usage-code-snippet"><code>// Programmatic TSV clipboard copy
+const tsv = grid.getSelectedRowsTSV();
+navigator.clipboard.writeText(tsv);</code></pre>
+              </div>
+            </div>
+
+            <!-- 11. Right-Column Actions Pinning -->
+            <div class="usage-card">
+              <div class="usage-card-title">11. Right-Column Actions Pinning (Freeze Right)</div>
+              <p>Locks action buttons and context triggers on the right edge of the viewport during horizontal scrolling with drop-shadow boundary markers.</p>
+              <div class="code-block-container">
+                <button type="button" class="btn-copy-code" title="Copy code to clipboard">Copy</button>
+                <pre class="usage-code-snippet"><code>grid.options = {
+  stickyActions: true // Freeze action buttons to the right edge
+};</code></pre>
+              </div>
+            </div>
+
+            <!-- 12. Bulk Batch Edit Modal -->
+            <div class="usage-card">
+              <div class="usage-card-title">12. Bulk Batch Edit Modal</div>
+              <p>Select multiple records and update target fields (e.g., status, tier, department) in a single transaction with automatic reactive calculation re-runs.</p>
+              <div class="code-block-container">
+                <button type="button" class="btn-copy-code" title="Copy code to clipboard">Copy</button>
+                <pre class="usage-code-snippet"><code>// Open batch edit dialog or update programmatically
+grid.batchUpdateSelected({ status: 'Active', tier: 'Enterprise' });</code></pre>
+              </div>
+            </div>
+          </div>
+        </section>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    // --- Embedded Standalone ProDataGrid Implementation (Zero-CORS, file:/// safe) ---
+    function resolveValue(row, fieldPath) {
+      if (!fieldPath || !row || typeof row !== 'object') return undefined;
+      const path = String(fieldPath);
+      if (!path.includes('.')) {
+        if (path === '__proto__' || path === 'constructor' || path === 'prototype') return undefined;
+        return row[path];
+      }
+      const parts = path.split('.');
+      let current = row;
+      for (const part of parts) {
+        if (part === '__proto__' || part === 'constructor' || part === 'prototype') return undefined;
+        if (current == null || typeof current !== 'object') return undefined;
+        current = current[part];
+      }
+      return current;
+    }
+
+    function createElement(tagName, className, attrs) {
+      const el = document.createElement(tagName);
+      if (className) el.className = className;
+      if (attrs) {
+        for (const [key, value] of Object.entries(attrs)) {
+          if (typeof value === 'boolean') {
+            if (value) el.setAttribute(key, '');
+            else el.removeAttribute(key);
+          } else {
+            el.setAttribute(key, String(value));
+          }
+        }
+      }
+      return el;
+    }
+
+    function removeAllChildren(parent) {
+      while (parent && parent.firstChild) parent.removeChild(parent.firstChild);
+    }
+
+    function sanitizeCSVValue(val) {
+      if (val == null) return '';
+      let str = String(val);
+      if (/^[=+\-@\t\r]/.test(str)) {
+        str = `'${str}`;
+      }
+      return `"${str.replace(/"/g, '""')}"`;
+    }
+
+    function exportToCSV(rows, columns, filename = 'export.csv') {
+      const visibleColumns = columns.filter((col) => col.visible !== false && col.field);
+      const headers = visibleColumns.map((col) => sanitizeCSVValue(col.header));
+      const lines = [headers.join(',')];
+      for (const row of rows) {
+        const values = visibleColumns.map((col) => {
+          const val = col.formatter ? col.formatter(resolveValue(row, col.field), row) : resolveValue(row, col.field);
+          return sanitizeCSVValue(val);
+        });
+        lines.push(values.join(','));
+      }
+      const blob = new Blob([lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.setAttribute('download', filename);
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function evalRule(row, rule) {
+      if (!rule || !rule.field) return true;
+      const v = resolveValue(row, rule.field);
+      const target = rule.value;
+      if (rule.operator === 'equals') return String(v).toLowerCase() === String(target).toLowerCase();
+      if (rule.operator === 'contains') return String(v || '').toLowerCase().includes(String(target || '').toLowerCase().trim());
+      if (rule.operator === 'greaterThan') return Number(v) > Number(target);
+      if (rule.operator === 'lessThan') return Number(v) < Number(target);
+      return true;
+    }
+
+    function evalExpressionGroup(row, group) {
+      if (!group || !group.rules || group.rules.length === 0) return true;
+      if (group.logic === 'AND') return group.rules.every(r => evalRule(row, r));
+      return group.rules.some(r => evalRule(row, r));
+    }
+
+    class ProDataGrid extends HTMLElement {
+      constructor() {
+        super();
+        this._rows = [];
+        this._columns = [];
+        this._options = {
+          rowIdKey: 'id',
+          multiSort: false,
+          selectable: true,
+          multiSelect: true,
+          editable: true,
+          deletable: true,
+          expandable: true,
+          pagination: true,
+          search: true,
+          sorting: true,
+          density: 'comfortable',
+          rowReordering: true,
+          columnReordering: true,
+          stickyFirstColumn: true,
+          advancedFilter: true,
+          filterPresets: true,
+          headerMenu: true,
+          contextMenu: true,
+          columnResizing: true,
+          footerAggregations: true,
+          statePersistence: true
+        };
+        this._columnWidths = new Map();
+        this._isResizingCol = false;
+        this._columnVisibility = new Map();
+        this._sortCriteria = [];
+        this._globalSearch = '';
+        this._pagination = { pageIndex: 0, pageSize: 6, totalRows: 0, totalPages: 1 };
+        this._selectedIds = new Set();
+        this._expandedIds = new Set();
+        this._draggedColIndex = null;
+        this._draggedRowIndex = null;
+        this._justDroppedRowId = null;
+        this._justDroppedColId = null;
+        this._filterExpression = { id: 'root', logic: 'AND', rules: [] };
+        this._isFilterBuilderOpen = false;
+        this._activePresetId = null;
+        this._filterPresets = [
+          {
+            id: 'preset-enterprise',
+            name: '⭐ Enterprise Clients',
+            expression: { id: 'root', logic: 'AND', rules: [{ id: 'r1', field: 'tier', operator: 'equals', value: 'Enterprise' }] }
+          },
+          {
+            id: 'preset-high-arr',
+            name: '💰 ARR > $100k',
+            expression: { id: 'root', logic: 'AND', rules: [{ id: 'r2', field: 'arr', operator: 'greaterThan', value: '100000' }] }
+          },
+          {
+            id: 'preset-active-na',
+            name: '🌐 Active North America',
+            expression: {
+              id: 'root',
+              logic: 'AND',
+              rules: [
+                { id: 'r3', field: 'status', operator: 'equals', value: 'Active' },
+                { id: 'r4', field: 'region', operator: 'contains', value: 'North America' }
+              ]
+            }
+          }
+        ];
+      }
+
+      get filterExpression() { return this._filterExpression; }
+      set filterExpression(expr) {
+        this._filterExpression = expr || { id: 'root', logic: 'AND', rules: [] };
+        this._pagination.pageIndex = 0;
+        this.dispatchEvent(new CustomEvent('pdg:filter-change', { detail: { expression: this._filterExpression } }));
+        this.render();
+      }
+
+      addFilterRule(rule) {
+        this._filterExpression.rules.push(rule);
+        this.filterExpression = { ...this._filterExpression };
+      }
+
+      removeFilterRule(ruleId) {
+        this._filterExpression.rules = this._filterExpression.rules.filter(r => r.id !== ruleId);
+        this.filterExpression = { ...this._filterExpression };
+      }
+
+      clearAllFilters() {
+        this._activePresetId = null;
+        this._filterExpression = { id: 'root', logic: 'AND', rules: [] };
+        this.filterExpression = { ...this._filterExpression };
+      }
+
+      applyFilterPreset(presetId) {
+        const found = this._filterPresets.find(p => p.id === presetId);
+        if (found) {
+          this._activePresetId = presetId;
+          this.filterExpression = JSON.parse(JSON.stringify(found.expression));
+        }
+      }
+
+      announceLive(message) {
+        if (!this._liveAnnouncerEl) return;
+        this._liveAnnouncerEl.textContent = '';
+        setTimeout(() => {
+          if (this._liveAnnouncerEl) this._liveAnnouncerEl.textContent = message;
+        }, 50);
+      }
+
+      recalculateFormulas() {
+        for (const row of this._rows) {
+          for (const col of this._columns) {
+            if (typeof col.calculate === 'function') {
+              try {
+                row[col.field] = col.calculate(row);
+              } catch (e) {
+                // ignore
+              }
+            }
+          }
+        }
+      }
+
+      get rows() { return this._rows; }
+      set rows(val) {
+        this._rows = Array.isArray(val) ? val : [];
+        this.recalculateFormulas();
+        this._pagination.pageIndex = 0;
+        this.render();
+      }
+
+      get selectedIds() {
+        return Array.from(this._selectedIds);
+      }
+      set selectedIds(ids) {
+        this._selectedIds = new Set(Array.isArray(ids) ? ids : []);
+        this.dispatchEvent(new CustomEvent('pdg:select', { detail: { selectedIds: this.selectedIds } }));
+        this.renderBody();
+      }
+
+      getSelectedRows() {
+        const idKey = this._options.rowIdKey || 'id';
+        return this._rows.filter(r => this._selectedIds.has(r[idKey]));
+      }
+
+      selectAll() {
+        const idKey = this._options.rowIdKey || 'id';
+        const { processed } = this.getProcessedData();
+        processed.forEach(r => this._selectedIds.add(r[idKey]));
+        this.dispatchEvent(new CustomEvent('pdg:select', { detail: { selectedIds: this.selectedIds } }));
+        this.renderBody();
+      }
+
+      clearSelection() {
+        this._selectedIds.clear();
+        this.dispatchEvent(new CustomEvent('pdg:select', { detail: { selectedIds: [] } }));
+        this.renderBody();
+      }
+
+      deleteSelectedRows() {
+        const idKey = this._options.rowIdKey || 'id';
+        const count = this._selectedIds.size;
+        if (count === 0) return 0;
+        this._rows = this._rows.filter(r => !this._selectedIds.has(r[idKey]));
+        this._selectedIds.clear();
+        this.dispatchEvent(new CustomEvent('pdg:select', { detail: { selectedIds: [] } }));
+        this.render();
+        return count;
+      }
+
+      get columns() { return this._columns; }
+      set columns(val) {
+        this._columns = Array.isArray(val) ? val : [];
+        this.render();
+      }
+
+      get options() { return this._options; }
+      set options(opts) {
+        this._options = Object.assign({}, this._options, opts);
+        if (this._options.density) this.setAttribute('density', this._options.density);
+        if (this._options.stickyFirstColumn) this.setAttribute('sticky-first-column', 'true');
+        else this.removeAttribute('sticky-first-column');
+        if (this._options.stickyActions) this.setAttribute('sticky-actions', 'true');
+        else this.removeAttribute('sticky-actions');
+        this.render();
+      }
+
+      connectedCallback() {
+        if (!this.containerEl) {
+          this.containerEl = createElement('div', 'pdg-wrapper');
+          this.toolbarEl = createElement('div', 'pdg-toolbar');
+          this.advFilterSectionEl = createElement('div', 'pdg-adv-filter-section');
+          this.presetsBarEl = createElement('div', 'pdg-filter-presets-bar');
+          this.chipsBarEl = createElement('div', 'pdg-filter-chips-bar');
+          this.builderPanelEl = createElement('div', 'pdg-builder-panel');
+          this.tableContainerEl = createElement('div', 'pdg-table-container');
+          this.tableEl = createElement('table', 'pdg-table');
+          this.theadEl = createElement('thead', 'pdg-thead');
+          this.tbodyEl = createElement('tbody', 'pdg-tbody');
+          this.tfootEl = createElement('tfoot', 'pdg-tfoot');
+          this.footerEl = createElement('div', 'pdg-footer');
+          this._liveAnnouncerEl = createElement('div', 'pdg-sr-only', {
+            'aria-live': 'polite',
+            'aria-atomic': 'true'
+          });
+
+          // Floating Menu Popup Element
+          this.menuPopupEl = createElement('div', 'pdg-menu-popup');
+          document.body.appendChild(this.menuPopupEl);
+
+          document.addEventListener('click', (e) => {
+            if (!this.menuPopupEl.contains(e.target)) {
+              this.closeMenu();
+            }
+          });
+
+          document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+              this.closeMenu();
+            }
+          });
+
+          this.advFilterSectionEl.appendChild(this.presetsBarEl);
+          this.advFilterSectionEl.appendChild(this.chipsBarEl);
+          this.advFilterSectionEl.appendChild(this.builderPanelEl);
+
+          this.tableEl.appendChild(this.theadEl);
+          this.tableEl.appendChild(this.tbodyEl);
+          this.tableEl.appendChild(this.tfootEl);
+          this.tableContainerEl.appendChild(this.tableEl);
+
+          // Horizontal scroll shadow listener for sticky column
+          this.tableContainerEl.addEventListener('scroll', () => {
+            if (this.tableContainerEl.scrollLeft > 2) {
+              this.tableContainerEl.classList.add('pdg-is-scrolled');
+            } else {
+              this.tableContainerEl.classList.remove('pdg-is-scrolled');
+            }
+          });
+
+          this.containerEl.appendChild(this.toolbarEl);
+          this.containerEl.appendChild(this.advFilterSectionEl);
+          this.containerEl.appendChild(this.tableContainerEl);
+          this.containerEl.appendChild(this.footerEl);
+          this.containerEl.appendChild(this._liveAnnouncerEl);
+          this.appendChild(this.containerEl);
+        }
+        this.restoreState();
+        this.render();
+      }
+
+      saveState() {
+        if (!this._options.statePersistence) return;
+        const key = `pdg-state-${this._options.model || 'default'}`;
+        const state = {
+          columnWidths: Array.from(this._columnWidths.entries()),
+          columnVisibility: Array.from(this._columnVisibility.entries()),
+          columnOrder: this._columns.map(c => c.id),
+          sortCriteria: this._sortCriteria,
+          globalSearch: this._globalSearch,
+          pageSize: this._pagination.pageSize
+        };
+        try {
+          localStorage.setItem(key, JSON.stringify(state));
+        } catch (e) {
+          // ignore localStorage errors (e.g. quota/privacy)
+        }
+      }
+
+      restoreState() {
+        if (!this._options.statePersistence) return;
+        const key = `pdg-state-${this._options.model || 'default'}`;
+        try {
+          const raw = localStorage.getItem(key);
+          if (!raw) return;
+          const state = JSON.parse(raw);
+          if (state.columnWidths) {
+            this._columnWidths = new Map(state.columnWidths);
+          }
+          if (state.columnVisibility) {
+            this._columnVisibility = new Map(state.columnVisibility);
+          }
+          if (Array.isArray(state.columnOrder) && state.columnOrder.length > 0) {
+            const colMap = new Map(this._columns.map(c => [c.id, c]));
+            const ordered = [];
+            state.columnOrder.forEach(cid => {
+              if (colMap.has(cid)) {
+                ordered.push(colMap.get(cid));
+                colMap.delete(cid);
+              }
+            });
+            colMap.forEach(col => ordered.push(col));
+            this._columns = ordered;
+          }
+          if (Array.isArray(state.sortCriteria)) {
+            this._sortCriteria = state.sortCriteria;
+          }
+          if (typeof state.globalSearch === 'string') {
+            this._globalSearch = state.globalSearch;
+          }
+        } catch (e) {
+          // ignore parse errors
+        }
+      }
+
+      closeMenu() {
+        if (this.menuPopupEl) {
+          this.menuPopupEl.classList.remove('pdg-open');
+          while (this.menuPopupEl.firstChild) this.menuPopupEl.removeChild(this.menuPopupEl.firstChild);
+        }
+      }
+
+      showMenuAt(x, y) {
+        if (!this.menuPopupEl) return;
+        this.menuPopupEl.classList.add('pdg-open');
+        const menuWidth = this.menuPopupEl.offsetWidth || 210;
+        const menuHeight = this.menuPopupEl.offsetHeight || 160;
+
+        let posX = x;
+        let posY = y;
+        if (posX + menuWidth > window.innerWidth - 10) posX = Math.max(10, window.innerWidth - menuWidth - 10);
+        if (posY + menuHeight > window.innerHeight - 10) posY = Math.max(10, window.innerHeight - menuHeight - 10);
+
+        this.menuPopupEl.style.left = `${posX}px`;
+        this.menuPopupEl.style.top = `${posY}px`;
+      }
+
+      openColumnHeaderMenu(col, btn) {
+        this.closeMenu();
+        if (!this.menuPopupEl) return;
+
+        // Sort Ascending
+        const sortAsc = createElement('button', 'pdg-menu-item');
+        sortAsc.textContent = '▲ Sort Ascending';
+        sortAsc.onclick = () => {
+          this._sortCriteria = [{ columnId: col.id, direction: 'asc' }];
+          this.closeMenu();
+          this.dispatchEvent(new CustomEvent('pdg:sort', { detail: { criteria: this._sortCriteria } }));
+          this.render();
+        };
+        this.menuPopupEl.appendChild(sortAsc);
+
+        // Sort Descending
+        const sortDesc = createElement('button', 'pdg-menu-item');
+        sortDesc.textContent = '▼ Sort Descending';
+        sortDesc.onclick = () => {
+          this._sortCriteria = [{ columnId: col.id, direction: 'desc' }];
+          this.closeMenu();
+          this.dispatchEvent(new CustomEvent('pdg:sort', { detail: { criteria: this._sortCriteria } }));
+          this.render();
+        };
+        this.menuPopupEl.appendChild(sortDesc);
+
+        // Clear Sort
+        if (this._sortCriteria.some(c => c.columnId === col.id)) {
+          const clearSort = createElement('button', 'pdg-menu-item');
+          clearSort.textContent = '✕ Clear Sort';
+          clearSort.onclick = () => {
+            this._sortCriteria = [];
+            this.closeMenu();
+            this.dispatchEvent(new CustomEvent('pdg:sort', { detail: { criteria: this._sortCriteria } }));
+            this.render();
+          };
+          this.menuPopupEl.appendChild(clearSort);
+        }
+
+        // Hide column option (if not required or last visible)
+        const visibleCols = this._columns.filter(c => this.isColumnVisible(c));
+        if (visibleCols.length > 1 && !col.required) {
+          this.menuPopupEl.appendChild(createElement('div', 'pdg-menu-separator'));
+          const hideBtn = createElement('button', 'pdg-menu-item');
+          hideBtn.textContent = '👁 Hide Column';
+          hideBtn.onclick = () => {
+            this._columnVisibility.set(col.id, false);
+            this.closeMenu();
+            this.dispatchEvent(new CustomEvent('pdg:column-visibility', { detail: { columnId: col.id, visible: false } }));
+            this.render();
+          };
+          this.menuPopupEl.appendChild(hideBtn);
+        }
+
+        // Column Visibility Checklist
+        this.menuPopupEl.appendChild(createElement('div', 'pdg-menu-separator'));
+        const sub = createElement('div', 'pdg-menu-subhead');
+        sub.textContent = 'Toggle Columns';
+        this.menuPopupEl.appendChild(sub);
+
+        this._columns.forEach(c => {
+          const isVis = this.isColumnVisible(c);
+          const label = createElement('label', 'pdg-menu-chk-item');
+          const chk = createElement('input', 'pdg-checkbox', { type: 'checkbox' });
+          chk.checked = isVis;
+          if (c.required) chk.disabled = true;
+
+          chk.onchange = () => {
+            if (c.required) return;
+            this._columnVisibility.set(c.id, chk.checked);
+            this.dispatchEvent(new CustomEvent('pdg:column-visibility', { detail: { columnId: c.id, visible: chk.checked } }));
+            this.render();
+          };
+
+          const sp = createElement('span');
+          sp.textContent = c.header;
+          label.appendChild(chk);
+          label.appendChild(sp);
+
+          if (c.required) {
+            const req = createElement('span', 'pdg-badge-req');
+            req.textContent = 'Required';
+            label.appendChild(req);
+          }
+          this.menuPopupEl.appendChild(label);
+        });
+
+        const r = btn.getBoundingClientRect();
+        this.showMenuAt(r.left, r.bottom + 4);
+      }
+
+      openRowContextMenu(row, x, y) {
+        this.closeMenu();
+        if (!this.menuPopupEl) return;
+
+        const rowId = row[this._options.rowIdKey || 'id'];
+
+        // View Details
+        if (this._options.expandable) {
+          const isExpanded = this._expandedIds.has(rowId);
+          const viewBtn = createElement('button', 'pdg-menu-item');
+          viewBtn.textContent = isExpanded ? '▲ Collapse Row Dossier' : '▶ Expand Row Dossier';
+          viewBtn.onclick = () => {
+            if (isExpanded) this._expandedIds.delete(rowId);
+            else this._expandedIds.add(rowId);
+            this.closeMenu();
+            this.dispatchEvent(new CustomEvent('pdg:row-expand', { detail: { rowId, expanded: !isExpanded } }));
+            this.renderBody();
+          };
+          this.menuPopupEl.appendChild(viewBtn);
+        }
+
+        // Quick Edit Prompt
+        if (this._options.editable) {
+          const editBtn = createElement('button', 'pdg-menu-item');
+          editBtn.textContent = '✏️ Quick Edit First Value';
+          editBtn.onclick = () => {
+            this.closeMenu();
+            const editableCol = this._columns.find(c => c.editable && this.isColumnVisible(c));
+            if (editableCol) {
+              const current = row[editableCol.field] != null ? row[editableCol.field] : '';
+              const updated = prompt(`Edit ${editableCol.header}:`, current);
+              if (updated !== null && updated !== String(current)) {
+                row[editableCol.field] = isNaN(Number(updated)) || updated.trim() === '' ? updated : Number(updated);
+                this.recalculateFormulas();
+                this.dispatchEvent(new CustomEvent('pdg:edit-save', {
+                  detail: { rowId, columnId: editableCol.id, oldValue: current, newValue: row[editableCol.field] }
+                }));
+                this.render();
+              }
+            }
+          };
+          this.menuPopupEl.appendChild(editBtn);
+        }
+
+        // Duplicate Record Action
+        const dupBtn = createElement('button', 'pdg-menu-item');
+        dupBtn.textContent = '📋 Duplicate Record';
+        dupBtn.onclick = () => {
+          this.closeMenu();
+          const clone = JSON.parse(JSON.stringify(row));
+          const newId = `${clone[this._options.rowIdKey || 'id']}-copy-${Math.floor(Math.random() * 1000)}`;
+          clone[this._options.rowIdKey || 'id'] = newId;
+          if (clone.client) clone.client = `${clone.client} (Copy)`;
+          if (clone.name) clone.name = `${clone.name} (Copy)`;
+          const idx = this._rows.findIndex(r => r[this._options.rowIdKey || 'id'] === rowId);
+          if (idx !== -1) {
+            this._rows.splice(idx + 1, 0, clone);
+          } else {
+            this._rows.push(clone);
+          }
+          this.recalculateFormulas();
+          this.dispatchEvent(new CustomEvent('pdg:row-duplicate', { detail: { originalId: rowId, newId } }));
+          this.render();
+        };
+        this.menuPopupEl.appendChild(dupBtn);
+
+        // Delete Row Action
+        if (this._options.deletable) {
+          this.menuPopupEl.appendChild(createElement('div', 'pdg-menu-separator'));
+          const delBtn = createElement('button', 'pdg-menu-item pdg-menu-item-destructive');
+          delBtn.textContent = '🗑 Delete Record';
+          delBtn.onclick = () => {
+            this.closeMenu();
+            if (confirm(`Are you sure you want to delete record ${rowId}?`)) {
+              this._rows = this._rows.filter(r => r[this._options.rowIdKey || 'id'] !== rowId);
+              this._selectedIds.delete(rowId);
+              this.dispatchEvent(new CustomEvent('pdg:delete', { detail: { rowId } }));
+              this.render();
+            }
+          };
+          this.menuPopupEl.appendChild(delBtn);
+        }
+
+        this.showMenuAt(x, y);
+      }
+
+      isColumnVisible(col) {
+        if (this._columnVisibility.has(col.id)) {
+          return this._columnVisibility.get(col.id);
+        }
+        return col.visible !== false;
+      }
+
+      getProcessedData() {
+        let list = [...this._rows];
+
+        // Advanced Filter Expression Rules
+        if (this._options.advancedFilter !== false && this._filterExpression.rules.length > 0) {
+          list = list.filter(row => evalExpressionGroup(row, this._filterExpression));
+        }
+
+        // Global Search
+        if (this._options.search !== false && this._globalSearch) {
+          const q = this._globalSearch.trim().toLowerCase();
+          list = list.filter(row => Object.values(row).some(v => v != null && String(v).toLowerCase().includes(q)));
+        }
+
+        // Multi-Column Sort logic
+        if (this._options.sorting !== false && this._sortCriteria.length > 0) {
+          const colMap = new Map(this._columns.map(c => [c.id, c]));
+          list.sort((a, b) => {
+            for (const crit of this._sortCriteria) {
+              const col = colMap.get(crit.columnId);
+              if (!col || !col.field) continue;
+              let valA = resolveValue(a, col.field);
+              let valB = resolveValue(b, col.field);
+
+              if (valA === valB) continue;
+              if (valA == null) return crit.direction === 'asc' ? 1 : -1;
+              if (valB == null) return crit.direction === 'asc' ? -1 : 1;
+
+              let comp = 0;
+              if (typeof valA === 'number' && typeof valB === 'number') {
+                comp = valA - valB;
+              } else {
+                comp = String(valA).localeCompare(String(valB), undefined, { numeric: true, sensitivity: 'base' });
+              }
+              if (comp !== 0) return crit.direction === 'asc' ? comp : -comp;
+            }
+            return 0;
+          });
+        }
+
+        return { processed: list, totalFilteredCount: list.length };
+      }
+
+      render() {
+        if (!this.containerEl) return;
+        this.renderToolbar();
+        this.renderAdvancedFilters();
+        this.renderHeader();
+        this.renderBody();
+        this.renderFooterAggregations();
+        this.renderFooter();
+      }
+
+      renderFooterAggregations() {
+        removeAllChildren(this.tfootEl);
+        if (this._options.footerAggregations === false) {
+          this.tfootEl.style.display = 'none';
+          return;
+        }
+        this.tfootEl.style.display = 'table-footer-group';
+
+        const { processed } = this.getProcessedData();
+        const tr = createElement('tr', 'pdg-tfoot-row');
+
+        if (this._options.rowReordering) {
+          const td = createElement('td', 'pdg-td');
+          tr.appendChild(td);
+        }
+        if (this._options.selectable) {
+          const td = createElement('td', 'pdg-td');
+          tr.appendChild(td);
+        }
+        if (this._options.expandable) {
+          const td = createElement('td', 'pdg-td');
+          tr.appendChild(td);
+        }
+
+        let renderedColIdx = 0;
+        this._columns.forEach(col => {
+          if (!this.isColumnVisible(col)) return;
+          const isSticky = Boolean(this._options.stickyFirstColumn && renderedColIdx === 0);
+          renderedColIdx++;
+
+          const td = createElement('td', `pdg-td ${isSticky ? 'pdg-col-sticky' : ''}`);
+
+          if (col.aggregation) {
+            const values = processed.map(r => resolveValue(r, col.field)).filter(v => v != null);
+            let result = 0;
+            let aggType = typeof col.aggregation === 'string' ? col.aggregation : 'calc';
+
+            if (col.aggregation === 'sum') {
+              result = values.reduce((acc, v) => acc + (Number(v) || 0), 0);
+            } else if (col.aggregation === 'avg') {
+              const sum = values.reduce((acc, v) => acc + (Number(v) || 0), 0);
+              result = values.length ? sum / values.length : 0;
+            } else if (col.aggregation === 'count') {
+              result = values.length;
+            } else if (col.aggregation === 'min') {
+              result = values.length ? Math.min(...values.map(v => Number(v) || 0)) : 0;
+            } else if (col.aggregation === 'max') {
+              result = values.length ? Math.max(...values.map(v => Number(v) || 0)) : 0;
+            } else if (typeof col.aggregation === 'function') {
+              result = col.aggregation(values, processed);
+            }
+
+            const labelSpan = createElement('span', 'pdg-agg-label');
+            labelSpan.textContent = typeof col.aggregation === 'string' ? col.aggregation.toUpperCase() : 'TOTAL';
+
+            const valSpan = createElement('span', 'pdg-agg-value');
+            if (col.aggregationFormatter) {
+              valSpan.textContent = col.aggregationFormatter(result);
+            } else if (col.formatter) {
+              valSpan.textContent = col.formatter(result);
+            } else if (typeof result === 'number') {
+              valSpan.textContent = Number.isInteger(result) ? result.toLocaleString() : result.toFixed(2);
+            } else {
+              valSpan.textContent = String(result);
+            }
+
+            td.appendChild(labelSpan);
+            td.appendChild(valSpan);
+          } else if (renderedColIdx === 1) {
+            const labelSpan = createElement('span', 'pdg-agg-label');
+            labelSpan.textContent = 'SUMMARY';
+            const valSpan = createElement('span');
+            valSpan.style.fontSize = '0.8rem';
+            valSpan.style.color = 'var(--pdg-text-muted)';
+            valSpan.textContent = `${processed.length} matching rows`;
+            td.appendChild(labelSpan);
+            td.appendChild(valSpan);
+          } else {
+            td.textContent = '—';
+            td.style.color = 'var(--pdg-text-muted)';
+            td.style.fontSize = '0.8rem';
+          }
+
+          tr.appendChild(td);
+        });
+
+        if (this._options.deletable || this._options.contextMenu !== false) {
+          const isStickyActions = Boolean(this._options.stickyActions);
+          const tdDel = createElement('td', `pdg-td ${isStickyActions ? 'pdg-col-sticky-right' : ''}`);
+          tr.appendChild(tdDel);
+        }
+
+        this.tfootEl.appendChild(tr);
+      }
+
+      renderAdvancedFilters() {
+        if (this._options.advancedFilter === false) {
+          this.advFilterSectionEl.style.display = 'none';
+          return;
+        }
+        this.advFilterSectionEl.style.display = 'flex';
+
+        // Presets Bar
+        removeAllChildren(this.presetsBarEl);
+        if (this._options.filterPresets !== false) {
+          this.presetsBarEl.style.display = 'flex';
+          const label = createElement('span');
+          label.style.cssText = 'font-size:0.75rem;font-weight:600;color:var(--pdg-text-muted);margin-right:0.25rem;';
+          label.textContent = 'Presets:';
+          this.presetsBarEl.appendChild(label);
+
+          this._filterPresets.forEach(preset => {
+            const pill = createElement('button', `pdg-preset-pill ${this._activePresetId === preset.id ? 'is-active' : ''}`, { type: 'button' });
+            pill.textContent = preset.name;
+            pill.addEventListener('click', () => this.applyFilterPreset(preset.id));
+            this.presetsBarEl.appendChild(pill);
+          });
+        } else {
+          this.presetsBarEl.style.display = 'none';
+        }
+
+        // Active Chips Bar
+        removeAllChildren(this.chipsBarEl);
+        const rules = this._filterExpression.rules;
+        if (rules.length > 0) {
+          this.chipsBarEl.style.display = 'flex';
+          const logicBadge = createElement('span');
+          logicBadge.style.cssText = 'font-size:0.7rem;font-weight:700;color:var(--pdg-primary);margin-right:0.35rem;';
+          logicBadge.textContent = `Match (${this._filterExpression.logic}):`;
+          this.chipsBarEl.appendChild(logicBadge);
+
+          rules.forEach(rule => {
+            const col = this._columns.find(c => c.id === rule.field);
+            const chip = createElement('span', 'pdg-chip');
+            chip.innerHTML = `<strong>${col ? col.header : rule.field}</strong> ${rule.operator} "<em>${rule.value}</em>"`;
+
+            const delBtn = createElement('button', 'pdg-chip-remove', {
+              type: 'button',
+              'aria-label': `Remove ${rule.field} filter`
+            });
+            delBtn.innerHTML = '&times;';
+            delBtn.addEventListener('click', () => this.removeFilterRule(rule.id));
+            chip.appendChild(delBtn);
+            this.chipsBarEl.appendChild(chip);
+          });
+
+          const clearBtn = createElement('button', 'pdg-btn pdg-btn-sm', { type: 'button' });
+          clearBtn.style.cssText = 'padding:0.15rem 0.5rem;font-size:0.75rem;color:#ef4444;border-color:#fca5a5;margin-left:auto;';
+          clearBtn.textContent = 'Clear All';
+          clearBtn.addEventListener('click', () => this.clearAllFilters());
+          this.chipsBarEl.appendChild(clearBtn);
+        } else {
+          this.chipsBarEl.style.display = 'none';
+        }
+
+        // Filter Builder Panel
+        removeAllChildren(this.builderPanelEl);
+        if (this._isFilterBuilderOpen) {
+          this.builderPanelEl.style.display = 'flex';
+
+          const topRow = createElement('div');
+          topRow.style.cssText = 'display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;';
+
+          const logicGroup = createElement('div');
+          logicGroup.style.cssText = 'display:flex;align-items:center;gap:0.35rem;';
+          const logicLabel = createElement('span');
+          logicLabel.style.cssText = 'font-size:0.8rem;font-weight:600;color:var(--pdg-text-main);';
+          logicLabel.textContent = 'Match conditions:';
+          logicGroup.appendChild(logicLabel);
+
+          ['AND', 'OR'].forEach(logic => {
+            const btn = createElement('button', `pdg-btn pdg-btn-sm ${this._filterExpression.logic === logic ? 'pdg-btn-active' : ''}`, { type: 'button' });
+            btn.textContent = logic;
+            btn.addEventListener('click', () => {
+              this._filterExpression.logic = logic;
+              this.filterExpression = { ...this._filterExpression };
+            });
+            logicGroup.appendChild(btn);
+          });
+          topRow.appendChild(logicGroup);
+
+          const addRuleBtn = createElement('button', 'pdg-btn pdg-btn-sm', { type: 'button' });
+          addRuleBtn.textContent = '+ Add Filter Condition';
+          addRuleBtn.addEventListener('click', () => {
+            const firstCol = this._columns.find(c => c.field && c.visible !== false) || this._columns[0];
+            this.addFilterRule({
+              id: `rule-${Date.now()}`,
+              field: firstCol ? firstCol.id : 'status',
+              operator: 'contains',
+              value: ''
+            });
+          });
+          topRow.appendChild(addRuleBtn);
+
+          this.builderPanelEl.appendChild(topRow);
+
+          // Rules List
+          rules.forEach(rule => {
+            const ruleRow = createElement('div', 'pdg-rule-row');
+
+            // Column selector
+            const colSel = createElement('select', 'pdg-rule-select');
+            this._columns.forEach(col => {
+              if (col.visible === false) return;
+              const opt = createElement('option', '', { value: col.id });
+              opt.textContent = col.header;
+              if (col.id === rule.field) opt.selected = true;
+              colSel.appendChild(opt);
+            });
+            colSel.addEventListener('change', (e) => {
+              rule.field = e.target.value;
+              this.filterExpression = { ...this._filterExpression };
+            });
+            ruleRow.appendChild(colSel);
+
+            // Operator selector
+            const opSel = createElement('select', 'pdg-rule-select');
+            [
+              { val: 'contains', label: 'contains' },
+              { val: 'equals', label: 'equals' },
+              { val: 'greaterThan', label: 'greater than (>)' },
+              { val: 'lessThan', label: 'less than (<)' }
+            ].forEach(op => {
+              const opt = createElement('option', '', { value: op.val });
+              opt.textContent = op.label;
+              if (op.val === rule.operator) opt.selected = true;
+              opSel.appendChild(opt);
+            });
+            opSel.addEventListener('change', (e) => {
+              rule.operator = e.target.value;
+              this.filterExpression = { ...this._filterExpression };
+            });
+            ruleRow.appendChild(opSel);
+
+            // Value Input
+            const valInp = createElement('input', 'pdg-rule-input', {
+              type: 'text',
+              placeholder: 'Filter criteria value...',
+              value: rule.value || ''
+            });
+            valInp.addEventListener('input', (e) => {
+              rule.value = e.target.value;
+              this.filterExpression = { ...this._filterExpression };
+            });
+            ruleRow.appendChild(valInp);
+
+            // Delete Rule Button
+            const delRuleBtn = createElement('button', 'pdg-btn pdg-btn-sm', {
+              type: 'button',
+              'aria-label': 'Remove condition'
+            });
+            delRuleBtn.style.color = '#ef4444';
+            delRuleBtn.style.borderColor = '#fca5a5';
+            delRuleBtn.textContent = '✕';
+            delRuleBtn.addEventListener('click', () => this.removeFilterRule(rule.id));
+            ruleRow.appendChild(delRuleBtn);
+
+            this.builderPanelEl.appendChild(ruleRow);
+          });
+        } else {
+          this.builderPanelEl.style.display = 'none';
+        }
+      }
+
+      renderToolbar() {
+        removeAllChildren(this.toolbarEl);
+        if (this._options.search === false) {
+          this.toolbarEl.style.display = 'none';
+          return;
+        }
+        this.toolbarEl.style.display = 'flex';
+
+        const left = createElement('div', 'pdg-toolbar-left');
+        const searchInput = createElement('input', 'pdg-search-input', {
+          type: 'search',
+          placeholder: 'Search client, contact, status...',
+          value: this._globalSearch
+        });
+        searchInput.addEventListener('input', (e) => {
+          this._globalSearch = e.target.value;
+          this._pagination.pageIndex = 0;
+          this.render();
+        });
+        left.appendChild(searchInput);
+
+        const right = createElement('div', 'pdg-toolbar-right');
+
+        // Advanced Filter Builder Toggle Button
+        if (this._options.advancedFilter !== false) {
+          const filterBuilderBtn = createElement('button', `pdg-btn ${this._isFilterBuilderOpen ? 'pdg-btn-active' : ''}`, { type: 'button' });
+          filterBuilderBtn.innerHTML = `⚙️ Filter Builder ${this._filterExpression.rules.length > 0 ? `(${this._filterExpression.rules.length})` : ''}`;
+          filterBuilderBtn.addEventListener('click', () => {
+            this._isFilterBuilderOpen = !this._isFilterBuilderOpen;
+            this.render();
+          });
+          right.appendChild(filterBuilderBtn);
+        }
+
+        const exportBtn = createElement('button', 'pdg-btn', { type: 'button' });
+        exportBtn.textContent = 'Export CSV';
+        exportBtn.addEventListener('click', () => {
+          const { processed } = this.getProcessedData();
+          exportToCSV(processed, this._columns);
+        });
+        right.appendChild(exportBtn);
+
+        this.toolbarEl.appendChild(left);
+        this.toolbarEl.appendChild(right);
+      }
+
+      renderHeader() {
+        removeAllChildren(this.theadEl);
+        const tr = createElement('tr', 'pdg-header-row');
+
+        // Row Reorder Header spacer
+        if (this._options.rowReordering) {
+          const thDrag = createElement('th', 'pdg-th');
+          thDrag.style.width = '40px';
+          tr.appendChild(thDrag);
+        }
+
+        if (this._options.selectable) {
+          const thSel = createElement('th', 'pdg-th');
+          thSel.style.width = '40px';
+          if (this._options.multiSelect) {
+            const chk = createElement('input', 'pdg-checkbox', { type: 'checkbox' });
+            const { processed } = this.getProcessedData();
+            chk.checked = processed.length > 0 && this._selectedIds.size === processed.length;
+            chk.indeterminate = this._selectedIds.size > 0 && this._selectedIds.size < processed.length;
+            chk.addEventListener('change', () => {
+              if (chk.checked) {
+                processed.forEach(r => this._selectedIds.add(r[this._options.rowIdKey || 'id']));
+              } else {
+                this._selectedIds.clear();
+              }
+              this.dispatchEvent(new CustomEvent('pdg:select', { detail: { selectedIds: Array.from(this._selectedIds) } }));
+              this.renderBody();
+            });
+            thSel.appendChild(chk);
+          }
+          tr.appendChild(thSel);
+        }
+
+        if (this._options.expandable) {
+          const thExp = createElement('th', 'pdg-th');
+          thExp.style.width = '40px';
+          tr.appendChild(thExp);
+        }
+
+        let renderedColIdx = 0;
+        this._columns.forEach((col, colIdx) => {
+          if (!this.isColumnVisible(col)) return;
+          const isSticky = Boolean(this._options.stickyFirstColumn && renderedColIdx === 0);
+          renderedColIdx++;
+
+          const th = createElement('th', `pdg-th ${isSticky ? 'pdg-col-sticky' : ''}`);
+          const customWidth = this._columnWidths.get(col.id);
+          if (customWidth) {
+            th.style.width = customWidth;
+          } else if (col.width) {
+            th.style.width = col.width;
+          }
+          if (this._justDroppedColId === col.id) {
+            th.classList.add('pdg-drop-success');
+          }
+          const inner = createElement('div', 'pdg-th-inner');
+
+          // Column Drag & Drop
+          if (this._options.columnReordering) {
+            th.classList.add('pdg-th-draggable');
+            th.setAttribute('draggable', 'true');
+            th.setAttribute('tabindex', '0');
+            th.setAttribute('aria-label', `${col.header}. Drag or press Left/Right arrow keys to reorder.`);
+
+            th.addEventListener('dragstart', (e) => {
+              this._draggedColIndex = colIdx;
+              th.classList.add('pdg-th-dragging');
+              if (e.dataTransfer) {
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', String(colIdx));
+              }
+              this.announceLive(`Started dragging column ${col.header}. Move over another column to reorder.`);
+            });
+
+            th.addEventListener('dragend', () => {
+              this._draggedColIndex = null;
+              this.theadEl.querySelectorAll('.pdg-th').forEach(h => {
+                h.classList.remove('pdg-th-dragging', 'pdg-drag-over-left', 'pdg-drag-over-right', 'pdg-drag-not-allowed');
+              });
+            });
+
+            th.addEventListener('dragover', (e) => {
+              e.preventDefault();
+              if (this._draggedColIndex === null) return;
+
+              if (this._draggedColIndex === colIdx) {
+                if (e.dataTransfer) e.dataTransfer.dropEffect = 'none';
+                th.classList.add('pdg-drag-not-allowed');
+                th.classList.remove('pdg-drag-over-left', 'pdg-drag-over-right');
+                return;
+              }
+
+              if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+              th.classList.remove('pdg-drag-not-allowed');
+
+              const rect = th.getBoundingClientRect();
+              const relX = e.clientX - rect.left;
+              if (relX < rect.width / 2) {
+                th.classList.add('pdg-drag-over-left');
+                th.classList.remove('pdg-drag-over-right');
+              } else {
+                th.classList.add('pdg-drag-over-right');
+                th.classList.remove('pdg-drag-over-left');
+              }
+            });
+
+            th.addEventListener('dragleave', () => {
+              th.classList.remove('pdg-drag-over-left', 'pdg-drag-over-right', 'pdg-drag-not-allowed');
+            });
+
+            th.addEventListener('drop', (e) => {
+              e.preventDefault();
+              const fromCol = this._draggedColIndex;
+              th.classList.remove('pdg-drag-over-left', 'pdg-drag-over-right', 'pdg-drag-not-allowed', 'pdg-th-dragging');
+
+              if (fromCol != null && fromCol !== colIdx) {
+                const rect = th.getBoundingClientRect();
+                const relX = e.clientX - rect.left;
+                let targetIdx = relX < rect.width / 2 ? colIdx : colIdx + 1;
+                if (fromCol < targetIdx) targetIdx--;
+                targetIdx = Math.max(0, Math.min(targetIdx, this._columns.length - 1));
+
+                if (targetIdx !== fromCol) {
+                  this.reorderColumn(fromCol, targetIdx);
+                }
+              }
+              this._draggedColIndex = null;
+            });
+
+            th.addEventListener('keydown', (e) => {
+              if (e.key === 'ArrowLeft' && colIdx > 0) {
+                e.preventDefault();
+                this.reorderColumn(colIdx, colIdx - 1);
+              } else if (e.key === 'ArrowRight' && colIdx < this._columns.length - 1) {
+                e.preventDefault();
+                this.reorderColumn(colIdx, colIdx + 1);
+              }
+            });
+          }
+
+          const headerGroup = createElement('div', 'pdg-th-header-group');
+          const title = createElement('span');
+          title.textContent = col.header;
+          headerGroup.appendChild(title);
+
+          if (this._options.sorting !== false && col.sortable !== false) {
+            th.classList.add('pdg-sortable');
+            const active = this._sortCriteria.find(c => c.columnId === col.id);
+            const activeIndex = this._sortCriteria.findIndex(c => c.columnId === col.id);
+            const icon = createElement('span');
+            let iconText = ' ⇅';
+            if (active) {
+              iconText = active.direction === 'asc' ? ' ▲' : ' ▼';
+              if (this._options.multiSort && this._sortCriteria.length > 1) {
+                iconText += ` (${activeIndex + 1})`;
+              }
+            }
+            icon.textContent = iconText;
+            headerGroup.appendChild(icon);
+            headerGroup.addEventListener('click', (e) => {
+              // Avoid triggering sort when clicking menu trigger
+              if (e.defaultPrevented) return;
+              const cur = this._sortCriteria.find(c => c.columnId === col.id);
+              let next = 'asc';
+              if (cur && cur.direction === 'asc') next = 'desc';
+              else if (cur && cur.direction === 'desc') next = null;
+
+              if (this._options.multiSort) {
+                if (cur) {
+                  if (next) cur.direction = next;
+                  else this._sortCriteria = this._sortCriteria.filter(c => c.columnId !== col.id);
+                } else if (next) {
+                  this._sortCriteria.push({ columnId: col.id, direction: next });
+                }
+              } else {
+                this._sortCriteria = next ? [{ columnId: col.id, direction: next }] : [];
+              }
+
+              this.dispatchEvent(new CustomEvent('pdg:sort', { detail: { criteria: this._sortCriteria } }));
+              this.render();
+            });
+          }
+          inner.appendChild(headerGroup);
+
+          // Column Header Menu Trigger (⋮)
+          if (this._options.headerMenu !== false) {
+            const menuBtn = createElement('button', 'pdg-th-menu-trigger', {
+              type: 'button',
+              title: `Column options for ${col.header}`,
+              'aria-label': `Column options for ${col.header}`
+            });
+            menuBtn.innerHTML = '⋮';
+            menuBtn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              this.openColumnHeaderMenu(col, menuBtn);
+            });
+            inner.appendChild(menuBtn);
+          }
+
+          th.appendChild(inner);
+
+          // Interactive Column Resizer Handle
+          if (this._options.columnResizing !== false) {
+            const resizer = createElement('div', 'pdg-col-resizer', {
+              title: 'Drag to resize, double click to auto-fit'
+            });
+
+            resizer.addEventListener('mousedown', (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              this._isResizingCol = true;
+              resizer.classList.add('is-resizing');
+              const startX = e.pageX;
+              const startWidth = th.offsetWidth;
+
+              const onMouseMove = (moveEvent) => {
+                const diff = moveEvent.pageX - startX;
+                const newWidth = Math.max(70, startWidth + diff);
+                th.style.width = `${newWidth}px`;
+                this._columnWidths.set(col.id, `${newWidth}px`);
+              };
+
+              const onMouseUp = () => {
+                this._isResizingCol = false;
+                resizer.classList.remove('is-resizing');
+                window.removeEventListener('mousemove', onMouseMove);
+                window.removeEventListener('mouseup', onMouseUp);
+                this.saveState();
+                this.announceLive(`Resized column ${col.header} to ${th.offsetWidth}px`);
+              };
+
+              window.addEventListener('mousemove', onMouseMove);
+              window.addEventListener('mouseup', onMouseUp);
+            });
+
+            // Double click auto-fit to content
+            resizer.addEventListener('dblclick', (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              // Estimate width by calculating header and row cell text lengths
+              let maxChars = col.header.length;
+              for (const r of this._rows) {
+                const val = resolveValue(r, col.field);
+                if (val != null) {
+                  const len = String(val).length;
+                  if (len > maxChars) maxChars = len;
+                }
+              }
+              const autoFitWidth = Math.max(90, Math.min(450, maxChars * 10 + 40));
+              th.style.width = `${autoFitWidth}px`;
+              this._columnWidths.set(col.id, `${autoFitWidth}px`);
+              this.saveState();
+              this.announceLive(`Auto-fitted column ${col.header} to ${autoFitWidth}px`);
+            });
+
+            th.appendChild(resizer);
+          }
+
+          tr.appendChild(th);
+        });
+
+        if (this._options.deletable || this._options.contextMenu !== false) {
+          const isStickyActions = Boolean(this._options.stickyActions);
+          const thDel = createElement('th', `pdg-th ${isStickyActions ? 'pdg-col-sticky-right' : ''}`);
+          thDel.style.width = '70px';
+          thDel.textContent = 'Actions';
+          tr.appendChild(thDel);
+        }
+
+        this.theadEl.appendChild(tr);
+      }
+
+      reorderColumn(fromIdx, toIdx) {
+        const movedCol = this._columns[fromIdx];
+        const newCols = [...this._columns];
+        newCols.splice(fromIdx, 1);
+        newCols.splice(toIdx, 0, movedCol);
+        this._columns = newCols;
+
+        this._justDroppedColId = movedCol.id;
+        setTimeout(() => {
+          this._justDroppedColId = null;
+          this.theadEl.querySelectorAll('.pdg-th.pdg-drop-success').forEach(th => th.classList.remove('pdg-drop-success'));
+        }, 600);
+
+        this.announceLive(`Moved column ${movedCol.header} to position ${toIdx + 1} of ${newCols.length}.`);
+        this.dispatchEvent(new CustomEvent('pdg:column-reorder', {
+          detail: { fromIndex: fromIdx, toIndex: toIdx, column: movedCol, columns: newCols }
+        }));
+        this.render();
+      }
+
+      reorderRow(fromIdx, toIdx, pagedList) {
+        const movedRow = pagedList[fromIdx];
+        const rowId = movedRow[this._options.rowIdKey || 'id'];
+        
+        // Find indices in global _rows
+        const globalFrom = this._rows.findIndex(r => r[this._options.rowIdKey || 'id'] === rowId);
+        const targetRow = pagedList[toIdx];
+        const globalTo = this._rows.findIndex(r => r[this._options.rowIdKey || 'id'] === targetRow[this._options.rowIdKey || 'id']);
+
+        if (globalFrom > -1 && globalTo > -1) {
+          const newRows = [...this._rows];
+          newRows.splice(globalFrom, 1);
+          newRows.splice(globalTo, 0, movedRow);
+          this._rows = newRows;
+        }
+
+        this._justDroppedRowId = rowId;
+        setTimeout(() => {
+          this._justDroppedRowId = null;
+          this.tbodyEl.querySelectorAll('.pdg-row.pdg-drop-success').forEach(r => r.classList.remove('pdg-drop-success'));
+        }, 600);
+
+        this.announceLive(`Moved row ${fromIdx + 1} to position ${toIdx + 1}.`);
+        this.dispatchEvent(new CustomEvent('pdg:row-reorder', {
+          detail: { fromIndex: fromIdx, toIndex: toIdx, row: movedRow }
+        }));
+        this.render();
+      }
+
+      renderBody() {
+        removeAllChildren(this.tbodyEl);
+        const { processed, totalFilteredCount } = this.getProcessedData();
+
+        let displayRows = processed;
+        if (this._options.pagination !== false) {
+          const totalPages = Math.max(1, Math.ceil(totalFilteredCount / this._pagination.pageSize));
+          this._pagination.totalPages = totalPages;
+          this._pagination.totalRows = totalFilteredCount;
+          if (this._pagination.pageIndex >= totalPages) this._pagination.pageIndex = Math.max(0, totalPages - 1);
+          const start = this._pagination.pageIndex * this._pagination.pageSize;
+          displayRows = processed.slice(start, start + this._pagination.pageSize);
+        } else {
+          this._pagination.totalRows = totalFilteredCount;
+          this._pagination.totalPages = 1;
+        }
+
+        if (displayRows.length === 0) {
+          const tr = createElement('tr', 'pdg-row');
+          const td = createElement('td', 'pdg-td', { colspan: 12 });
+          td.style.textAlign = 'center';
+          td.style.padding = '2.5rem 1rem';
+          td.style.color = 'var(--pdg-text-muted)';
+          td.textContent = 'No records match current filters.';
+          tr.appendChild(td);
+          this.tbodyEl.appendChild(tr);
+          return;
+        }
+
+        displayRows.forEach((row, i) => {
+          const rowId = row[this._options.rowIdKey || 'id'];
+          const isSelected = this._selectedIds.has(rowId);
+          const isExpanded = this._expandedIds.has(rowId);
+          const isDroppedTarget = this._justDroppedRowId === rowId;
+          const tr = createElement('tr', `pdg-row ${isSelected ? 'pdg-row-selected' : ''} ${isDroppedTarget ? 'pdg-drop-success' : ''}`);
+
+          // Row Reordering Drag & Drop
+          if (this._options.rowReordering) {
+            const tdDrag = createElement('td', 'pdg-td');
+            const handle = createElement('span', 'pdg-drag-handle', {
+              draggable: 'true',
+              tabindex: '0',
+              'aria-label': 'Drag or press Up/Down arrow keys to reorder row'
+            });
+            handle.innerHTML = '⋮⋮';
+
+            handle.addEventListener('dragstart', (e) => {
+              this._draggedRowIndex = i;
+              tr.classList.add('pdg-row-dragging');
+              handle.classList.add('is-grabbing');
+              if (e.dataTransfer) {
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', String(i));
+              }
+              this.announceLive(`Started dragging row ${i + 1}. Move over a row to reorder.`);
+            });
+
+            handle.addEventListener('dragend', () => {
+              this._draggedRowIndex = null;
+              handle.classList.remove('is-grabbing');
+              this.tbodyEl.querySelectorAll('.pdg-row').forEach(r => {
+                r.classList.remove('pdg-row-dragging', 'pdg-drag-over-top', 'pdg-drag-over-bottom', 'pdg-drag-not-allowed');
+              });
+            });
+
+            tr.addEventListener('dragover', (e) => {
+              e.preventDefault();
+              if (this._draggedRowIndex === null) return;
+
+              if (this._draggedRowIndex === i) {
+                if (e.dataTransfer) e.dataTransfer.dropEffect = 'none';
+                tr.classList.add('pdg-drag-not-allowed');
+                tr.classList.remove('pdg-drag-over-top', 'pdg-drag-over-bottom');
+                return;
+              }
+
+              if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+              tr.classList.remove('pdg-drag-not-allowed');
+
+              const rect = tr.getBoundingClientRect();
+              const relY = e.clientY - rect.top;
+              if (relY < rect.height / 2) {
+                tr.classList.add('pdg-drag-over-top');
+                tr.classList.remove('pdg-drag-over-bottom');
+              } else {
+                tr.classList.add('pdg-drag-over-bottom');
+                tr.classList.remove('pdg-drag-over-top');
+              }
+            });
+
+            tr.addEventListener('dragleave', () => {
+              tr.classList.remove('pdg-drag-over-top', 'pdg-drag-over-bottom', 'pdg-drag-not-allowed');
+            });
+
+            tr.addEventListener('drop', (e) => {
+              e.preventDefault();
+              const fromIdx = this._draggedRowIndex;
+              tr.classList.remove('pdg-drag-over-top', 'pdg-drag-over-bottom', 'pdg-drag-not-allowed', 'pdg-row-dragging');
+
+              if (fromIdx != null && fromIdx !== i) {
+                const rect = tr.getBoundingClientRect();
+                const relY = e.clientY - rect.top;
+                let targetIdx = relY < rect.height / 2 ? i : i + 1;
+                if (fromIdx < targetIdx) targetIdx--;
+                targetIdx = Math.max(0, Math.min(targetIdx, displayRows.length - 1));
+
+                if (targetIdx !== fromIdx) {
+                  this.reorderRow(fromIdx, targetIdx, displayRows);
+                }
+              }
+              this._draggedRowIndex = null;
+            });
+
+            handle.addEventListener('keydown', (e) => {
+              if (e.key === 'ArrowUp' && i > 0) {
+                e.preventDefault();
+                this.reorderRow(i, i - 1, displayRows);
+              } else if (e.key === 'ArrowDown' && i < displayRows.length - 1) {
+                e.preventDefault();
+                this.reorderRow(i, i + 1, displayRows);
+              }
+            });
+
+            tdDrag.appendChild(handle);
+            tr.appendChild(tdDrag);
+          }
+
+          if (this._options.selectable) {
+            const tdSel = createElement('td', 'pdg-td');
+            const chk = createElement('input', 'pdg-checkbox', { type: 'checkbox' });
+            chk.checked = isSelected;
+            chk.addEventListener('change', () => {
+              if (!this._options.multiSelect) {
+                this._selectedIds.clear();
+                if (chk.checked) this._selectedIds.add(rowId);
+              } else {
+                if (chk.checked) this._selectedIds.add(rowId);
+                else this._selectedIds.delete(rowId);
+              }
+              this.dispatchEvent(new CustomEvent('pdg:select', { detail: { selectedIds: Array.from(this._selectedIds) } }));
+              this.render();
+            });
+            tdSel.appendChild(chk);
+            tr.appendChild(tdSel);
+          }
+
+          if (this._options.expandable) {
+            const tdExp = createElement('td', 'pdg-td');
+            const btnExp = createElement('button', 'pdg-btn', { type: 'button' });
+            btnExp.style.padding = '0.2rem 0.45rem';
+            btnExp.style.fontSize = '0.75rem';
+            btnExp.textContent = isExpanded ? '▼' : '▶';
+            btnExp.addEventListener('click', () => {
+              if (isExpanded) this._expandedIds.delete(rowId);
+              else this._expandedIds.add(rowId);
+              this.dispatchEvent(new CustomEvent('pdg:row-expand', { detail: { rowId, expanded: !isExpanded } }));
+              this.renderBody();
+            });
+            tdExp.appendChild(btnExp);
+            tr.appendChild(tdExp);
+          }
+
+          // Row Context Menu via Right-Click
+          if (this._options.contextMenu !== false) {
+            tr.addEventListener('contextmenu', (e) => {
+              e.preventDefault();
+              this.openRowContextMenu(row, e.clientX, e.clientY);
+            });
+          }
+
+          let renderedTdIdx = 0;
+          for (const col of this._columns) {
+            if (!this.isColumnVisible(col)) continue;
+            const isSticky = Boolean(this._options.stickyFirstColumn && renderedTdIdx === 0);
+            renderedTdIdx++;
+
+            const td = createElement('td', `pdg-td ${isSticky ? 'pdg-col-sticky' : ''}`);
+            const val = resolveValue(row, col.field);
+
+            if (this._options.editable && col.editable) {
+              const span = createElement('span', 'pdg-cell-editable');
+              if (col.renderer) {
+                const rendered = col.renderer(val, row, i);
+                if (typeof rendered === 'string') span.innerHTML = rendered;
+                else span.appendChild(rendered);
+              } else {
+                span.innerHTML = col.formatter ? col.formatter(val, row) : (val == null ? '—' : String(val));
+              }
+              span.title = 'Click to edit value';
+              span.addEventListener('click', () => {
+                const current = row[col.field] != null ? row[col.field] : '';
+                const updated = prompt(`Edit ${col.header}:`, current);
+                if (updated !== null && updated !== String(current)) {
+                  row[col.field] = isNaN(Number(updated)) || updated.trim() === '' ? updated : Number(updated);
+                  
+                  // Trigger recalculation if any calculated dependencies exist
+                  this.recalculateFormulas();
+
+                  this.dispatchEvent(new CustomEvent('pdg:edit-save', {
+                    detail: { rowId, columnId: col.id, oldValue: current, newValue: row[col.field] }
+                  }));
+                  this.render();
+                }
+              });
+              td.appendChild(span);
+            } else if (col.renderer) {
+              const rendered = col.renderer(val, row, i);
+              if (typeof rendered === 'string') td.innerHTML = rendered;
+              else td.appendChild(rendered);
+            } else if (col.formatter) {
+              td.innerHTML = col.formatter(val, row);
+            } else {
+              td.textContent = val == null ? '—' : String(val);
+            }
+            tr.appendChild(td);
+          }
+
+          if (this._options.deletable || this._options.contextMenu !== false) {
+            const isStickyActions = Boolean(this._options.stickyActions);
+            const tdDel = createElement('td', `pdg-td ${isStickyActions ? 'pdg-col-sticky-right' : ''}`);
+            tdDel.style.display = 'flex';
+            tdDel.style.alignItems = 'center';
+            tdDel.style.gap = '0.35rem';
+
+            // Row Action/Context Menu Button (⋮)
+            if (this._options.contextMenu !== false) {
+              const btnRowMenu = createElement('button', 'pdg-row-action-btn', {
+                type: 'button',
+                title: 'Row actions',
+                'aria-label': 'Row actions'
+              });
+              btnRowMenu.innerHTML = '⋮';
+              btnRowMenu.addEventListener('click', (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                const rect = btnRowMenu.getBoundingClientRect();
+                this.openRowContextMenu(row, rect.left, rect.bottom + 4);
+              });
+              tdDel.appendChild(btnRowMenu);
+            }
+
+            if (this._options.deletable) {
+              const btnDel = createElement('button', 'pdg-btn', { type: 'button' });
+              btnDel.textContent = '🗑';
+              btnDel.title = 'Delete record';
+              btnDel.style.color = '#ef4444';
+              btnDel.style.borderColor = '#fca5a5';
+              btnDel.style.padding = '0.2rem 0.45rem';
+              btnDel.addEventListener('click', () => {
+                this._rows = this._rows.filter(r => r[this._options.rowIdKey || 'id'] !== rowId);
+                this._selectedIds.delete(rowId);
+                this.dispatchEvent(new CustomEvent('pdg:delete', { detail: { rowId } }));
+                this.render();
+              });
+              tdDel.appendChild(btnDel);
+            }
+            tr.appendChild(tdDel);
+          }
+
+          this.tbodyEl.appendChild(tr);
+
+          if (this._options.expandable && isExpanded && this._options.rowDetailRenderer) {
+            const trDetail = createElement('tr', 'pdg-detail-row');
+            const totalCols = this._columns.length + (this._options.selectable ? 1 : 0) + (this._options.expandable ? 1 : 0) + (this._options.rowReordering ? 1 : 0) + (this._options.deletable ? 1 : 0);
+            const tdDetail = createElement('td', 'pdg-detail-td', { colspan: totalCols });
+            tdDetail.style.padding = '0.75rem 1.25rem';
+            tdDetail.style.backgroundColor = 'var(--pdg-bg-subtle)';
+            tdDetail.style.borderBottom = '1px solid var(--pdg-border-color)';
+            const content = this._options.rowDetailRenderer(row);
+            if (typeof content === 'string') tdDetail.innerHTML = content;
+            else tdDetail.appendChild(content);
+            trDetail.appendChild(tdDetail);
+            this.tbodyEl.appendChild(trDetail);
+          }
+        });
+      }
+
+      renderFooter() {
+        removeAllChildren(this.footerEl);
+        if (this._options.pagination === false) {
+          this.footerEl.style.display = 'none';
+          return;
+        }
+        this.footerEl.style.display = 'flex';
+
+        const info = createElement('div', 'pdg-pagination-info');
+        const total = this._pagination.totalRows;
+        const start = total > 0 ? this._pagination.pageIndex * this._pagination.pageSize + 1 : 0;
+        const end = Math.min((this._pagination.pageIndex + 1) * this._pagination.pageSize, total);
+        info.textContent = `Showing ${start}–${end} of ${total} entries (Page ${this._pagination.pageIndex + 1} of ${this._pagination.totalPages})`;
+
+        const controls = createElement('div', 'pdg-pagination-controls');
+
+        // First Page Button
+        const firstBtn = createElement('button', 'pdg-btn pdg-btn-sm', { type: 'button', disabled: this._pagination.pageIndex === 0 });
+        firstBtn.textContent = '«';
+        firstBtn.title = 'First Page';
+        firstBtn.addEventListener('click', () => {
+          this._pagination.pageIndex = 0;
+          this.render();
+        });
+        controls.appendChild(firstBtn);
+
+        // Previous Page Button
+        const prevBtn = createElement('button', 'pdg-btn pdg-btn-sm', { type: 'button', disabled: this._pagination.pageIndex === 0 });
+        prevBtn.textContent = '‹ Prev';
+        prevBtn.addEventListener('click', () => {
+          if (this._pagination.pageIndex > 0) {
+            this._pagination.pageIndex--;
+            this.render();
+          }
+        });
+        controls.appendChild(prevBtn);
+
+        // Numbered Page Buttons with Ellipsis Windowing
+        const totalPages = this._pagination.totalPages;
+        const curPage = this._pagination.pageIndex;
+        const pageWindow = 2;
+
+        for (let p = 0; p < totalPages; p++) {
+          if (p === 0 || p === totalPages - 1 || (p >= curPage - pageWindow && p <= curPage + pageWindow)) {
+            const pBtn = createElement('button', `pdg-btn pdg-btn-sm ${p === curPage ? 'pdg-btn-active' : ''}`, { type: 'button' });
+            pBtn.textContent = String(p + 1);
+            pBtn.addEventListener('click', () => {
+              this._pagination.pageIndex = p;
+              this.render();
+            });
+            controls.appendChild(pBtn);
+          } else if ((p === curPage - pageWindow - 1 && p > 0) || (p === curPage + pageWindow + 1 && p < totalPages - 1)) {
+            const ellipsis = createElement('span');
+            ellipsis.textContent = '…';
+            ellipsis.style.padding = '0 0.35rem';
+            ellipsis.style.color = 'var(--pdg-text-muted)';
+            controls.appendChild(ellipsis);
+          }
+        }
+
+        // Next Page Button
+        const nextBtn = createElement('button', 'pdg-btn pdg-btn-sm', { type: 'button', disabled: this._pagination.pageIndex >= this._pagination.totalPages - 1 });
+        nextBtn.textContent = 'Next ›';
+        nextBtn.addEventListener('click', () => {
+          if (this._pagination.pageIndex < this._pagination.totalPages - 1) {
+            this._pagination.pageIndex++;
+            this.render();
+          }
+        });
+        controls.appendChild(nextBtn);
+
+        // Last Page Button
+        const lastBtn = createElement('button', 'pdg-btn pdg-btn-sm', { type: 'button', disabled: this._pagination.pageIndex >= this._pagination.totalPages - 1 });
+        lastBtn.textContent = '»';
+        lastBtn.title = 'Last Page';
+        lastBtn.addEventListener('click', () => {
+          this._pagination.pageIndex = this._pagination.totalPages - 1;
+          this.render();
+        });
+        controls.appendChild(lastBtn);
+
+        this.footerEl.appendChild(info);
+        this.footerEl.appendChild(controls);
+      }
+    }
+
+    if (!window.customElements.get('pro-data-grid')) {
+      window.customElements.define('pro-data-grid', ProDataGrid);
+    }
+
+    // --- Mock Dataset (16 items) ---
+    const initialDataset = [
+      { id: 'REC-101', client: 'Acme Corporation', contact: 'Alice Smith', tier: 'Enterprise', arr: 125000, status: 'Active', region: 'North America', joinDate: '2021-04-12' },
+      { id: 'REC-102', client: 'Globex Industries', contact: 'Bob Jones', tier: 'Growth', arr: 48000, status: 'Active', region: 'Europe', joinDate: '2022-01-19' },
+      { id: 'REC-103', client: 'Soylent Health', contact: 'Charlie Day', tier: 'Starter', arr: 14000, status: 'Trial', region: 'North America', joinDate: '2023-08-01' },
+      { id: 'REC-104', client: 'Initech Software', contact: 'Diana Prince', tier: 'Enterprise', arr: 210000, status: 'Active', region: 'Asia-Pacific', joinDate: '2020-11-05' },
+      { id: 'REC-105', client: 'Umbrella Pharma', contact: 'Ethan Hunt', tier: 'Growth', arr: 76000, status: 'Overdue', region: 'Europe', joinDate: '2021-09-15' },
+      { id: 'REC-106', client: 'Stark Industries', contact: 'Fiona Gallagher', tier: 'Enterprise', arr: 450000, status: 'Active', region: 'North America', joinDate: '2019-03-22' },
+      { id: 'REC-107', client: 'Wayne Enterprises', contact: 'George Clark', tier: 'Enterprise', arr: 380000, status: 'Active', region: 'North America', joinDate: '2020-02-14' },
+      { id: 'REC-108', client: 'Cyberdyne Systems', contact: 'Hannah Abbott', tier: 'Growth', arr: 62000, status: 'Trial', region: 'Europe', joinDate: '2023-10-10' },
+      { id: 'REC-109', client: 'Massive Dynamic', contact: 'Ian Malcolm', tier: 'Starter', arr: 18000, status: 'Active', region: 'North America', joinDate: '2022-06-30' },
+      { id: 'REC-110', client: 'Hooli Tech', contact: 'Julia Roberts', tier: 'Growth', arr: 92000, status: 'Active', region: 'North America', joinDate: '2021-12-01' },
+      { id: 'REC-111', client: 'Pied Piper', contact: 'Kevin Bacon', tier: 'Starter', arr: 25000, status: 'Trial', region: 'North America', joinDate: '2023-04-18' },
+      { id: 'REC-112', client: 'Dunder Mifflin', contact: 'Laura Croft', tier: 'Starter', arr: 12000, status: 'Overdue', region: 'North America', joinDate: '2022-07-04' },
+      { id: 'REC-113', client: 'CyberLink Global', contact: 'Michael Scott', tier: 'Growth', arr: 68000, status: 'Active', region: 'Europe', joinDate: '2021-10-25' },
+      { id: 'REC-114', client: 'Aperture Science', contact: 'Gladys Port', tier: 'Enterprise', arr: 310000, status: 'Active', region: 'North America', joinDate: '2020-09-14' },
+      { id: 'REC-115', client: 'Bluth Development', contact: 'George Oscar', tier: 'Starter', arr: 19000, status: 'Trial', region: 'North America', joinDate: '2023-11-20' },
+      { id: 'REC-116', client: 'Weyland-Yutani', contact: 'Ellen Ripley', tier: 'Enterprise', arr: 520000, status: 'Active', region: 'Asia-Pacific', joinDate: '2018-05-30' }
+    ];
+
+    const grid = document.getElementById('liveGrid');
+
+    // Column Definitions
+    const columns = [
+      { id: 'client', header: 'Client Account', field: 'client', sortable: true, editable: true, width: '200px' },
+      { id: 'contact', header: 'Primary Contact', field: 'contact', sortable: true, editable: true, width: '160px' },
+      { id: 'tier', header: 'Subscription Tier', field: 'tier', sortable: true, editable: true, width: '140px' },
+      {
+        id: 'arr',
+        header: 'Annual Revenue',
+        field: 'arr',
+        sortable: true,
+        editable: true,
+        width: '150px',
+        aggregation: 'sum',
+        formatter: (val) => `$${Number(val || 0).toLocaleString()}`
+      },
+      { id: 'status', header: 'Status', field: 'status', sortable: true, editable: true, width: '120px' },
+      { id: 'region', header: 'Region', field: 'region', sortable: true, editable: true, width: '150px' },
+      { id: 'joinDate', header: 'Member Since', field: 'joinDate', sortable: true, width: '130px' }
+    ];
+
+    // Payroll Calculated Columns Configuration
+    const payrollColumns = [
+      { id: 'empId', header: 'Emp ID', field: 'empId', sortable: true, width: '110px' },
+      { id: 'name', header: 'Employee Name', field: 'name', sortable: true, width: '180px' },
+      { id: 'department', header: 'Department', field: 'department', sortable: true, width: '140px' },
+      { id: 'role', header: 'Position / Role', field: 'role', sortable: true, width: '160px' },
+      {
+        id: 'baseSalary',
+        header: 'Base Salary',
+        field: 'baseSalary',
+        sortable: true,
+        editable: true,
+        width: '140px',
+        aggregation: 'sum',
+        formatter: (val) => `<span style="font-weight:600; color:#2563eb;">$${Number(val || 0).toLocaleString()}</span>`
+      },
+      {
+        id: 'bonusPct',
+        header: 'Bonus %',
+        field: 'bonusPct',
+        sortable: true,
+        editable: true,
+        width: '110px',
+        formatter: (val) => `${val}%`
+      },
+      {
+        id: 'otHours',
+        header: 'OT Hours',
+        field: 'otHours',
+        sortable: true,
+        editable: true,
+        width: '110px',
+        formatter: (val) => `${val} hrs`
+      },
+      {
+        id: 'bonusAmount',
+        header: 'Bonus Pay',
+        field: 'bonusAmount',
+        sortable: true,
+        width: '130px',
+        calculate: (row) => ((Number(row.baseSalary) || 0) * ((Number(row.bonusPct) || 0) / 100)),
+        formatter: (val) => `$${Number(val || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+      },
+      {
+        id: 'overtimePay',
+        header: 'Overtime Pay',
+        field: 'overtimePay',
+        sortable: true,
+        width: '130px',
+        calculate: (row) => {
+          const hourly = (Number(row.baseSalary) || 0) / 2080;
+          return hourly * 1.5 * (Number(row.otHours) || 0);
+        },
+        formatter: (val) => `$${Number(val || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+      },
+      {
+        id: 'grossPay',
+        header: 'Gross Total',
+        field: 'grossPay',
+        sortable: true,
+        width: '140px',
+        aggregation: 'sum',
+        calculate: (row) => {
+          const bonus = (Number(row.baseSalary) || 0) * ((Number(row.bonusPct) || 0) / 100);
+          const ot = ((Number(row.baseSalary) || 0) / 2080) * 1.5 * (Number(row.otHours) || 0);
+          return (Number(row.baseSalary) || 0) + bonus + ot;
+        },
+        formatter: (val) => `<strong>$${Number(val || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>`
+      },
+      {
+        id: 'taxWithholding',
+        header: 'Tax Deductions',
+        field: 'taxWithholding',
+        sortable: true,
+        width: '140px',
+        calculate: (row) => {
+          const bonus = (Number(row.baseSalary) || 0) * ((Number(row.bonusPct) || 0) / 100);
+          const ot = ((Number(row.baseSalary) || 0) / 2080) * 1.5 * (Number(row.otHours) || 0);
+          const gross = (Number(row.baseSalary) || 0) + bonus + ot;
+          return gross * 0.245;
+        },
+        formatter: (val) => `<span style="color:#ef4444;">-$${Number(val || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>`
+      },
+      {
+        id: 'netPay',
+        header: 'Net Take-Home',
+        field: 'netPay',
+        sortable: true,
+        width: '160px',
+        calculate: (row) => {
+          const bonus = (Number(row.baseSalary) || 0) * ((Number(row.bonusPct) || 0) / 100);
+          const ot = ((Number(row.baseSalary) || 0) / 2080) * 1.5 * (Number(row.otHours) || 0);
+          const gross = (Number(row.baseSalary) || 0) + bonus + ot;
+          const tax = gross * 0.245;
+          const k401 = (Number(row.baseSalary) || 0) * ((Number(row.k401kPct) || 0) / 100);
+          return gross - tax - k401;
+        },
+        formatter: (val) => `<strong style="color:#10b981; font-size:0.95rem;">$${Number(val || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>`
+      }
+    ];
+
+    const defaultPayrollData = [
+      { id: 'EMP-1001', empId: 'EMP-1001', name: 'Alice Freeman', department: 'Engineering', role: 'Staff UI Architect', baseSalary: 165000, bonusPct: 15, otHours: 4, k401kPct: 8 },
+      { id: 'EMP-1002', empId: 'EMP-1002', name: 'Bob Henderson', department: 'Cloud Infra', role: 'DevOps Lead', baseSalary: 152000, bonusPct: 12, otHours: 12, k401kPct: 6 },
+      { id: 'EMP-1003', empId: 'EMP-1003', name: 'Clara Oswald', department: 'Product Design', role: 'Principal Designer', baseSalary: 148000, bonusPct: 10, otHours: 0, k401kPct: 10 },
+      { id: 'EMP-1004', empId: 'EMP-1004', name: 'David Kim', department: 'Engineering', role: 'Senior React Engineer', baseSalary: 135000, bonusPct: 8, otHours: 8, k401kPct: 5 },
+      { id: 'EMP-1005', empId: 'EMP-1005', name: 'Elena Rostova', department: 'Product Design', role: 'UX Lead', baseSalary: 128000, bonusPct: 10, otHours: 2, k401kPct: 7 },
+      { id: 'EMP-1006', empId: 'EMP-1006', name: 'Frank Zhang', department: 'Sales & Growth', role: 'VP Enterprise Sales', baseSalary: 195000, bonusPct: 25, otHours: 0, k401kPct: 9 },
+      { id: 'EMP-1007', empId: 'EMP-1007', name: 'Grace Hopper', department: 'Cloud Infra', role: 'Principal SRE', baseSalary: 178000, bonusPct: 15, otHours: 16, k401kPct: 8 },
+      { id: 'EMP-1008', empId: 'EMP-1008', name: 'Henry Ford', department: 'Operations', role: 'Operations Director', baseSalary: 142000, bonusPct: 12, otHours: 6, k401kPct: 6 },
+      { id: 'EMP-1009', empId: 'EMP-1009', name: 'Iris West', department: 'Sales & Growth', role: 'Senior Account Exec', baseSalary: 118000, bonusPct: 20, otHours: 5, k401kPct: 5 },
+      { id: 'EMP-1010', empId: 'EMP-1010', name: 'James Wilson', department: 'Operations', role: 'Workplace Manager', baseSalary: 105000, bonusPct: 6, otHours: 10, k401kPct: 4 },
+      { id: 'EMP-1011', empId: 'EMP-1011', name: 'Katherine Pierce', department: 'Engineering', role: 'Security Architect', baseSalary: 168000, bonusPct: 14, otHours: 6, k401kPct: 8 },
+      { id: 'EMP-1012', empId: 'EMP-1012', name: 'Liam Gallagher', department: 'Product Design', role: 'Motion Designer', baseSalary: 112000, bonusPct: 8, otHours: 0, k401kPct: 5 }
+    ];
+
+    // Core Grid Fleet Columns Configuration
+    const fleetColumns = [
+      { id: 'vin', header: 'VIN', field: 'vin', sortable: true, editable: true, width: '160px' },
+      { id: 'model', header: 'Model', field: 'model', sortable: true, editable: true, width: '160px' },
+      {
+        id: 'status',
+        header: 'Status',
+        field: 'status',
+        sortable: true,
+        editable: true,
+        width: '140px',
+        renderer: (val) => {
+          const badge = document.createElement('span');
+          badge.textContent = val || 'Active';
+          badge.style.padding = '0.2rem 0.5rem';
+          badge.style.borderRadius = '9999px';
+          badge.style.fontSize = '0.75rem';
+          badge.style.fontWeight = '600';
+          badge.style.background = val === 'Active' ? '#dcfce7' : '#fee2e2';
+          badge.style.color = val === 'Active' ? '#15803d' : '#b91c1c';
+          return badge;
+        }
+      },
+      {
+        id: 'efficiency',
+        header: 'Efficiency',
+        field: 'kwhPerMile',
+        sortable: true,
+        editable: true,
+        width: '150px',
+        formatter: (val) => `${val} kWh/mi`
+      },
+      {
+        id: 'batteryHealth',
+        header: 'Battery Health',
+        field: 'batteryHealth',
+        sortable: true,
+        editable: true,
+        width: '140px',
+        formatter: (val) => `${val}%`
+      },
+      {
+        id: 'lastPing',
+        header: 'Telemetry Ping',
+        field: 'lastPing',
+        sortable: true,
+        width: '150px'
+      }
+    ];
+
+    const defaultFleetData = [
+      { id: 1, vin: '1HGCR2F83HA', model: 'Model 3 LR', status: 'Active', kwhPerMile: 0.24, batteryHealth: 98, lastPing: '2 mins ago' },
+      { id: 2, vin: '2HGCR2F84HB', model: 'Ioniq 5 AWD', status: 'Maintenance', kwhPerMile: 0.29, batteryHealth: 92, lastPing: '15 mins ago' },
+      { id: 3, vin: '3HGCR2F85HC', model: 'Taycan 4S', status: 'Active', kwhPerMile: 0.36, batteryHealth: 96, lastPing: '1 min ago' },
+      { id: 4, vin: '4HGCR2F86HD', model: 'Rivian R1T', status: 'Active', kwhPerMile: 0.48, batteryHealth: 94, lastPing: 'Just now' },
+      { id: 5, vin: '5HGCR2F87HE', model: 'Lucid Air GT', status: 'Active', kwhPerMile: 0.26, batteryHealth: 99, lastPing: '5 mins ago' },
+      { id: 6, vin: '6HGCR2F88HF', model: 'Polestar 2', status: 'Active', kwhPerMile: 0.31, batteryHealth: 95, lastPing: '8 mins ago' },
+      { id: 7, vin: '7HGCR2F89HG', model: 'BMW i4 M50', status: 'Maintenance', kwhPerMile: 0.34, batteryHealth: 89, lastPing: '1 hour ago' },
+      { id: 8, vin: '8HGCR2F90HH', model: 'Audi e-tron GT', status: 'Active', kwhPerMile: 0.37, batteryHealth: 97, lastPing: '12 mins ago' },
+      { id: 9, vin: '9HGCR2F91HI', model: 'Mercedes EQE', status: 'Active', kwhPerMile: 0.32, batteryHealth: 96, lastPing: '25 mins ago' },
+      { id: 10, vin: '0HGCR2F92HJ', model: 'Kia EV6 GT', status: 'Active', kwhPerMile: 0.30, batteryHealth: 98, lastPing: '7 mins ago' }
+    ];
+
+    // Detail Renderer
+    const detailRenderer = (row) => {
+      const div = document.createElement('div');
+      div.style.cssText = 'padding: 0.75rem 1rem; background: #eff6ff; border-left: 3px solid #2563eb; border-radius: 0.25rem;';
+      if (row.vin) {
+        div.innerHTML = `
+          <div style="font-weight:700; color:#1e40af; margin-bottom:0.25rem;">Diagnostic Telemetry: ${row.model} (VIN: ${row.vin})</div>
+          <div style="font-size:0.8125rem; color:#475569;">Fleet Status: <strong>${row.status}</strong> &bull; Energy Efficiency: <strong>${row.kwhPerMile} kWh/mi</strong> &bull; Battery State of Health: <strong>${row.batteryHealth || 98}%</strong> &bull; Last Live Telemetry Ping: <strong>${row.lastPing || '2 mins ago'}</strong></div>
+        `;
+      } else if (row.client) {
+        div.innerHTML = `
+          <div style="font-weight:700; color:#1e40af; margin-bottom:0.25rem;">Account Dossier: ${row.client} (${row.id})</div>
+          <div style="font-size:0.8125rem; color:#475569;">Primary Representative: <strong>${row.contact}</strong> &bull; Region: <strong>${row.region}</strong> &bull; Contracted ARR: <strong>$${Number(row.arr).toLocaleString()}</strong> &bull; Client Lifecycle: <strong>${row.status}</strong></div>
+        `;
+      } else {
+        div.innerHTML = `
+          <div style="font-weight:700; color:#1e40af; margin-bottom:0.25rem;">Payroll Summary: ${row.name} (${row.empId})</div>
+          <div style="font-size:0.8125rem; color:#475569;">Role: <strong>${row.role}</strong> &bull; Department: <strong>${row.department}</strong> &bull; Base Salary: <strong>$${Number(row.baseSalary).toLocaleString()}</strong> &bull; Net Take-Home: <strong>$${Number(row.netPay || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></div>
+        `;
+      }
+      return div;
+    };
+
+    // Apply Settings
+    function applySettings() {
+      const model = document.getElementById('cfgDataModel').value;
+      const isPayroll = model === 'payroll';
+
+      const settings = {
+        model,
+        pagination: document.getElementById('cfgPagination').checked,
+        search: document.getElementById('cfgSearch').checked,
+        sorting: document.getElementById('cfgSorting').checked,
+        multiSort: document.getElementById('cfgMultiSort').checked,
+        advancedFilter: document.getElementById('cfgAdvancedFilter').checked,
+        filterPresets: document.getElementById('cfgFilterPresets').checked,
+        density: document.getElementById('cfgDensity').value,
+        selectable: document.getElementById('cfgSelectable').checked,
+        multiSelect: document.getElementById('cfgMultiSelect').checked,
+        editable: document.getElementById('cfgEditable').checked,
+        deletable: document.getElementById('cfgDeletable').checked,
+        rowReordering: document.getElementById('cfgRowReorder').checked,
+        columnReordering: document.getElementById('cfgColumnReorder').checked,
+        columnResizing: document.getElementById('cfgColResize').checked,
+        footerAggregations: document.getElementById('cfgFooterAgg').checked,
+        statePersistence: document.getElementById('cfgStatePersistence').checked,
+        headerMenu: document.getElementById('cfgHeaderMenu').checked,
+        contextMenu: document.getElementById('cfgContextMenu').checked,
+        stickyFirstColumn: document.getElementById('cfgStickyFirst').checked,
+        stickyActions: document.getElementById('cfgStickyRight').checked,
+        expandable: document.getElementById('cfgExpandable').checked,
+        serverSide: document.getElementById('cfgServerSide').checked,
+        theme: document.getElementById('cfgTheme').value
+      };
+
+      if (settings.theme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+
+      // Configure Presets based on selected model
+      if (model === 'payroll') {
+        grid._filterPresets = [
+          {
+            id: 'preset-high-comp',
+            name: '⭐ Base > $150k',
+            expression: { id: 'root', logic: 'AND', rules: [{ id: 'p1', field: 'baseSalary', operator: 'greaterThan', value: '150000' }] }
+          },
+          {
+            id: 'preset-eng',
+            name: '💻 Engineering Team',
+            expression: { id: 'root', logic: 'AND', rules: [{ id: 'p2', field: 'department', operator: 'equals', value: 'Engineering' }] }
+          },
+          {
+            id: 'preset-ot',
+            name: '⏱️ OT Hours > 5',
+            expression: { id: 'root', logic: 'AND', rules: [{ id: 'p3', field: 'otHours', operator: 'greaterThan', value: '5' }] }
+          }
+        ];
+        grid.columns = payrollColumns;
+        grid.rows = JSON.parse(JSON.stringify(defaultPayrollData));
+      } else if (model === 'fleet') {
+        grid._filterPresets = [
+          {
+            id: 'preset-fleet-active',
+            name: '🚗 Active Fleet',
+            expression: { id: 'root', logic: 'AND', rules: [{ id: 'f1', field: 'status', operator: 'equals', value: 'Active' }] }
+          },
+          {
+            id: 'preset-fleet-high-eff',
+            name: '⚡ < 0.30 kWh/mi',
+            expression: { id: 'root', logic: 'AND', rules: [{ id: 'f2', field: 'kwhPerMile', operator: 'lessThan', value: '0.30' }] }
+          },
+          {
+            id: 'preset-fleet-maint',
+            name: '🛠️ Maintenance Due',
+            expression: { id: 'root', logic: 'AND', rules: [{ id: 'f3', field: 'status', operator: 'equals', value: 'Maintenance' }] }
+          }
+        ];
+        grid.columns = fleetColumns;
+        grid.rows = JSON.parse(JSON.stringify(defaultFleetData));
+      } else {
+        grid._filterPresets = [
+          {
+            id: 'preset-enterprise',
+            name: '⭐ Enterprise Clients',
+            expression: { id: 'root', logic: 'AND', rules: [{ id: 'r1', field: 'tier', operator: 'equals', value: 'Enterprise' }] }
+          },
+          {
+            id: 'preset-high-arr',
+            name: '💰 ARR > $100k',
+            expression: { id: 'root', logic: 'AND', rules: [{ id: 'r2', field: 'arr', operator: 'greaterThan', value: '100000' }] }
+          },
+          {
+            id: 'preset-active-na',
+            name: '🌐 Active North America',
+            expression: {
+              id: 'root',
+              logic: 'AND',
+              rules: [
+                { id: 'r3', field: 'status', operator: 'equals', value: 'Active' },
+                { id: 'r4', field: 'region', operator: 'contains', value: 'North America' }
+              ]
+            }
+          }
+        ];
+        grid.columns = columns;
+        grid.rows = JSON.parse(JSON.stringify(initialDataset));
+      }
+
+      grid.options = {
+        pagination: settings.pagination,
+        search: settings.search,
+        sorting: settings.sorting,
+        multiSort: settings.multiSort,
+        advancedFilter: settings.advancedFilter,
+        filterPresets: settings.filterPresets,
+        density: settings.density,
+        selectable: settings.selectable,
+        multiSelect: settings.selectable && settings.multiSelect,
+        editable: settings.editable,
+        deletable: settings.deletable,
+        rowReordering: settings.rowReordering,
+        columnReordering: settings.columnReordering,
+        headerMenu: settings.headerMenu,
+        contextMenu: settings.contextMenu,
+        stickyFirstColumn: settings.stickyFirstColumn,
+        stickyActions: settings.stickyActions,
+        columnResizing: settings.columnResizing,
+        footerAggregations: settings.footerAggregations,
+        statePersistence: settings.statePersistence,
+        expandable: settings.expandable,
+        rowDetailRenderer: settings.expandable ? detailRenderer : undefined
+      };
+
+      updateSummary(settings);
+    }
+
+    function updateSummary(s) {
+      const bar = document.getElementById('summaryBar');
+      const active = [];
+      const modelLabels = {
+        payroll: 'Calculated Payroll',
+        fleet: 'Core Grid (Fleet Telemetry)',
+        accounts: 'SaaS Accounts'
+      };
+      active.push(`Model: ${modelLabels[s.model] || 'SaaS Accounts'}`);
+      if (s.pagination) active.push('Pagination');
+      if (s.search) active.push('Global Search');
+      if (s.sorting) active.push(s.multiSort ? 'Multi-Sort' : 'Sorting');
+      if (s.advancedFilter) active.push('Advanced Filtering');
+      if (s.filterPresets) active.push('Filter Presets');
+      if (s.selectable) active.push(s.multiSelect ? 'Multi-Select' : 'Single-Select');
+      if (s.editable) active.push('Inline Reactive Edit');
+      if (s.deletable) active.push('Delete Action');
+      if (s.rowReordering) active.push('Row Drag & Drop');
+      if (s.columnReordering) active.push('Column Drag & Drop');
+      if (s.headerMenu) active.push('Header Menu (⋮)');
+      if (s.contextMenu) active.push('Row Context Menu (Right-Click)');
+      if (s.stickyFirstColumn) active.push('Sticky First Column');
+      if (s.stickyActions) active.push('Sticky Actions (Freeze Right)');
+      if (s.columnResizing) active.push('Interactive Column Resizing');
+      if (s.footerAggregations) active.push('Footer Aggregations (SUM/AVG)');
+      if (s.statePersistence) active.push('State Persistence (localStorage)');
+      if (s.expandable) active.push('Master-Detail');
+      if (s.serverSide) active.push('Simulated Server Mode');
+      active.push(`Density: ${s.density}`);
+
+      bar.innerHTML = `<span style="color:var(--text-muted);margin-right:0.35rem;">Active Features (${active.length}):</span>` +
+        active.map(a => `<span class="summary-badge">${a}</span>`).join(' ');
+    }
+
+    // Event Logging
+    const auditList = document.getElementById('auditList');
+    function logEvent(title, detail) {
+      const entry = document.createElement('div');
+      entry.innerHTML = `&gt; <strong>${title}</strong>: ${typeof detail === 'object' ? JSON.stringify(detail) : detail}`;
+      auditList.insertBefore(entry, auditList.firstChild);
+    }
+
+    grid.addEventListener('pdg:select', (e) => {
+      const count = e.detail.selectedIds.length;
+      logEvent('pdg:select', `${count} rows selected: [${e.detail.selectedIds.join(', ')}]`);
+      
+      const actionBar = document.getElementById('selectionActionBar');
+      const countLabel = document.getElementById('selectionCountLabel');
+      if (actionBar && countLabel) {
+        if (count > 0) {
+          actionBar.style.display = 'flex';
+          countLabel.textContent = `${count} row${count > 1 ? 's' : ''} selected`;
+        } else {
+          actionBar.style.display = 'none';
+        }
+      }
+    });
+
+    // Selection Action Bar Handlers
+    // Phase 2: Copy Selection as TSV (Tab-Separated Values for Excel/Sheets)
+    async function copySelectionTSV() {
+      const selected = grid.getSelectedRows();
+      if (selected.length === 0) {
+        alert('No rows selected to copy.');
+        return;
+      }
+      const visibleCols = grid.columns.filter(c => c.visible !== false && c.field);
+      const headerRow = visibleCols.map(c => c.header).join('\t');
+      const dataRows = selected.map(row => {
+        return visibleCols.map(col => {
+          let val = resolveValue(row, col.field);
+          if (val == null) return '';
+          return String(val).replace(/[\t\r\n]+/g, ' ');
+        }).join('\t');
+      });
+      const tsvContent = [headerRow, ...dataRows].join('\r\n');
+
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(tsvContent);
+        } else {
+          const ta = document.createElement('textarea');
+          ta.value = tsvContent;
+          ta.style.position = 'fixed';
+          ta.style.opacity = '0';
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+        }
+        const btn = document.getElementById('btnCopySelectionTSV');
+        if (btn) {
+          const original = btn.textContent;
+          btn.textContent = '✓ Copied TSV!';
+          btn.style.background = '#10b981';
+          setTimeout(() => {
+            btn.textContent = original;
+            btn.style.background = '#0ea5e9';
+          }, 2000);
+        }
+        logEvent('Copy TSV (Excel)', `Copied ${selected.length} rows to clipboard in tab-separated format`);
+      } catch (err) {
+        console.error('Failed to copy TSV:', err);
+        alert('Failed to copy to clipboard: ' + err.message);
+      }
+    }
+
+    document.getElementById('btnCopySelectionTSV')?.addEventListener('click', copySelectionTSV);
+
+    // Global keyboard shortcut: Ctrl+C / Cmd+C when rows are selected and not typing in input
+    document.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'c') {
+        const activeEl = document.activeElement;
+        const isInput = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.isContentEditable);
+        if (!isInput && grid.selectedIds.length > 0) {
+          e.preventDefault();
+          copySelectionTSV();
+        }
+      }
+    });
+
+    // Phase 2: Batch Edit Modal Handler
+    document.getElementById('btnBatchEditSelection')?.addEventListener('click', () => {
+      const selected = grid.getSelectedRows();
+      if (selected.length === 0) {
+        alert('No rows selected to edit.');
+        return;
+      }
+
+      // Filter columns that are editable
+      const editableCols = grid.columns.filter(c => c.field && c.editable !== false);
+      if (editableCols.length === 0) {
+        alert('No editable fields found in the current schema.');
+        return;
+      }
+
+      // Create modal backdrop & container
+      const backdrop = createElement('div', 'pdg-modal-backdrop');
+      const card = createElement('div', 'pdg-modal-card');
+
+      const title = createElement('div', 'pdg-modal-title');
+      title.innerHTML = `<span>✏️ Batch Edit (${selected.length} rows selected)</span>`;
+      card.appendChild(title);
+
+      const subtitle = createElement('div');
+      subtitle.style.fontSize = '0.8125rem';
+      subtitle.style.color = 'var(--pdg-text-muted)';
+      subtitle.style.marginBottom = '1rem';
+      subtitle.textContent = 'Select a column and enter the new value to apply across all chosen records.';
+      card.appendChild(subtitle);
+
+      // Select field dropdown
+      const fieldWrapper = createElement('div', 'pdg-modal-field');
+      const fieldLabel = createElement('label');
+      fieldLabel.style.display = 'block';
+      fieldLabel.style.fontSize = '0.75rem';
+      fieldLabel.style.fontWeight = '600';
+      fieldLabel.style.marginBottom = '0.25rem';
+      fieldLabel.textContent = 'Target Column';
+      fieldWrapper.appendChild(fieldLabel);
+
+      const selectCol = createElement('select', 'setting-select');
+      selectCol.style.width = '100%';
+      editableCols.forEach(c => {
+        const opt = createElement('option', '', { value: c.field });
+        opt.textContent = `${c.header} (${c.field})`;
+        selectCol.appendChild(opt);
+      });
+      fieldWrapper.appendChild(selectCol);
+      card.appendChild(fieldWrapper);
+
+      // Value input
+      const valWrapper = createElement('div', 'pdg-modal-field');
+      const valLabel = createElement('label');
+      valLabel.style.display = 'block';
+      valLabel.style.fontSize = '0.75rem';
+      valLabel.style.fontWeight = '600';
+      valLabel.style.marginBottom = '0.25rem';
+      valLabel.textContent = 'New Value';
+      valWrapper.appendChild(valLabel);
+
+      const inputVal = createElement('input', 'pdg-search-input', {
+        type: 'text',
+        placeholder: 'Enter new value for all selected rows...'
+      });
+      inputVal.style.width = '100%';
+      valWrapper.appendChild(inputVal);
+      card.appendChild(valWrapper);
+
+      // Action Buttons
+      const actions = createElement('div', 'pdg-modal-actions');
+      const btnCancel = createElement('button', 'pdg-btn', { type: 'button' });
+      btnCancel.textContent = 'Cancel';
+      btnCancel.addEventListener('click', () => {
+        document.body.removeChild(backdrop);
+      });
+
+      const btnApply = createElement('button', 'pdg-btn', {
+        type: 'button',
+        style: 'background:var(--pdg-primary);color:#fff;border-color:var(--pdg-primary);font-weight:600;'
+      });
+      btnApply.textContent = `Apply to ${selected.length} Rows`;
+
+      btnApply.addEventListener('click', () => {
+        const targetField = selectCol.value;
+        const rawVal = inputVal.value.trim();
+        if (!targetField) return;
+
+        const parsedVal = (rawVal !== '' && !isNaN(Number(rawVal))) ? Number(rawVal) : rawVal;
+
+        const idKey = grid.options.rowIdKey || 'id';
+        const selectedIdSet = new Set(selected.map(r => r[idKey]));
+
+        // Mutate grid._rows
+        let updatedCount = 0;
+        grid.rows.forEach(r => {
+          if (selectedIdSet.has(r[idKey])) {
+            r[targetField] = parsedVal;
+            updatedCount++;
+          }
+        });
+
+        // Recalculate dependent computed columns
+        grid.recalculateFormulas();
+
+        logEvent('Batch Edit Applied', `Updated ${targetField}="${parsedVal}" on ${updatedCount} records`);
+        document.body.removeChild(backdrop);
+        grid.render();
+      });
+
+      actions.appendChild(btnCancel);
+      actions.appendChild(btnApply);
+      card.appendChild(actions);
+
+      backdrop.appendChild(card);
+      document.body.appendChild(backdrop);
+      inputVal.focus();
+
+      // Close on backdrop click outside card
+      backdrop.addEventListener('click', (e) => {
+        if (e.target === backdrop) {
+          document.body.removeChild(backdrop);
+        }
+      });
+    });
+
+    document.getElementById('btnLogSelection')?.addEventListener('click', () => {
+      const selected = grid.getSelectedRows();
+      logEvent('getSelectedRows()', selected);
+      alert(`Retrieved ${selected.length} full data objects:\n` + JSON.stringify(selected, null, 2));
+    });
+
+    document.getElementById('btnExportSelection')?.addEventListener('click', () => {
+      const selected = grid.getSelectedRows();
+      if (selected.length === 0) {
+        alert('No rows selected to export.');
+        return;
+      }
+      exportToCSV(selected, grid.columns, `selected-rows-${Date.now()}.csv`);
+      logEvent('Export Selected CSV', `Exported ${selected.length} records`);
+    });
+
+    document.getElementById('btnDeleteSelection')?.addEventListener('click', () => {
+      const count = grid.selectedIds.length;
+      if (count === 0) return;
+      if (confirm(`Are you sure you want to delete all ${count} selected record(s)?`)) {
+        const deleted = grid.deleteSelectedRows();
+        logEvent('deleteSelectedRows()', `Deleted ${deleted} items`);
+      }
+    });
+
+    document.getElementById('btnClearSelection')?.addEventListener('click', () => {
+      grid.clearSelection();
+      logEvent('clearSelection()', 'Selection reset to empty');
+    });
+
+    // Copy Code Snippet Button Functionality
+    document.querySelectorAll('.btn-copy-code').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const container = btn.closest('.code-block-container');
+        const codeEl = container ? container.querySelector('code') : null;
+        if (!codeEl) return;
+        const codeText = codeEl.innerText || codeEl.textContent;
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(codeText);
+          } else {
+            const ta = document.createElement('textarea');
+            ta.value = codeText;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+          }
+          btn.textContent = '✓ Copied!';
+          btn.classList.add('copied');
+          setTimeout(() => {
+            btn.textContent = 'Copy';
+            btn.classList.remove('copied');
+          }, 2000);
+        } catch (err) {
+          console.error('Failed to copy snippet', err);
+          btn.textContent = 'Failed';
+          setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
+        }
+      });
+    });
+    grid.addEventListener('pdg:sort', (e) => logEvent('pdg:sort', e.detail.criteria));
+    grid.addEventListener('pdg:filter-change', (e) => logEvent('pdg:filter-change', `${e.detail.expression.rules.length} active rules (${e.detail.expression.logic})`));
+    grid.addEventListener('pdg:row-expand', (e) => logEvent('pdg:row-expand', `Row ${e.detail.rowId} expanded: ${e.detail.expanded}`));
+    grid.addEventListener('pdg:edit-save', (e) => logEvent('pdg:edit-save', `Saved ${e.detail.columnId} &rarr; "${e.detail.newValue}"`));
+    grid.addEventListener('pdg:delete', (e) => logEvent('pdg:delete', `Removed Row ${e.detail.rowId}`));
+    grid.addEventListener('pdg:row-reorder', (e) => logEvent('pdg:row-reorder', `Moved row from ${e.detail.fromIndex + 1} to ${e.detail.toIndex + 1}`));
+    grid.addEventListener('pdg:column-reorder', (e) => logEvent('pdg:column-reorder', `Moved column ${e.detail.column.header} to position ${e.detail.toIndex + 1}`));
+    grid.addEventListener('pdg:column-visibility', (e) => logEvent('pdg:column-visibility', `Column ${e.detail.columnId} visible: ${e.detail.visible}`));
+    grid.addEventListener('pdg:row-duplicate', (e) => logEvent('pdg:row-duplicate', `Duplicated ${e.detail.originalId} &rarr; ${e.detail.newId}`));
+
+    // Bind controls
+    document.querySelectorAll('.settings-panel input, .settings-panel select').forEach(el => {
+      el.addEventListener('change', applySettings);
+    });
+
+    document.getElementById('btnResetSettings').addEventListener('click', () => {
+      document.getElementById('cfgDataModel').value = 'accounts';
+      document.getElementById('cfgPagination').checked = true;
+      document.getElementById('cfgSearch').checked = true;
+      document.getElementById('cfgSorting').checked = true;
+      document.getElementById('cfgMultiSort').checked = false;
+      document.getElementById('cfgAdvancedFilter').checked = true;
+      document.getElementById('cfgFilterPresets').checked = true;
+      document.getElementById('cfgDensity').value = 'comfortable';
+      document.getElementById('cfgSelectable').checked = true;
+      document.getElementById('cfgMultiSelect').checked = true;
+      document.getElementById('cfgEditable').checked = true;
+      document.getElementById('cfgDeletable').checked = true;
+      document.getElementById('cfgColResize').checked = true;
+      document.getElementById('cfgFooterAgg').checked = true;
+      document.getElementById('cfgStatePersistence').checked = true;
+      document.getElementById('cfgRowReorder').checked = true;
+      document.getElementById('cfgColumnReorder').checked = true;
+      document.getElementById('cfgHeaderMenu').checked = true;
+      document.getElementById('cfgContextMenu').checked = true;
+      document.getElementById('cfgStickyFirst').checked = true;
+      document.getElementById('cfgStickyRight').checked = true;
+      document.getElementById('cfgExpandable').checked = true;
+      document.getElementById('cfgServerSide').checked = false;
+      document.getElementById('cfgTheme').value = 'light';
+      grid.clearAllFilters();
+      applySettings();
+      logEvent('Reset Defaults', 'All feature toggles restored');
+    });
+
+    // Initial setup
+    applySettings();
+  </script>
+</body>
+</html>

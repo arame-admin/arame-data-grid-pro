@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ProDataGrid - Full Features & Server-Side Demo</title>
+  <style>
+    :root, [data-theme="light"] {
+      --pdg-primary: #2563eb;
+      --pdg-primary-hover: #1d4ed8;
+      --pdg-danger: #ef4444;
+      --pdg-danger-hover: #dc2626;
+      --pdg-bg-surface: #ffffff;
+      --pdg-bg-subtle: #f8fafc;
+      --pdg-bg-hover: #f1f5f9;
+      --pdg-text-main: #0f172a;
+      --pdg-text-muted: #64748b;
+      --pdg-border-color: #e2e8f0;
+      --pdg-focus-ring: rgba(37, 99, 235, 0.35);
+      --pdg-radius: 0.5rem;
+      --pdg-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+      --pdg-cell-py: 0.75rem;
+      --pdg-cell-px: 1rem;
+    }
+
+    [data-theme="dark"] {
+      --pdg-primary: #3b82f6;
+      --pdg-primary-hover: #60a5fa;
+      --pdg-danger: #f87171;
+      --pdg-danger-hover: #ef4444;
+      --pdg-bg-surface: #0f172a;
+      --pdg-bg-subtle: #1e293b;
+      --pdg-bg-hover: #334155;
+      --pdg-text-main: #f8fafc;
+      --pdg-text-muted: #94a3b8;
+      --pdg-border-color: #334155;
+      --pdg-focus-ring: rgba(59, 130, 246, 0.4);
+      --pdg-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
+    }
+
+    body {
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      padding: 2rem;
+      background: #f8fafc;
+      color: #0f172a;
+    }
+    .demo-card {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.5rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: 9999px;
+    }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-warning { background: #fef9c3; color: #854d0e; }
+
+    pro-data-grid {
+      display: block;
+      color: var(--pdg-text-main);
+      background-color: var(--pdg-bg-surface);
+      border: 1px solid var(--pdg-border-color);
+      border-radius: var(--pdg-radius);
+      box-shadow: var(--pdg-shadow);
+      overflow: hidden;
+      box-sizing: border-box;
+      position: relative;
+    }
+
+    pro-data-grid * {
+      box-sizing: border-box;
+    }
+
+    pro-data-grid[density="compact"] {
+      --pdg-cell-py: 0.375rem;
+      --pdg-cell-px: 0.75rem;
+      font-size: 0.8125rem;
+    }
+    pro-data-grid[density="comfortable"] {
+      --pdg-cell-py: 0.75rem;
+      --pdg-cell-px: 1rem;
+      font-size: 0.875rem;
+    }
+
+    .pdg-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      background-color: var(--pdg-bg-subtle);
+      border-bottom: 1px solid var(--pdg-border-color);
+    }
+    .pdg-toolbar-left, .pdg-toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .pdg-search-input {
+      border: 1px solid var(--pdg-border-color);
+      background-color: var(--pdg-bg-surface);
+      color: var(--pdg-text-main);
+      border-radius: 0.375rem;
+      padding: 0.4rem 0.75rem;
+      font-size: 0.875rem;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .pdg-search-input:focus {
+      border-color: var(--pdg-primary);
+      box-shadow: 0 0 0 3px var(--pdg-focus-ring);
+    }
+    .pdg-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 500;
+      border-radius: 0.375rem;
+      padding: 0.4rem 0.75rem;
+      font-size: 0.875rem;
+      cursor: pointer;
+      background-color: var(--pdg-bg-surface);
+      border: 1px solid var(--pdg-border-color);
+      color: var(--pdg-text-main);
+      transition: all 0.15s ease;
+    }
+    .pdg-btn:hover { background-color: var(--pdg-bg-hover); }
+    .pdg-btn-sm { padding: 0.2rem 0.5rem; font-size: 0.75rem; }
+    .pdg-btn-danger { color: var(--pdg-danger); border-color: var(--pdg-danger); }
+    .pdg-btn-danger:hover { background-color: var(--pdg-danger); color: #ffffff; }
+
+    .pdg-table-container {
+      position: relative;
+      width: 100%;
+      overflow-x: auto;
+      overflow-y: auto;
+      max-height: 520px;
+    }
+    .pdg-table { width: 100%; border-collapse: collapse; text-align: left; }
+    .pdg-thead {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background-color: var(--pdg-bg-subtle);
+      border-bottom: 2px solid var(--pdg-border-color);
+    }
+    .pdg-th {
+      padding: var(--pdg-cell-py) var(--pdg-cell-px);
+      font-weight: 600;
+      color: var(--pdg-text-muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      user-select: none;
+      white-space: nowrap;
+    }
+    .pdg-th-inner { display: flex; align-items: center; gap: 0.5rem; }
+    .pdg-sort-icon { font-size: 0.75rem; color: var(--pdg-text-muted); }
+    .pdg-sortable { cursor: pointer; }
+    .pdg-sortable:hover { color: var(--pdg-text-main); }
+
+    .pdg-th-draggable { cursor: grab; }
+    .pdg-th-draggable:active { cursor: grabbing; }
+    .pdg-th.pdg-drag-over { border-left: 2px solid var(--pdg-primary) !important; }
+
+    .pdg-tbody .pdg-row {
+      border-bottom: 1px solid var(--pdg-border-color);
+      transition: background-color 0.15s ease;
+    }
+    .pdg-tbody .pdg-row:hover { background-color: var(--pdg-bg-hover); }
+    .pdg-tbody .pdg-row.pdg-row-selected { background-color: rgba(37, 99, 235, 0.08); }
+    .pdg-row.pdg-drag-over { border-top: 2px solid var(--pdg-primary) !important; }
+    .pdg-td { padding: var(--pdg-cell-py) var(--pdg-cell-px); color: var(--pdg-text-main); vertical-align: middle; }
+
+    .pdg-drag-handle { cursor: grab; user-select: none; color: var(--pdg-text-muted); font-size: 1rem; }
+    .pdg-drag-handle:active { cursor: grabbing; }
+
+    .pdg-cell-editable { cursor: pointer; }
+    .pdg-cell-editable:hover { text-decoration: underline dotted var(--pdg-primary); }
+    .pdg-edit-input {
+      width: 100%;
+      padding: 0.25rem 0.5rem;
+      font-size: inherit;
+      border: 1px solid var(--pdg-primary);
+      border-radius: 0.25rem;
+      outline: none;
+      box-shadow: 0 0 0 2px var(--pdg-focus-ring);
+    }
+
+    .pdg-refresh-indicator {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: var(--pdg-primary);
+      overflow: hidden;
+      z-index: 25;
+    }
+    .pdg-refresh-indicator::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 30%;
+      height: 100%;
+      background: #ffffff;
+      animation: pdg-indeterminate 1.4s infinite ease-in-out;
+    }
+    @keyframes pdg-indeterminate {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(350%); }
+    }
+
+    .pdg-footer {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1rem;
+      border-top: 1px solid var(--pdg-border-color);
+      background-color: var(--pdg-bg-subtle);
+      gap: 0.5rem;
+    }
+    .pdg-pagination-info { font-size: 0.875rem; color: var(--pdg-text-muted); }
+    .pdg-pagination-controls { display: flex; align-items: center; gap: 0.25rem; }
+
+    @media (max-width: 640px) {
+      pro-data-grid[mobile-layout="card"] .pdg-table,
+      pro-data-grid[mobile-layout="card"] .pdg-thead,
+      pro-data-grid[mobile-layout="card"] .pdg-tbody,
+      pro-data-grid[mobile-layout="card"] .pdg-th,
+      pro-data-grid[mobile-layout="card"] .pdg-td,
+      pro-data-grid[mobile-layout="card"] .pdg-row { display: block; }
+      pro-data-grid[mobile-layout="card"] .pdg-thead { display: none; }
+      pro-data-grid[mobile-layout="card"] .pdg-row {
+        margin: 0.75rem;
+        border: 1px solid var(--pdg-border-color);
+        border-radius: var(--pdg-radius);
+        padding: 0.5rem;
+        box-shadow: var(--pdg-shadow);
+      }
+      pro-data-grid[mobile-layout="card"] .pdg-td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px dashed var(--pdg-border-color);
+        padding: 0.5rem 0.25rem;
+      }
+      pro-data-grid[mobile-layout="card"] .pdg-td:last-child { border-bottom: none; }
+      pro-data-grid[mobile-layout="card"] .pdg-td::before {
+        content: attr(data-header);
+        font-weight: 600;
+        color: var(--pdg-text-muted);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="demo-card">
+    <h2>Enterprise Fleet Management (Server-Side DataLoader & Full Features)</h2>
+    <p style="color: #64748b; font-size: 0.875rem;">
+      Double-click to open locally in any browser (Zero server needed). 
+      Simulates remote API latency (350ms), typed AbortController cancellation on rapid keystrokes, 
+      search debouncing, column reordering (drag headers), row reordering (drag handle), inline cell editing (double-click Model/MRR), 
+      and row deletion.
+    </p>
+    <div id="status-logger" style="margin-bottom: 1rem; font-family: monospace; font-size: 0.8rem; color: #2563eb; background: #eff6ff; padding: 0.5rem; border-radius: 0.375rem;">
+      Ready.
+    </div>
+
+    <pro-data-grid id="fleet-grid" density="comfortable" mobile-layout="card"></pro-data-grid>
+
+    <!-- Usage Guide Section -->
+    <section style="margin-top: 2rem; background: #f8fafc; border: 1px solid var(--pdg-border-color); border-radius: var(--pdg-radius); padding: 1.25rem;" aria-label="Server-Side Data Loading Guide">
+      <h3 style="margin: 0 0 0.5rem 0; font-size: 1.1rem; font-weight: 700; color: var(--pdg-text-main); display: flex; align-items: center; gap: 0.5rem;">
+        <span>💡 How to Use Server-Side Data Loading</span>
+      </h3>
+      <p style="color: var(--pdg-text-muted); font-size: 0.85rem; margin-bottom: 1rem; line-height: 1.5;">
+        Offload query execution, filtering, multi-sort, and pagination to an API endpoint with request cancellation and loading spinners.
+      </p>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem;">
+        <div style="background: #ffffff; border: 1px solid var(--pdg-border-color); border-radius: 0.375rem; padding: 0.85rem;">
+          <h4 style="margin: 0 0 0.35rem 0; font-size: 0.85rem; font-weight: 700; color: var(--pdg-primary);">1. Define Server Loader Callback</h4>
+          <p style="margin: 0; font-size: 0.8rem; color: var(--pdg-text-muted); line-height: 1.4;">
+            Supply an async function to <code>grid.dataLoader</code> that receives pagination, sorting, search terms, and an <code>AbortSignal</code>.
+          </p>
+          <pre style="background: #0f172a; color: #38bdf8; padding: 0.5rem; border-radius: 0.25rem; font-size: 0.725rem; margin-top: 0.4rem; overflow-x: auto;"><code>grid.dataLoader = async ({ page, pageSize, sort, search, signal }) => {
+  const res = await fetch(`/api/fleet?page=${page}&amp;q=${search}`, { signal });
+  return await res.json(); // { rows, total }
+};</code></pre>
+        </div>
+
+        <div style="background: #ffffff; border: 1px solid var(--pdg-border-color); border-radius: 0.375rem; padding: 0.85rem;">
+          <h4 style="margin: 0 0 0.35rem 0; font-size: 0.85rem; font-weight: 700; color: var(--pdg-primary);">2. Request Cancellation &amp; Loading</h4>
+          <p style="margin: 0; font-size: 0.8rem; color: var(--pdg-text-muted); line-height: 1.4;">
+            Rapid user keystrokes automatically abort in-flight HTTP requests via <code>signal</code>, while showing an indeterminate top progress bar.
+          </p>
+          <pre style="background: #0f172a; color: #38bdf8; padding: 0.5rem; border-radius: 0.25rem; font-size: 0.725rem; margin-top: 0.4rem; overflow-x: auto;"><code>grid.refresh(); // Triggers server query re-fetch</code></pre>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // --- Standalone ProDataGrid Component ---
+    function resolveValue(row, fieldPath) {
+      if (!fieldPath) return undefined;
+      const path = String(fieldPath);
+      if (!path.includes('.')) return row[path];
+      return path.split('.').reduce((acc, part) => (acc ? acc[part] : undefined), row);
+    }
+
+    function createElement(tagName, className, attrs) {
+      const el = document.createElement(tagName);
+      if (className) el.className = className;
+      if (attrs) {
+        for (const [key, value] of Object.entries(attrs)) {
+          if (typeof value === 'boolean') {
+            if (value) el.setAttribute(key, '');
+            else el.removeAttribute(key);
+          } else {
+            el.setAttribute(key, String(value));
+          }
+        }
+      }
+      return el;
+    }
+
+    function removeAllChildren(parent) {
+      while (parent.firstChild) parent.removeChild(parent.firstChild);
+    }
+
+    class ProDataGrid extends HTMLElement {
+      constructor() {
+        super();
+        this._rows = [];
+        this._columns = [];
+        this._options = {
+          rowIdKey: 'id',
+          selectable: true,
+          multiSelect: true,
+          expandable: false,
+          serverSide: false,
+          rowReordering: false,
+          columnReordering: false,
+          editable: false,
+          deletable: false,
+          confirmDelete: true,
+          searchDebounceMs: 250,
+          animations: { enabled: true, duration: 250 }
+        };
+        this._sortCriteria = [];
+        this._columnFilters = [];
+        this._globalSearch = '';
+        this._pagination = { pageIndex: 0, pageSize: 10, totalRows: 0, totalPages: 1 };
+        this._selectedIds = new Set();
+        this._isLoading = false;
+        this._abortController = null;
+        this._searchDebounceTimer = null;
+        this._currentRequestId = 0;
+        this._editingCell = null;
+        this._draggedColIndex = null;
+        this._draggedRowIndex = null;
+        this._previousRowRects = new Map();
+      }
+
+      get rows() { return this._rows; }
+      set rows(val) {
+        this._rows = Array.isArray(val) ? val : [];
+        this.render();
+      }
+
+      get columns() { return this._columns; }
+      set columns(val) {
+        this._columns = Array.isArray(val) ? val : [];
+        this.render();
+      }
+
+      get options() { return this._options; }
+      set options(opts) {
+        this._options = Object.assign({}, this._options, opts);
+        if (this._options.serverSide && this._options.serverDataLoader) {
+          this.triggerServerLoad(true);
+        } else {
+          this.render();
+        }
+      }
+
+      connectedCallback() {
+        if (!this.containerEl) {
+          this.containerEl = createElement('div', 'pdg-wrapper');
+          this.refreshIndicatorEl = createElement('div', 'pdg-refresh-indicator');
+          this.refreshIndicatorEl.style.display = 'none';
+
+          this.toolbarEl = createElement('div', 'pdg-toolbar');
+          this.tableContainerEl = createElement('div', 'pdg-table-container');
+          this.tableEl = createElement('table', 'pdg-table');
+          this.theadEl = createElement('thead', 'pdg-thead');
+          this.tbodyEl = createElement('tbody', 'pdg-tbody');
+          this.footerEl = createElement('div', 'pdg-footer');
+
+          this.tableEl.appendChild(this.theadEl);
+          this.tableEl.appendChild(this.tbodyEl);
+          this.tableContainerEl.appendChild(this.tableEl);
+
+          this.containerEl.appendChild(this.refreshIndicatorEl);
+          this.containerEl.appendChild(this.toolbarEl);
+          this.containerEl.appendChild(this.tableContainerEl);
+          this.containerEl.appendChild(this.footerEl);
+          this.appendChild(this.containerEl);
+        }
+        if (this._options.serverSide && this._options.serverDataLoader) {
+          this.triggerServerLoad(true);
+        } else {
+          this.render();
+        }
+      }
+
+      async triggerServerLoad(isInitial = false) {
+        if (!this._options.serverSide || !this._options.serverDataLoader) return;
+
+        if (this._abortController) this._abortController.abort();
+        this._abortController = new AbortController();
+        const signal = this._abortController.signal;
+        const reqId = ++this._currentRequestId;
+
+        this._isLoading = true;
+        this.refreshIndicatorEl.style.display = 'block';
+
+        const params = {
+          pageIndex: this._pagination.pageIndex,
+          pageSize: this._pagination.pageSize,
+          globalSearch: this._globalSearch,
+          sortCriteria: [...this._sortCriteria],
+          signal
+        };
+
+        try {
+          const res = await this._options.serverDataLoader(params);
+          if (reqId !== this._currentRequestId || signal.aborted) return;
+          this._rows = res.rows;
+          this._pagination.totalRows = res.totalRows;
+          this._pagination.totalPages = Math.max(1, Math.ceil(res.totalRows / this._pagination.pageSize));
+        } catch (err) {
+          if (err.name === 'AbortError' || signal.aborted) return;
+          console.error('Server error:', err);
+        } finally {
+          if (reqId === this._currentRequestId) {
+            this._isLoading = false;
+            this.refreshIndicatorEl.style.display = 'none';
+            this.render();
+          }
+        }
+      }
+
+      render() {
+        if (!this.containerEl) return;
+        this.renderToolbar();
+        this.renderHeader();
+        this.renderBody();
+        this.renderFooter();
+      }
+
+      renderToolbar() {
+        removeAllChildren(this.toolbarEl);
+        const left = createElement('div', 'pdg-toolbar-left');
+        const searchInput = createElement('input', 'pdg-search-input', {
+          type: 'search',
+          placeholder: 'Search all columns...',
+          value: this._globalSearch
+        });
+
+        searchInput.addEventListener('input', (e) => {
+          this._globalSearch = e.target.value;
+          this._pagination.pageIndex = 0;
+          if (this._options.serverSide) {
+            if (this._searchDebounceTimer) clearTimeout(this._searchDebounceTimer);
+            this._searchDebounceTimer = setTimeout(() => this.triggerServerLoad(false), this._options.searchDebounceMs || 250);
+          } else {
+            this.render();
+          }
+        });
+        left.appendChild(searchInput);
+
+        const right = createElement('div', 'pdg-toolbar-right');
+        const exportBtn = createElement('button', 'pdg-btn', { type: 'button' });
+        exportBtn.textContent = 'Export CSV';
+        exportBtn.addEventListener('click', () => {
+          const headers = this._columns.map(c => `"${c.header}"`).join(',');
+          const lines = this._rows.map(r => this._columns.map(c => `"${r[c.field] || ''}"`).join(','));
+          const blob = new Blob([[headers, ...lines].join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'fleet-export.csv';
+          a.click();
+        });
+        right.appendChild(exportBtn);
+
+        this.toolbarEl.appendChild(left);
+        this.toolbarEl.appendChild(right);
+      }
+
+      renderHeader() {
+        removeAllChildren(this.theadEl);
+        const tr = createElement('tr', 'pdg-header-row');
+
+        if (this._options.rowReordering) {
+          const thDrag = createElement('th', 'pdg-th');
+          thDrag.style.width = '36px';
+          tr.appendChild(thDrag);
+        }
+
+        if (this._options.selectable) {
+          const thSel = createElement('th', 'pdg-th');
+          thSel.style.width = '40px';
+          tr.appendChild(thSel);
+        }
+
+        this._columns.forEach((col, colIdx) => {
+          if (col.visible === false) return;
+          const th = createElement('th', 'pdg-th');
+          if (this._options.columnReordering && col.reorderable !== false) {
+            th.classList.add('pdg-th-draggable');
+            th.draggable = true;
+            th.addEventListener('dragstart', (e) => {
+              this._draggedColIndex = colIdx;
+              e.dataTransfer.setData('text/plain', String(colIdx));
+            });
+            th.addEventListener('dragover', (e) => { e.preventDefault(); th.classList.add('pdg-drag-over'); });
+            th.addEventListener('dragleave', () => th.classList.remove('pdg-drag-over'));
+            th.addEventListener('drop', (e) => {
+              e.preventDefault();
+              th.classList.remove('pdg-drag-over');
+              if (this._draggedColIndex != null && this._draggedColIndex !== colIdx) {
+                const moved = this._columns.splice(this._draggedColIndex, 1)[0];
+                this._columns.splice(colIdx, 0, moved);
+                this.dispatchEvent(new CustomEvent('pdg:column-reorder', {
+                  detail: { column: moved, toIndex: colIdx }
+                }));
+                this.render();
+              }
+              this._draggedColIndex = null;
+            });
+          }
+
+          const inner = createElement('div', 'pdg-th-inner');
+          const title = createElement('span');
+          title.textContent = col.header;
+          inner.appendChild(title);
+
+          if (col.sortable) {
+            th.classList.add('pdg-sortable');
+            const active = this._sortCriteria.find(c => c.columnId === col.id);
+            const icon = createElement('span', 'pdg-sort-icon');
+            icon.textContent = active?.direction === 'asc' ? ' ▲' : active?.direction === 'desc' ? ' ▼' : ' ⇅';
+            inner.appendChild(icon);
+            th.addEventListener('click', () => {
+              const cur = this._sortCriteria.find(c => c.columnId === col.id);
+              let next = 'asc';
+              if (cur && cur.direction === 'asc') next = 'desc';
+              else if (cur && cur.direction === 'desc') next = null;
+              this._sortCriteria = next ? [{ columnId: col.id, direction: next }] : [];
+              if (this._options.serverSide) this.triggerServerLoad(false);
+              else this.render();
+            });
+          }
+          th.appendChild(inner);
+          tr.appendChild(th);
+        });
+
+        if (this._options.deletable) {
+          const thActions = createElement('th', 'pdg-th');
+          thActions.style.width = '70px';
+          thActions.textContent = 'Actions';
+          tr.appendChild(thActions);
+        }
+        this.theadEl.appendChild(tr);
+      }
+
+      renderBody() {
+        removeAllChildren(this.tbodyEl);
+        const rows = this._rows;
+
+        if (rows.length === 0) {
+          const tr = createElement('tr', 'pdg-row');
+          const td = createElement('td', 'pdg-td', { colspan: 10 });
+          td.style.textAlign = 'center';
+          td.textContent = 'No records found.';
+          tr.appendChild(td);
+          this.tbodyEl.appendChild(tr);
+          return;
+        }
+
+        for (let i = 0; i < rows.length; i++) {
+          const row = rows[i];
+          const rowId = row[this._options.rowIdKey || 'id'];
+          const isSelected = this._selectedIds.has(rowId);
+          const tr = createElement('tr', `pdg-row ${isSelected ? 'pdg-row-selected' : ''}`);
+
+          if (this._options.rowReordering) {
+            const tdDrag = createElement('td', 'pdg-td');
+            const handle = createElement('span', 'pdg-drag-handle', { draggable: 'true' });
+            handle.innerHTML = '⋮⋮';
+            handle.addEventListener('dragstart', () => { this._draggedRowIndex = i; });
+            tr.addEventListener('dragover', (e) => { e.preventDefault(); tr.classList.add('pdg-drag-over'); });
+            tr.addEventListener('dragleave', () => tr.classList.remove('pdg-drag-over'));
+            tr.addEventListener('drop', (e) => {
+              e.preventDefault();
+              tr.classList.remove('pdg-drag-over');
+              if (this._draggedRowIndex != null && this._draggedRowIndex !== i) {
+                const moved = this._rows.splice(this._draggedRowIndex, 1)[0];
+                this._rows.splice(i, 0, moved);
+                this.dispatchEvent(new CustomEvent('pdg:row-reorder', { detail: { fromIndex: this._draggedRowIndex, toIndex: i, row: moved } }));
+                this.render();
+              }
+              this._draggedRowIndex = null;
+            });
+            tdDrag.appendChild(handle);
+            tr.appendChild(tdDrag);
+          }
+
+          if (this._options.selectable) {
+            const tdSel = createElement('td', 'pdg-td');
+            const chk = createElement('input', 'pdg-checkbox', { type: 'checkbox' });
+            chk.checked = isSelected;
+            chk.addEventListener('change', () => {
+              if (chk.checked) this._selectedIds.add(rowId);
+              else this._selectedIds.delete(rowId);
+              this.render();
+            });
+            tdSel.appendChild(chk);
+            tr.appendChild(tdSel);
+          }
+
+          for (const col of this._columns) {
+            if (col.visible === false) continue;
+            const td = createElement('td', 'pdg-td', { 'data-header': col.header });
+            const val = resolveValue(row, col.field);
+
+            const isEditing = this._editingCell && this._editingCell.rowId === rowId && this._editingCell.columnId === col.id;
+            if (isEditing) {
+              const input = createElement('input', 'pdg-edit-input', { value: val == null ? '' : String(val) });
+              input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                  const newVal = typeof val === 'number' ? Number(input.value) : input.value;
+                  row[col.field] = newVal;
+                  this._editingCell = null;
+                  this.dispatchEvent(new CustomEvent('pdg:edit-save', {
+                    detail: { rowId, columnId: col.id, row, newValue: newVal }
+                  }));
+                  this.render();
+                } else if (e.key === 'Escape') {
+                  this._editingCell = null;
+                  this.render();
+                }
+              });
+              td.appendChild(input);
+              setTimeout(() => input.focus(), 10);
+            } else {
+              if (this._options.editable && col.editable) {
+                td.classList.add('pdg-cell-editable');
+                td.title = 'Double-click to edit';
+                td.addEventListener('dblclick', () => {
+                  this._editingCell = { rowId, columnId: col.id };
+                  this.render();
+                });
+              }
+              if (col.renderer) {
+                const res = col.renderer(val, row, i);
+                if (typeof res === 'string') td.innerHTML = res;
+                else td.appendChild(res);
+              } else if (col.formatter) {
+                td.textContent = col.formatter(val, row);
+              } else {
+                td.textContent = val == null ? '' : String(val);
+              }
+            }
+            tr.appendChild(td);
+          }
+
+          if (this._options.deletable) {
+            const tdAct = createElement('td', 'pdg-td');
+            const delBtn = createElement('button', 'pdg-btn pdg-btn-sm pdg-btn-danger', { type: 'button' });
+            delBtn.textContent = '✕';
+            delBtn.addEventListener('click', () => {
+              if (this._options.confirmDelete && !confirm(`Delete record #${rowId}?`)) return;
+              this._rows = this._rows.filter(r => r[this._options.rowIdKey || 'id'] !== rowId);
+              this.dispatchEvent(new CustomEvent('pdg:delete', { detail: { rowId, row } }));
+              this.render();
+            });
+            tdAct.appendChild(delBtn);
+            tr.appendChild(tdAct);
+          }
+
+          this.tbodyEl.appendChild(tr);
+        }
+      }
+
+      renderFooter() {
+        removeAllChildren(this.footerEl);
+        const info = createElement('div', 'pdg-pagination-info');
+        const total = this._pagination.totalRows;
+        const start = total > 0 ? this._pagination.pageIndex * this._pagination.pageSize + 1 : 0;
+        const end = Math.min((this._pagination.pageIndex + 1) * this._pagination.pageSize, total);
+        info.textContent = `Showing ${start} to ${end} of ${total} entries (Page ${this._pagination.pageIndex + 1} of ${this._pagination.totalPages})`;
+
+        const controls = createElement('div', 'pdg-pagination-controls');
+
+        // First button
+        const firstBtn = createElement('button', 'pdg-btn pdg-btn-sm', { type: 'button', disabled: this._pagination.pageIndex === 0 });
+        firstBtn.textContent = '«';
+        firstBtn.title = 'First Page';
+        firstBtn.addEventListener('click', () => this.goToPage(0));
+        controls.appendChild(firstBtn);
+
+        // Prev button
+        const prevBtn = createElement('button', 'pdg-btn pdg-btn-sm', { type: 'button', disabled: this._pagination.pageIndex === 0 });
+        prevBtn.textContent = '‹ Prev';
+        prevBtn.addEventListener('click', () => {
+          if (this._pagination.pageIndex > 0) this.goToPage(this._pagination.pageIndex - 1);
+        });
+        controls.appendChild(prevBtn);
+
+        // Page number buttons
+        const totalPages = this._pagination.totalPages;
+        const curPage = this._pagination.pageIndex;
+        const pageWindow = 2;
+
+        for (let p = 0; p < totalPages; p++) {
+          if (p === 0 || p === totalPages - 1 || (p >= curPage - pageWindow && p <= curPage + pageWindow)) {
+            const pageBtn = createElement('button', 'pdg-btn pdg-btn-sm', { type: 'button' });
+            pageBtn.textContent = String(p + 1);
+            if (p === curPage) {
+              pageBtn.style.backgroundColor = 'var(--pdg-primary)';
+              pageBtn.style.color = '#ffffff';
+              pageBtn.style.fontWeight = 'bold';
+            }
+            const target = p;
+            pageBtn.addEventListener('click', () => this.goToPage(target));
+            controls.appendChild(pageBtn);
+          } else if ((p === curPage - pageWindow - 1 && p > 0) || (p === curPage + pageWindow + 1 && p < totalPages - 1)) {
+            const ellipsis = createElement('span');
+            ellipsis.textContent = '…';
+            ellipsis.style.padding = '0 0.35rem';
+            ellipsis.style.color = 'var(--pdg-text-muted)';
+            controls.appendChild(ellipsis);
+          }
+        }
+
+        // Next button
+        const nextBtn = createElement('button', 'pdg-btn pdg-btn-sm', { type: 'button', disabled: this._pagination.pageIndex >= this._pagination.totalPages - 1 });
+        nextBtn.textContent = 'Next ›';
+        nextBtn.addEventListener('click', () => {
+          if (this._pagination.pageIndex < this._pagination.totalPages - 1) this.goToPage(this._pagination.pageIndex + 1);
+        });
+        controls.appendChild(nextBtn);
+
+        // Last button
+        const lastBtn = createElement('button', 'pdg-btn pdg-btn-sm', { type: 'button', disabled: this._pagination.pageIndex >= this._pagination.totalPages - 1 });
+        lastBtn.textContent = '»';
+        lastBtn.title = 'Last Page';
+        lastBtn.addEventListener('click', () => this.goToPage(this._pagination.totalPages - 1));
+        controls.appendChild(lastBtn);
+
+        // Page size dropdown
+        const selectEl = createElement('select', 'pdg-btn pdg-btn-sm');
+        selectEl.style.marginLeft = '0.5rem';
+        [10, 25, 50].forEach((sz) => {
+          const opt = createElement('option');
+          opt.value = String(sz);
+          opt.textContent = `${sz} / page`;
+          if (sz === this._pagination.pageSize) opt.selected = true;
+          selectEl.appendChild(opt);
+        });
+        selectEl.addEventListener('change', () => {
+          this._pagination.pageSize = Number(selectEl.value);
+          this._pagination.pageIndex = 0;
+          this.goToPage(0);
+        });
+        controls.appendChild(selectEl);
+
+        this.footerEl.appendChild(info);
+        this.footerEl.appendChild(controls);
+      }
+
+      goToPage(p) {
+        this._pagination.pageIndex = p;
+        if (this._options.serverSide) this.triggerServerLoad(false);
+        else this.render();
+      }
+    }
+
+    if (!window.customElements.get('pro-data-grid')) {
+      window.customElements.define('pro-data-grid', ProDataGrid);
+    }
+
+    // --- Demo Application Setup ---
+    const logger = document.getElementById('status-logger');
+    const grid = document.getElementById('fleet-grid');
+
+    const remoteDatabase = Array.from({ length: 150 }, (_, i) => ({
+      id: i + 1,
+      model: ['Tesla Model 3', 'Rivian R1T', 'Lucid Air', 'Porsche Taycan', 'Hyundai Ioniq 5'][i % 5],
+      vin: `5YJ3E1EB${1000 + i}X`,
+      mrr: Math.floor(1200 + Math.random() * 4500),
+      status: i % 4 === 0 ? 'Maintenance' : 'Active'
+    }));
+
+    grid.columns = [
+      { id: 'model', header: 'Model Name', field: 'model', sortable: true, reorderable: true, editable: true },
+      { id: 'vin', header: 'VIN', field: 'vin', sortable: true, reorderable: true },
+      { id: 'mrr', header: 'Monthly MRR', field: 'mrr', sortable: true, editable: true, formatter: (v) => `$${Number(v).toLocaleString()}` },
+      { 
+        id: 'status', 
+        header: 'Deployment Status', 
+        field: 'status',
+        renderer: (val) => {
+          const badge = document.createElement('span');
+          badge.className = `badge ${val === 'Active' ? 'badge-success' : 'badge-warning'}`;
+          badge.textContent = val;
+          return badge;
+        }
+      }
+    ];
+
+    grid.options = {
+      serverSide: true,
+      rowReordering: true,
+      columnReordering: true,
+      selectable: true,
+      editable: true,
+      deletable: true,
+      searchDebounceMs: 250,
+      serverDataLoader: async (params) => {
+        logger.textContent = `[Request] Fetching page ${params.pageIndex + 1}, search="${params.globalSearch}"...`;
+
+        await new Promise((resolve, reject) => {
+          const timer = setTimeout(resolve, 350);
+          params.signal.addEventListener('abort', () => {
+            clearTimeout(timer);
+            reject(new DOMException('Request cancelled', 'AbortError'));
+          });
+        });
+
+        let filtered = remoteDatabase;
+        if (params.globalSearch) {
+          const q = params.globalSearch.toLowerCase();
+          filtered = filtered.filter(item => 
+            item.model.toLowerCase().includes(q) || item.vin.toLowerCase().includes(q)
+          );
+        }
+
+        if (params.sortCriteria && params.sortCriteria.length > 0) {
+          const crit = params.sortCriteria[0];
+          filtered = [...filtered].sort((a, b) => {
+            const valA = a[crit.columnId];
+            const valB = b[crit.columnId];
+            if (valA < valB) return crit.direction === 'asc' ? -1 : 1;
+            if (valA > valB) return crit.direction === 'asc' ? 1 : -1;
+            return 0;
+          });
+        }
+
+        const start = params.pageIndex * params.pageSize;
+        const paged = filtered.slice(start, start + params.pageSize);
+
+        logger.textContent = `[Success] Received ${paged.length} records (Total: ${filtered.length})`;
+        return {
+          rows: paged,
+          totalRows: filtered.length
+        };
+      }
+    };
+
+    grid.addEventListener('pdg:edit-save', (e) => {
+      logger.textContent = `[Edit Saved] Row ${e.detail.rowId}, Column: ${e.detail.columnId}, New Value: ${e.detail.newValue}`;
+    });
+
+    grid.addEventListener('pdg:delete', (e) => {
+      logger.textContent = `[Deleted] Row ${e.detail.rowId} removed.`;
+    });
+
+    grid.addEventListener('pdg:column-reorder', (e) => {
+      logger.textContent = `[Column Reordered] ${e.detail.column.header} moved to index ${e.detail.toIndex}`;
+    });
+
+    grid.addEventListener('pdg:row-reorder', (e) => {
+      logger.textContent = `[Row Reordered] Moved from ${e.detail.fromIndex} to ${e.detail.toIndex}`;
+    });
+  </script>
+</body>
+</html>

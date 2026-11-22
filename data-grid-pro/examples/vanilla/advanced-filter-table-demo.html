@@ -1,0 +1,2652 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Advanced Filtering Data Table Demo</title>
+    <style>
+      :root {
+        --bg: #0f172a;
+        --card-bg: #1e293b;
+        --border: #334155;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --primary: #3b82f6;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+          Arial, sans-serif;
+        background-color: var(--bg);
+        color: var(--text);
+        padding: 2rem;
+        min-height: 100vh;
+      }
+
+      .container {
+        max-width: 1280px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+
+      header {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #ffffff;
+      }
+      p.subtitle {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        max-width: 880px;
+        line-height: 1.5;
+      }
+
+      .card {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 0.75rem;
+        padding: 1.25rem 1.5rem;
+      }
+
+      .controls-grid {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+      }
+
+      .controls-group {
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        flex-wrap: wrap;
+      }
+
+      .toggle-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        color: #e2e8f0;
+        cursor: pointer;
+        user-select: none;
+      }
+
+      .btn {
+        padding: 0.45rem 0.9rem;
+        border-radius: 0.375rem;
+        font-size: 0.85rem;
+        font-weight: 500;
+        cursor: pointer;
+        border: 1px solid var(--border);
+        background: #334155;
+        color: white;
+        transition: background 0.15s ease;
+      }
+
+      .btn:hover {
+        background: #475569;
+      }
+      .btn.active {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: #ffffff;
+        font-weight: 600;
+      }
+
+      .table-container-wrap {
+        background: #ffffff;
+        border-radius: 0.5rem;
+        overflow: hidden;
+        color: #0f172a;
+      }
+
+      .log-panel {
+        margin-top: 1rem;
+        background: #090d16;
+        border: 1px solid var(--border);
+        border-radius: 0.5rem;
+        padding: 1rem;
+        font-family: monospace;
+        font-size: 0.8rem;
+        color: #38bdf8;
+        max-height: 160px;
+        overflow-y: auto;
+      }
+
+      .log-title {
+        color: var(--text-muted);
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.7rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header
+        style="
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          flex-wrap: wrap;
+          gap: 1rem;
+        "
+      >
+        <div>
+          <h1>
+            Advanced Filtering, Sticky Column, Expandable Rows &amp; Grouped
+            Table
+          </h1>
+          <p class="subtitle">
+            A high-performance enterprise Web Component supporting pinned sticky
+            first column with dynamic horizontal scroll drop-shadow, clickable
+            expandable master-detail rows with animated chevrons, simulated
+            async telemetry dossier fetching, dynamic column visibility toggling
+            (with locked required columns and persistence), dedicated in-column
+            filtering inputs (text, category select, price &amp; stock numeric
+            ranges), boolean rule builder (<code>AND</code> /
+            <code>OR</code> logic), presets, in-place cell editing with live
+            validation, multi-level hierarchical row grouping (Category &gt;
+            Brand with aggregate calculations), full pagination, multi-column
+            sorting, and global search.
+          </p>
+        </div>
+        <div style="display: flex; gap: 0.75rem; align-items: center">
+          <a href="index.html" class="btn" style="text-decoration: none"
+            >&larr; Demo Gallery</a
+          >
+          <a
+            href="configurable-table-demo.html"
+            class="btn"
+            style="text-decoration: none"
+            >⚙️ Configurable Studio</a
+          >
+          <a href="docs.html" class="btn" style="text-decoration: none"
+            >📖 Docs</a
+          >
+        </div>
+      </header>
+
+      <div class="card">
+        <div class="controls-grid">
+          <div class="controls-group">
+            <label class="toggle-label">
+              <input type="checkbox" id="toggleTheme" />
+              <span>Dark Theme</span>
+            </label>
+          </div>
+
+          <div
+            class="controls-group"
+            style="
+              display: flex;
+              align-items: center;
+              gap: 0.5rem;
+              flex-wrap: wrap;
+            "
+          >
+            <span
+              style="
+                font-size: 0.85rem;
+                font-weight: 600;
+                color: var(--text-muted);
+              "
+              >Row Grouping:</span
+            >
+            <button class="btn" id="btnGroupNone">None (Flat)</button>
+            <button class="btn active" id="btnGroupCategory">Category</button>
+            <button class="btn" id="btnGroupMulti">
+              Category &gt; Brand (Multi-Level)
+            </button>
+          </div>
+
+          <div class="controls-group">
+            <label class="toggle-label">
+              <input type="checkbox" id="toggleStickyFirst" checked />
+              <span>Sticky First Column</span>
+            </label>
+          </div>
+
+          <div class="controls-group">
+            <label class="toggle-label">
+              <input type="checkbox" id="toggleMultiExpand" checked />
+              <span>Multi-Row Expansion</span>
+            </label>
+          </div>
+
+          <div class="controls-group">
+            <button class="btn" id="btnSavePreset">
+              Save Current Filter as Preset
+            </button>
+            <button class="btn" id="btnClearAllFilters">
+              Clear All Active Filters
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-container-wrap">
+        <advanced-filter-data-table id="advTable"></advanced-filter-data-table>
+      </div>
+
+      <!-- Usage & Integration Guide Section -->
+      <section
+        class="card"
+        style="margin-top: 0.5rem"
+        aria-label="Advanced Filter Table Usage Guide"
+      >
+        <h3
+          style="
+            margin: 0 0 0.75rem 0;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+          "
+        >
+          <span>💡 How to Use the Advanced Filter Table</span>
+        </h3>
+        <p
+          style="
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            margin-bottom: 1.25rem;
+            line-height: 1.5;
+          "
+        >
+          This table combines enterprise multi-level row grouping, pinned
+          columns, master-detail drawers, editable cells with validation, and
+          Boolean expression trees. Here is how each component is used:
+        </p>
+
+        <div
+          style="
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+          "
+        >
+          <div
+            style="
+              background: rgba(15, 23, 42, 0.6);
+              border: 1px solid var(--border);
+              border-radius: 0.375rem;
+              padding: 1rem;
+            "
+          >
+            <h4
+              style="
+                margin: 0 0 0.5rem 0;
+                font-size: 0.875rem;
+                font-weight: 700;
+                color: var(--primary);
+              "
+            >
+              1. Hierarchical Row Grouping
+            </h4>
+            <p
+              style="
+                margin: 0;
+                font-size: 0.8125rem;
+                color: var(--text-muted);
+                line-height: 1.5;
+              "
+            >
+              Group by single or multiple fields (e.g.
+              <code>Category &gt; Brand</code>) with auto-calculated summaries
+              for item counts, sum of revenue, and stock totals.
+            </p>
+            <pre
+              style="
+                background: #090d16;
+                color: #38bdf8;
+                padding: 0.5rem;
+                border-radius: 0.25rem;
+                font-size: 0.75rem;
+                margin-top: 0.5rem;
+                overflow-x: auto;
+              "
+            ><code>table.groupBy = ['category', 'brand'];</code></pre>
+          </div>
+
+          <div
+            style="
+              background: rgba(15, 23, 42, 0.6);
+              border: 1px solid var(--border);
+              border-radius: 0.375rem;
+              padding: 1rem;
+            "
+          >
+            <h4
+              style="
+                margin: 0 0 0.5rem 0;
+                font-size: 0.875rem;
+                font-weight: 700;
+                color: var(--primary);
+              "
+            >
+              2. Column Visibility Controls
+            </h4>
+            <p
+              style="
+                margin: 0;
+                font-size: 0.8125rem;
+                color: var(--text-muted);
+                line-height: 1.5;
+              "
+            >
+              Click <strong>Columns ▼</strong> to toggle column visibility
+              checkboxes, hide optional columns, or restore defaults. Key
+              columns can be locked to prevent hiding.
+            </p>
+            <pre
+              style="
+                background: #090d16;
+                color: #38bdf8;
+                padding: 0.5rem;
+                border-radius: 0.25rem;
+                font-size: 0.75rem;
+                margin-top: 0.5rem;
+                overflow-x: auto;
+              "
+            ><code>// Locked column config
+{ id: 'sku', header: 'SKU', locked: true }</code></pre>
+          </div>
+
+          <div
+            style="
+              background: rgba(15, 23, 42, 0.6);
+              border: 1px solid var(--border);
+              border-radius: 0.375rem;
+              padding: 1rem;
+            "
+          >
+            <h4
+              style="
+                margin: 0 0 0.5rem 0;
+                font-size: 0.875rem;
+                font-weight: 700;
+                color: var(--primary);
+              "
+            >
+              3. Inline Editing &amp; Validation
+            </h4>
+            <p
+              style="
+                margin: 0;
+                font-size: 0.8125rem;
+                color: var(--text-muted);
+                line-height: 1.5;
+              "
+            >
+              Double click cells (or click the edit pencil icon) to modify
+              values in-place. Validates input types (e.g., positive numbers for
+              price) before persisting.
+            </p>
+            <pre
+              style="
+                background: #090d16;
+                color: #38bdf8;
+                padding: 0.5rem;
+                border-radius: 0.25rem;
+                font-size: 0.75rem;
+                margin-top: 0.5rem;
+                overflow-x: auto;
+              "
+            ><code>table.addEventListener('aft:cell-save', (e) => {
+  console.log('Saved:', e.detail);
+});</code></pre>
+          </div>
+
+          <div
+            style="
+              background: rgba(15, 23, 42, 0.6);
+              border: 1px solid var(--border);
+              border-radius: 0.375rem;
+              padding: 1rem;
+            "
+          >
+            <h4
+              style="
+                margin: 0 0 0.5rem 0;
+                font-size: 0.875rem;
+                font-weight: 700;
+                color: var(--primary);
+              "
+            >
+              4. Filter Builder &amp; Chips
+            </h4>
+            <p
+              style="
+                margin: 0;
+                font-size: 0.8125rem;
+                color: var(--text-muted);
+                line-height: 1.5;
+              "
+            >
+              Open <strong>Filter Builder</strong> to craft compound rules with
+              <code>AND</code> / <code>OR</code> logic. Active rules appear in
+              the chips bar and can be deleted individually.
+            </p>
+            <pre
+              style="
+                background: #090d16;
+                color: #38bdf8;
+                padding: 0.5rem;
+                border-radius: 0.25rem;
+                font-size: 0.75rem;
+                margin-top: 0.5rem;
+                overflow-x: auto;
+              "
+            ><code>table.filterExpression = {
+  logic: 'AND',
+  rules: [{ field: 'price', operator: 'lessThan', value: 50 }]
+};</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <div class="log-panel" id="logOutput">
+        <div class="log-title">Filter Expression Event Stream:</div>
+        <div id="logList">
+          &gt; Ready. Try choosing quick filters above, opening the Filter
+          Builder, or switching Presets.
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // --- Embedded AdvancedFilterDataTable Web Component ---
+      function evalRule(row, rule) {
+        const v = row[rule.field];
+        const target = rule.value;
+        if (rule.operator === "equals")
+          return String(v).toLowerCase() === String(target).toLowerCase();
+        if (rule.operator === "contains")
+          return String(v)
+            .toLowerCase()
+            .includes(String(target).toLowerCase().trim());
+        if (rule.operator === "greaterThan") return Number(v) > Number(target);
+        if (rule.operator === "lessThan") return Number(v) < Number(target);
+        if (rule.operator === "between") {
+          const num = Number(v);
+          if (
+            target.min !== "" &&
+            target.min !== undefined &&
+            num < Number(target.min)
+          )
+            return false;
+          if (
+            target.max !== "" &&
+            target.max !== undefined &&
+            num > Number(target.max)
+          )
+            return false;
+          return true;
+        }
+        return true;
+      }
+
+      function evalGroup(row, group) {
+        if (!group || !group.rules || group.rules.length === 0) return true;
+        if (group.logic === "AND")
+          return group.rules.every((r) => evalRule(row, r));
+        return group.rules.some((r) => evalRule(row, r));
+      }
+
+      class AdvancedFilterDataTableElement extends HTMLElement {
+        constructor() {
+          super();
+          this.attachShadow({ mode: "open" });
+          this._columns = [];
+          this._rows = [];
+          this._presets = [];
+          this._activePresetId = null;
+          this._expression = { id: "root", logic: "AND", rules: [] };
+          this._options = {
+            pagination: { pageSize: 8 },
+            sorting: { enabled: true },
+            search: { enabled: true },
+            groupBy: ["category"],
+            multiExpand: true,
+            expandOnRowClick: true,
+          };
+          this._groupBy = ["category"];
+          this._expandedGroups = new Map();
+          this._columnFilters = new Map();
+          this._expandedRowIds = new Set();
+          this._asyncDetailCache = new Map();
+          this._asyncDetailLoading = new Set();
+          this._editing = null;
+          this._validationError = null;
+          this._visibleMap = new Map();
+          this._isColMenuOpen = false;
+          this._currentPage = 1;
+          this._pageSize = 8;
+          this._search = "";
+          this._sort = null;
+          this._isBuilderOpen = false;
+        }
+
+        connectedCallback() {
+          this.setAttribute("sticky-first-column", "true");
+          this.renderDom();
+          this.setupEvents();
+          this.refresh();
+        }
+
+        get visibleColumns() {
+          return this._columns.filter(
+            (c) => this._visibleMap.get(c.key) !== false,
+          );
+        }
+
+        initVisibility() {
+          if (this._visibleMap.size === 0) {
+            try {
+              const saved = localStorage.getItem("aft-demo-col-vis");
+              if (saved) {
+                const parsed = JSON.parse(saved);
+                this._columns.forEach((c) => {
+                  if (c.required) this._visibleMap.set(c.key, true);
+                  else if (parsed[c.key] !== undefined)
+                    this._visibleMap.set(c.key, Boolean(parsed[c.key]));
+                  else this._visibleMap.set(c.key, true);
+                });
+              }
+            } catch (e) {}
+          }
+          this._columns.forEach((c) => {
+            if (!this._visibleMap.has(c.key)) {
+              this._visibleMap.set(c.key, true);
+            }
+          });
+        }
+
+        saveVisibility() {
+          try {
+            const obj = {};
+            this._visibleMap.forEach((v, k) => {
+              obj[k] = v;
+            });
+            localStorage.setItem("aft-demo-col-vis", JSON.stringify(obj));
+          } catch (e) {}
+        }
+
+        get columns() {
+          return this._columns;
+        }
+        set columns(v) {
+          this._columns = v || [];
+          this.initVisibility();
+          if (this.shadowRoot) {
+            this.renderColVisMenu();
+            this.renderHeader();
+            this.refresh();
+          }
+        }
+
+        get data() {
+          return this._rows;
+        }
+        set data(v) {
+          this._rows = v || [];
+          if (this.shadowRoot) {
+            this.refresh();
+          }
+        }
+
+        get options() {
+          return this._options;
+        }
+        set options(v) {
+          this._options = { ...this._options, ...v };
+          if (v.presets) this._presets = [...v.presets];
+          if (v.groupBy !== undefined) this._groupBy = [...v.groupBy];
+          if (this.shadowRoot) {
+            this.renderPresets();
+            this.renderQuick();
+            this.refresh();
+          }
+        }
+
+        async toggleRowExpand(rowId, row) {
+          if (this._expandedRowIds.has(rowId)) {
+            this._expandedRowIds.delete(rowId);
+            this.refresh();
+          } else {
+            if (!this._options.multiExpand) {
+              this._expandedRowIds.clear();
+            }
+            this._expandedRowIds.add(rowId);
+
+            if (
+              this._options.asyncDetailRenderer &&
+              !this._asyncDetailCache.has(rowId)
+            ) {
+              this._asyncDetailLoading.add(rowId);
+              this.refresh();
+              try {
+                const res = await this._options.asyncDetailRenderer(row);
+                this._asyncDetailCache.set(rowId, res);
+              } catch (e) {
+                this._asyncDetailCache.set(
+                  rowId,
+                  `<span style="color:#ef4444;">Failed to fetch detail telemetry: ${e.message}</span>`,
+                );
+              }
+              this._asyncDetailLoading.delete(rowId);
+            }
+            this.refresh();
+          }
+        }
+
+        get groupBy() {
+          return this._groupBy;
+        }
+        set groupBy(v) {
+          this._groupBy = Array.isArray(v) ? [...v] : v ? [v] : [];
+          this._options.groupBy = [...this._groupBy];
+          this._currentPage = 1;
+          this.dispatchEvent(
+            new CustomEvent("advanced-filter:group-change", {
+              detail: { groupBy: this._groupBy },
+              bubbles: true,
+              composed: true,
+            }),
+          );
+          this.refresh();
+        }
+
+        get expression() {
+          return this._expression;
+        }
+        set expression(v) {
+          this._expression = v;
+          this._currentPage = 1;
+          this.dispatchEvent(
+            new CustomEvent("advanced-filter:expression-change", {
+              detail: { expression: v },
+              bubbles: true,
+              composed: true,
+            }),
+          );
+          this.renderChips();
+          this.refresh();
+        }
+
+        addRule(rule) {
+          this._expression.rules.push(rule);
+          this.expression = { ...this._expression };
+        }
+
+        removeRule(id) {
+          this._expression.rules = this._expression.rules.filter(
+            (r) => r.id !== id,
+          );
+          this.expression = { ...this._expression };
+        }
+
+        clearAll() {
+          this._expression.rules = [];
+          this._columnFilters.clear();
+          this.renderHeader();
+          this.expression = { ...this._expression };
+        }
+
+        setLogic(l) {
+          this._expression.logic = l;
+          this.expression = { ...this._expression };
+        }
+
+        applyPreset(id) {
+          const found = this._presets.find((p) => p.id === id);
+          if (found) {
+            this._activePresetId = id;
+            this.expression = JSON.parse(JSON.stringify(found.expression));
+          }
+        }
+
+        savePreset(name) {
+          const p = {
+            id: `preset-${Date.now()}`,
+            name,
+            expression: JSON.parse(JSON.stringify(this._expression)),
+          };
+          this._presets.push(p);
+          this.renderPresets();
+          return p;
+        }
+
+        renderDom() {
+          this.shadowRoot.innerHTML = `
+          <style>
+            :host {
+              display: block; width: 100%;
+              --aft-primary: #3b82f6; --aft-bg: #ffffff; --aft-panel-bg: #f8fafc;
+              --aft-row-hover: #f1f5f9; --aft-border-color: #e2e8f0;
+              --aft-text-main: #0f172a; --aft-text-muted: #64748b;
+              --aft-font-family: inherit; --aft-font-size: 0.875rem;
+            }
+            :host([theme="dark"]) {
+              --aft-primary: #60a5fa; --aft-bg: #0f172a; --aft-panel-bg: #1e293b;
+              --aft-row-hover: #1e293b; --aft-border-color: #334155;
+              --aft-text-main: #f8fafc; --aft-text-muted: #94a3b8;
+            }
+            .aft-container {
+              font-family: var(--aft-font-family); font-size: var(--aft-font-size);
+              color: var(--aft-text-main); background: var(--aft-bg);
+              border: 1px solid var(--aft-border-color); border-radius: 0.5rem;
+              display: flex; flex-direction: column; overflow: hidden;
+            }
+            .aft-toolbar {
+              display: flex; align-items: center; justify-content: space-between;
+              padding: 0.75rem 1rem; border-bottom: 1px solid var(--aft-border-color); gap: 1rem;
+            }
+            .aft-search-input {
+              padding: 0.45rem 0.75rem; border: 1px solid var(--aft-border-color);
+              border-radius: 0.375rem; outline: none; font-size: var(--aft-font-size);
+              background: var(--aft-bg); color: var(--aft-text-main); min-width: 260px;
+              box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+              transition: all 0.15s ease-in-out;
+            }
+            .aft-search-input:hover { border-color: #94a3b8; }
+            .aft-search-input:focus {
+              border-color: var(--aft-primary);
+              box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+            }
+            .aft-btn {
+              padding: 0.35rem 0.75rem; font-size: 0.8125rem; font-weight: 500;
+              border-radius: 0.375rem; border: 1px solid var(--aft-border-color);
+              background: var(--aft-bg); color: var(--aft-text-main); cursor: pointer;
+            }
+            .aft-btn:hover { background: var(--aft-row-hover); }
+            .aft-quick-bar {
+              display: flex; gap: 0.5rem; padding: 0.5rem 1rem; background: var(--aft-panel-bg);
+              border-bottom: 1px solid var(--aft-border-color); overflow-x: auto;
+            }
+            .aft-quick-pill {
+              padding: 0.2rem 0.65rem; border-radius: 9999px; font-size: 0.75rem;
+              border: 1px solid var(--aft-border-color); background: var(--aft-bg);
+              color: var(--aft-text-muted); cursor: pointer; white-space: nowrap;
+            }
+            .aft-quick-pill:hover { background: #eff6ff; color: var(--aft-primary); }
+            .aft-chips-bar {
+              display: flex; align-items: center; flex-wrap: wrap; gap: 0.4rem;
+              padding: 0.5rem 1rem; border-bottom: 1px solid var(--aft-border-color);
+            }
+            .aft-chip {
+              display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.2rem 0.55rem;
+              font-size: 0.75rem; font-weight: 500; border-radius: 0.375rem;
+              background: #f1f5f9; border: 1px solid #cbd5e1;
+            }
+            :host([theme="dark"]) .aft-chip { background: #334155; border-color: #475569; }
+            .aft-chip-del { background: none; border: none; cursor: pointer; color: var(--aft-text-muted); }
+            .aft-builder {
+              background: var(--aft-panel-bg); border-bottom: 1px solid var(--aft-border-color);
+              padding: 1rem; display: flex; flex-direction: column; gap: 0.75rem;
+            }
+            .aft-viewport { overflow: auto; max-height: 520px; }
+            .aft-table { width: 100%; border-collapse: separate; border-spacing: 0; text-align: left; }
+            .aft-thead { position: sticky; top: 0; z-index: 20; background: var(--aft-panel-bg); }
+            .aft-th {
+              padding: 0.65rem 0.85rem; font-weight: 600; color: var(--aft-text-main);
+              border-bottom: 1px solid var(--aft-border-color); cursor: pointer;
+            }
+            .aft-tr { background: var(--aft-bg); }
+            .aft-tr:hover { background: var(--aft-row-hover); }
+            .aft-td { padding: 0.65rem 0.85rem; border-bottom: 1px solid var(--aft-border-color); white-space: nowrap; }
+
+            /* Editable Cell Styles */
+            .aft-cell-editable {
+              cursor: pointer;
+              position: relative;
+            }
+            .aft-cell-editable:hover {
+              background-color: rgba(59, 130, 246, 0.08);
+              outline: 1px dashed var(--aft-primary);
+              outline-offset: -2px;
+            }
+            .aft-cell-editing {
+              padding: 0.25rem 0.5rem !important;
+              background-color: #eff6ff !important;
+            }
+            :host([theme="dark"]) .aft-cell-editing {
+              background-color: #1e293b !important;
+            }
+            .aft-editor-wrapper {
+              display: flex;
+              align-items: center;
+              gap: 0.35rem;
+              position: relative;
+              width: 100%;
+            }
+            .aft-input, .aft-select {
+              width: 100%;
+              padding: 0.35rem 0.5rem;
+              border: 1px solid var(--aft-primary);
+              border-radius: 0.25rem;
+              background: var(--aft-bg);
+              color: var(--aft-text-main);
+              font-size: 0.8125rem;
+              outline: none;
+              box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+            }
+            .aft-btn-save, .aft-btn-cancel {
+              border: none;
+              border-radius: 0.25rem;
+              padding: 0.3rem 0.45rem;
+              font-size: 0.75rem;
+              font-weight: bold;
+              cursor: pointer;
+              line-height: 1;
+              display: inline-flex;
+              align-items: center;
+              justify-content: center;
+            }
+            .aft-btn-save {
+              background: #10b981;
+              color: white;
+            }
+            .aft-btn-save:hover { background: #059669; }
+            .aft-btn-cancel {
+              background: #ef4444;
+              color: white;
+            }
+            .aft-btn-cancel:hover { background: #dc2626; }
+            .aft-validation-error-bubble {
+              position: absolute;
+              bottom: 100%;
+              left: 0;
+              margin-bottom: 4px;
+              background: #ef4444;
+              color: white;
+              font-size: 0.7rem;
+              padding: 0.25rem 0.5rem;
+              border-radius: 0.25rem;
+              white-space: nowrap;
+              z-index: 50;
+              box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+              animation: aftFadeIn 0.15s ease-in-out;
+            }
+            @keyframes aftFadeIn {
+              from { opacity: 0; transform: translateY(4px); }
+              to { opacity: 1; transform: translateY(0); }
+            }
+
+            /* Expandable Row Styles */
+            .aft-expand-btn {
+              display: inline-flex;
+              align-items: center;
+              justify-content: center;
+              width: 20px;
+              height: 20px;
+              border-radius: 0.25rem;
+              background: transparent;
+              border: none;
+              color: var(--aft-text-muted);
+              cursor: pointer;
+              font-size: 0.65rem;
+              transition: transform 0.2s ease, color 0.15s ease;
+              margin-right: 0.35rem;
+              vertical-align: middle;
+            }
+            .aft-expand-btn:hover {
+              color: var(--aft-primary);
+              background: var(--aft-row-hover);
+            }
+            .aft-row-expanded .aft-expand-btn {
+              transform: rotate(90deg);
+              color: var(--aft-primary);
+            }
+            .aft-detail-row {
+              background-color: var(--aft-panel-bg);
+            }
+            .aft-detail-content {
+              padding: 1rem 1.25rem;
+              border-left: 3px solid var(--aft-primary);
+              margin: 0.25rem 0.5rem;
+              border-radius: 0.375rem;
+              background: var(--aft-bg);
+              box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+            }
+            .aft-detail-grid {
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+              gap: 0.75rem;
+            }
+            .aft-detail-stat {
+              padding: 0.6rem 0.75rem;
+              border-radius: 0.375rem;
+              border: 1px solid var(--aft-border-color);
+              background: var(--aft-panel-bg);
+            }
+            .aft-detail-stat-lbl {
+              font-size: 0.7rem;
+              font-weight: 600;
+              text-transform: uppercase;
+              color: var(--aft-text-muted);
+            }
+            .aft-detail-stat-val {
+              font-size: 0.95rem;
+              font-weight: 700;
+              color: var(--aft-text-main);
+              margin-top: 0.2rem;
+            }
+            .aft-spinner {
+              display: inline-block;
+              width: 14px;
+              height: 14px;
+              border: 2px solid #cbd5e1;
+              border-top-color: var(--aft-primary);
+              border-radius: 50%;
+              animation: aftSpin 0.7s linear infinite;
+              margin-right: 0.5rem;
+              vertical-align: middle;
+            }
+            @keyframes aftSpin { to { transform: rotate(360deg); } }
+
+            /* Column Filters Row */
+            .aft-filter-row th {
+              padding: 0.35rem 0.65rem 0.5rem;
+              background: var(--aft-panel-bg);
+              border-bottom: 1px solid var(--aft-border-color);
+              font-weight: normal;
+            }
+            .aft-col-filter-input, .aft-col-filter-select {
+              width: 100%;
+              height: 1.85rem;
+              padding: 0.2rem 0.45rem;
+              font-size: 0.775rem;
+              border: 1px solid var(--aft-border-color);
+              border-radius: 0.25rem;
+              background: var(--aft-bg);
+              color: var(--aft-text-main);
+              outline: none;
+              box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03);
+              transition: all 0.15s ease;
+            }
+            .aft-col-filter-input:focus, .aft-col-filter-select:focus {
+              border-color: var(--aft-primary);
+              box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+            }
+            .aft-col-filter-range {
+              display: flex;
+              gap: 0.25rem;
+              align-items: center;
+            }
+            .aft-col-filter-range input {
+              width: 50%;
+              min-width: 0;
+            }
+
+            /* Row Grouping Styles */
+            .aft-group-header-row {
+              background: #f1f5f9;
+              cursor: pointer;
+              font-weight: 600;
+              user-select: none;
+              transition: background 0.15s ease;
+            }
+            :host([theme="dark"]) .aft-group-header-row {
+              background: #1e293b;
+            }
+            .aft-group-header-row:hover {
+              background: #e2e8f0;
+            }
+            :host([theme="dark"]) .aft-group-header-row:hover {
+              background: #334155;
+            }
+            .aft-group-header-row[data-level="1"] {
+              background: #f8fafc;
+            }
+            :host([theme="dark"]) .aft-group-header-row[data-level="1"] {
+              background: #0f172a;
+            }
+            .aft-group-header-inner {
+              display: flex;
+              align-items: center;
+              gap: 0.5rem;
+              padding: 0.2rem 0;
+            }
+            .aft-group-chevron {
+              font-size: 0.7rem;
+              color: var(--aft-text-muted);
+              transition: transform 0.2s ease;
+              display: inline-block;
+              width: 1rem;
+              text-align: center;
+            }
+            .aft-group-expanded .aft-group-chevron {
+              transform: rotate(90deg);
+              color: var(--aft-primary);
+            }
+            .aft-group-badge-count {
+              font-size: 0.75rem;
+              color: var(--aft-text-muted);
+              background: var(--aft-bg);
+              border: 1px solid var(--aft-border-color);
+              padding: 0.1rem 0.45rem;
+              border-radius: 9999px;
+              margin-left: 0.35rem;
+              font-weight: 500;
+            }
+            .aft-group-aggregates {
+              margin-left: auto;
+              font-size: 0.785rem;
+              font-weight: normal;
+              color: var(--aft-text-muted);
+              display: flex;
+              gap: 1.25rem;
+              align-items: center;
+            }
+            .aft-group-aggregates strong {
+              color: var(--aft-text-main);
+              font-weight: 600;
+            }
+            /* Column Visibility Menu */
+            .aft-col-vis-wrapper {
+              position: relative;
+              display: inline-block;
+            }
+            .aft-col-vis-menu {
+              position: absolute;
+              right: 0;
+              top: calc(100% + 0.35rem);
+              width: 240px;
+              background-color: var(--aft-bg);
+              border: 1px solid var(--aft-border-color);
+              border-radius: 0.375rem;
+              box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+              padding: 0.5rem;
+              z-index: 50;
+              display: none;
+              text-align: left;
+            }
+            .aft-col-vis-menu.is-open {
+              display: block;
+            }
+            .aft-col-vis-actions {
+              display: flex;
+              justify-content: space-between;
+              padding-bottom: 0.5rem;
+              margin-bottom: 0.5rem;
+              border-bottom: 1px solid var(--aft-border-color);
+            }
+            .aft-col-vis-action-btn {
+              background: transparent;
+              border: none;
+              color: var(--aft-primary);
+              font-size: 0.75rem;
+              font-weight: 600;
+              cursor: pointer;
+              padding: 0.2rem 0.4rem;
+              border-radius: 0.25rem;
+            }
+            .aft-col-vis-action-btn:hover {
+              background-color: var(--aft-row-hover);
+            }
+            .aft-col-vis-list {
+              max-height: 220px;
+              overflow-y: auto;
+              display: flex;
+              flex-direction: column;
+              gap: 0.25rem;
+            }
+            .aft-col-vis-item {
+              display: flex;
+              align-items: center;
+              gap: 0.5rem;
+              padding: 0.35rem 0.5rem;
+              border-radius: 0.25rem;
+              font-size: 0.8125rem;
+              cursor: pointer;
+              user-select: none;
+            }
+            .aft-col-vis-item:hover {
+              background-color: var(--aft-row-hover);
+            }
+            .aft-col-vis-badge-req {
+              margin-left: auto;
+              font-size: 0.6875rem;
+              font-weight: 600;
+              background: var(--aft-panel-bg);
+              color: var(--aft-text-muted);
+              padding: 0.1rem 0.35rem;
+              border-radius: 0.2rem;
+              border: 1px solid var(--aft-border-color);
+            }
+
+            /* Sticky First Column Styles */
+            :host([sticky-first-column="true"]) .aft-col-sticky {
+              position: sticky;
+              left: 0;
+              z-index: 5;
+              background-color: var(--aft-bg) !important;
+            }
+            :host([sticky-first-column="true"]) th.aft-col-sticky {
+              z-index: 25;
+              background-color: var(--aft-panel-bg) !important;
+            }
+            :host([sticky-first-column="true"]) .aft-tr:hover .aft-col-sticky {
+              background-color: var(--aft-row-hover) !important;
+            }
+            :host([sticky-first-column="true"]) .aft-viewport.aft-is-scrolled .aft-col-sticky {
+              box-shadow: 4px 0 8px -2px rgba(0, 0, 0, 0.15);
+              border-right: 1px solid var(--aft-border-color);
+            }
+            :host([theme="dark"][sticky-first-column="true"]) .aft-viewport.aft-is-scrolled .aft-col-sticky {
+              box-shadow: 4px 0 10px -2px rgba(0, 0, 0, 0.5);
+            }
+
+            .aft-pagination {
+              display: flex; align-items: center; justify-content: space-between;
+              padding: 0.75rem 1rem; border-top: 1px solid var(--aft-border-color);
+              font-size: 0.8125rem; color: var(--aft-text-muted);
+              background: var(--aft-panel-bg); gap: 0.5rem; flex-wrap: wrap;
+            }
+            .aft-page-info {
+              font-size: 0.8125rem; color: var(--aft-text-muted);
+            }
+            .aft-page-controls {
+              display: flex; align-items: center; gap: 0.25rem;
+            }
+            .aft-page-btn {
+              min-width: 2rem; height: 2rem; padding: 0 0.5rem;
+              font-size: 0.8125rem; font-weight: 500;
+              border-radius: 0.375rem; border: 1px solid var(--aft-border-color);
+              background: var(--aft-bg); color: var(--aft-text-main);
+              cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
+              transition: all 0.15s ease;
+            }
+            .aft-page-btn:hover:not(:disabled) {
+              background: var(--aft-row-hover);
+              border-color: #94a3b8;
+            }
+            .aft-page-btn:disabled {
+              opacity: 0.45; cursor: not-allowed;
+            }
+            .aft-page-btn.is-active {
+              background: var(--aft-primary) !important;
+              color: #ffffff !important;
+              border-color: var(--aft-primary) !important;
+              font-weight: 600;
+            }
+          </style>
+
+          <div class="aft-container">
+            <div class="aft-toolbar">
+              <input type="text" class="aft-search-input" placeholder="Search globally..." />
+              <div style="display:flex;align-items:center;gap:0.5rem;">
+                <select class="aft-preset-sel" style="padding:0.35rem 0.6rem;font-size:0.8125rem;border-radius:0.375rem;border:1px solid var(--aft-border-color);"><option value="">Presets...</option></select>
+                <button class="aft-btn toggle-builder">Filter Builder</button>
+
+                <!-- Column Visibility Dropdown Button -->
+                <div class="aft-col-vis-wrapper">
+                  <button class="aft-btn btn-col-vis" type="button" title="Show or hide columns">
+                    <span>Columns</span>
+                    <span class="aft-col-vis-count" style="font-size:0.75rem;color:var(--aft-text-muted);">(0)</span>
+                    <span style="font-size:0.7rem;">▼</span>
+                  </button>
+                  <div class="aft-col-vis-menu">
+                    <div class="aft-col-vis-actions">
+                      <button type="button" class="aft-col-vis-action-btn btn-show-all">Show all</button>
+                      <button type="button" class="aft-col-vis-action-btn btn-hide-optional">Hide optional</button>
+                      <button type="button" class="aft-col-vis-action-btn btn-reset-cols">Reset</button>
+                    </div>
+                    <div class="aft-col-vis-list"></div>
+                  </div>
+                </div>
+
+                <span class="meta-badge" style="font-size:0.75rem;color:var(--aft-text-muted);">0 records</span>
+              </div>
+            </div>
+
+            <div class="aft-quick-bar" style="display:none;"></div>
+            <div class="aft-chips-bar" style="display:none;"></div>
+            <div class="aft-builder" style="display:none;"></div>
+
+            <div class="aft-viewport">
+              <table class="aft-table">
+                <thead class="aft-thead">
+                  <tr class="aft-header-tr"></tr>
+                  <tr class="aft-filter-row"></tr>
+                </thead>
+                <tbody class="aft-tbody"></tbody>
+              </table>
+            </div>
+
+            <div class="aft-pagination"></div>
+          </div>
+        `;
+
+          this._viewport = this.shadowRoot.querySelector(".aft-viewport");
+          this._headerTr = this.shadowRoot.querySelector(".aft-header-tr");
+          this._filterTr = this.shadowRoot.querySelector(".aft-filter-row");
+          this._tbody = this.shadowRoot.querySelector(".aft-tbody");
+          this._pagination = this.shadowRoot.querySelector(".aft-pagination");
+          this._metaBadge = this.shadowRoot.querySelector(".meta-badge");
+          this._searchInput =
+            this.shadowRoot.querySelector(".aft-search-input");
+          this._presetSel = this.shadowRoot.querySelector(".aft-preset-sel");
+          this._quickBar = this.shadowRoot.querySelector(".aft-quick-bar");
+          this._chipsBar = this.shadowRoot.querySelector(".aft-chips-bar");
+          this._builder = this.shadowRoot.querySelector(".aft-builder");
+          this._toggleBuilder =
+            this.shadowRoot.querySelector(".toggle-builder");
+          this._colVisWrapper = this.shadowRoot.querySelector(
+            ".aft-col-vis-wrapper",
+          );
+          this._colVisBtn = this.shadowRoot.querySelector(".btn-col-vis");
+          this._colVisMenu = this.shadowRoot.querySelector(".aft-col-vis-menu");
+          this._colVisCount =
+            this.shadowRoot.querySelector(".aft-col-vis-count");
+          this._colVisList = this.shadowRoot.querySelector(".aft-col-vis-list");
+          this._btnShowAll = this.shadowRoot.querySelector(".btn-show-all");
+          this._btnHideOptional =
+            this.shadowRoot.querySelector(".btn-hide-optional");
+          this._btnResetCols = this.shadowRoot.querySelector(".btn-reset-cols");
+        }
+
+        setupEvents() {
+          // Sync horizontal scroll state for sticky shadow
+          this._viewport.addEventListener("scroll", () => {
+            if (this._viewport.scrollLeft > 2) {
+              this._viewport.classList.add("aft-is-scrolled");
+            } else {
+              this._viewport.classList.remove("aft-is-scrolled");
+            }
+          });
+
+          this._searchInput.addEventListener("input", (e) => {
+            this._search = e.target.value.trim();
+            this._currentPage = 1;
+            this.refresh();
+          });
+
+          this._presetSel.addEventListener("change", (e) => {
+            if (e.target.value) this.applyPreset(e.target.value);
+          });
+
+          this._toggleBuilder.addEventListener("click", () => {
+            this._isBuilderOpen = !this._isBuilderOpen;
+            this._builder.style.display = this._isBuilderOpen ? "flex" : "none";
+            if (this._isBuilderOpen) this.renderBuilder();
+          });
+
+          // Column Visibility Dropdown Toggles
+          this._colVisBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            this._isColMenuOpen = !this._isColMenuOpen;
+            if (this._isColMenuOpen) {
+              this._colVisMenu.classList.add("is-open");
+              this.renderColVisMenu();
+            } else {
+              this._colVisMenu.classList.remove("is-open");
+            }
+          });
+
+          document.addEventListener("click", (e) => {
+            if (this._isColMenuOpen && !this.shadowRoot.contains(e.target)) {
+              this._isColMenuOpen = false;
+              this._colVisMenu.classList.remove("is-open");
+            }
+          });
+
+          this.shadowRoot.addEventListener("click", (e) => {
+            if (
+              this._isColMenuOpen &&
+              !this._colVisWrapper.contains(e.target)
+            ) {
+              this._isColMenuOpen = false;
+              this._colVisMenu.classList.remove("is-open");
+            }
+          });
+
+          this._btnShowAll.addEventListener("click", () => {
+            this._columns.forEach((c) => this._visibleMap.set(c.key, true));
+            this.saveVisibility();
+            this.renderColVisMenu();
+            this.renderHeader();
+            this.refresh();
+          });
+
+          this._btnHideOptional.addEventListener("click", () => {
+            this._columns.forEach((c) => {
+              if (!c.required) this._visibleMap.set(c.key, false);
+            });
+            this.saveVisibility();
+            this.renderColVisMenu();
+            this.renderHeader();
+            this.refresh();
+          });
+
+          this._btnResetCols.addEventListener("click", () => {
+            this._columns.forEach((c) => this._visibleMap.set(c.key, true));
+            try {
+              localStorage.removeItem("aft-demo-col-vis");
+            } catch (e) {}
+            this.renderColVisMenu();
+            this.renderHeader();
+            this.refresh();
+          });
+        }
+
+        renderColVisMenu() {
+          if (!this._colVisList) return;
+          this._colVisList.innerHTML = "";
+          const visibleCols = this.visibleColumns;
+          if (this._colVisCount) {
+            this._colVisCount.textContent = `(${visibleCols.length}/${this._columns.length})`;
+          }
+
+          this._columns.forEach((col) => {
+            const isVis = this._visibleMap.get(col.key) !== false;
+            const isReq = Boolean(col.required);
+
+            const item = document.createElement("label");
+            item.className = "aft-col-vis-item";
+
+            const chk = document.createElement("input");
+            chk.type = "checkbox";
+            chk.checked = isVis;
+            chk.disabled = isReq;
+
+            chk.addEventListener("change", () => {
+              if (isReq) return;
+              this._visibleMap.set(col.key, chk.checked);
+              this.saveVisibility();
+              if (this._colVisCount) {
+                this._colVisCount.textContent = `(${this.visibleColumns.length}/${this._columns.length})`;
+              }
+              this.renderHeader();
+              this.refresh();
+            });
+
+            const lbl = document.createElement("span");
+            lbl.textContent = col.header;
+
+            item.appendChild(chk);
+            item.appendChild(lbl);
+
+            if (isReq) {
+              const reqBadge = document.createElement("span");
+              reqBadge.className = "aft-col-vis-badge-req";
+              reqBadge.textContent = "Required";
+              item.appendChild(reqBadge);
+            }
+
+            this._colVisList.appendChild(item);
+          });
+        }
+
+        renderHeader() {
+          this._headerTr.innerHTML = "";
+          this._filterTr.innerHTML = "";
+
+          const activeCols = this.visibleColumns;
+
+          activeCols.forEach((col, idx) => {
+            // 1. Header TH with Sort
+            const th = document.createElement("th");
+            th.className = `aft-th ${idx === 0 ? "aft-col-sticky" : ""}`;
+            if (col.width) th.style.width = col.width;
+            let label = col.header;
+            const sortIcon =
+              this._sort?.column === col.key
+                ? this._sort.direction === "asc"
+                  ? " ▲"
+                  : " ▼"
+                : " ⇅";
+            th.textContent = `${label}${sortIcon}`;
+            th.title = `Click to sort by ${col.header}`;
+            th.addEventListener("click", () => {
+              const next =
+                this._sort?.column === col.key && this._sort.direction === "asc"
+                  ? "desc"
+                  : "asc";
+              this._sort = { column: col.key, direction: next };
+              this.renderHeader();
+              this.refresh();
+            });
+            this._headerTr.appendChild(th);
+
+            // 2. In-Column Filter Controls TH
+            const thFilt = document.createElement("th");
+            if (idx === 0) thFilt.className = "aft-col-sticky";
+            if (col.filter) {
+              const f = col.filter;
+              const cur = this._columnFilters.get(col.key);
+
+              if (f.type === "select") {
+                const sel = document.createElement("select");
+                sel.className = "aft-col-filter-select";
+                sel.innerHTML =
+                  '<option value="">All Categories</option>' +
+                  (f.options || [])
+                    .map(
+                      (o) =>
+                        `<option value="${o.value}" ${cur === o.value ? "selected" : ""}>${o.label}</option>`,
+                    )
+                    .join("");
+                sel.addEventListener("change", () => {
+                  if (sel.value) this._columnFilters.set(col.key, sel.value);
+                  else this._columnFilters.delete(col.key);
+                  this._currentPage = 1;
+                  this.refresh();
+                });
+                thFilt.appendChild(sel);
+              } else if (f.type === "number-range") {
+                const wrap = document.createElement("div");
+                wrap.className = "aft-col-filter-range";
+                const minIn = document.createElement("input");
+                minIn.type = "number";
+                minIn.className = "aft-col-filter-input";
+                minIn.placeholder = "Min";
+                minIn.value = cur?.min || "";
+
+                const maxIn = document.createElement("input");
+                maxIn.type = "number";
+                maxIn.className = "aft-col-filter-input";
+                maxIn.placeholder = "Max";
+                maxIn.value = cur?.max || "";
+
+                const onRangeChange = () => {
+                  if (minIn.value || maxIn.value) {
+                    this._columnFilters.set(col.key, {
+                      min: minIn.value,
+                      max: maxIn.value,
+                    });
+                  } else {
+                    this._columnFilters.delete(col.key);
+                  }
+                  this._currentPage = 1;
+                  this.refresh();
+                };
+
+                minIn.addEventListener("input", onRangeChange);
+                maxIn.addEventListener("input", onRangeChange);
+                wrap.appendChild(minIn);
+                wrap.appendChild(maxIn);
+                thFilt.appendChild(wrap);
+              } else {
+                // text filter
+                const inp = document.createElement("input");
+                inp.type = "text";
+                inp.className = "aft-col-filter-input";
+                inp.placeholder = `Filter ${col.header}...`;
+                inp.value = cur || "";
+                inp.addEventListener("input", () => {
+                  if (inp.value.trim())
+                    this._columnFilters.set(col.key, inp.value.trim());
+                  else this._columnFilters.delete(col.key);
+                  this._currentPage = 1;
+                  this.refresh();
+                });
+                thFilt.appendChild(inp);
+              }
+            }
+            this._filterTr.appendChild(thFilt);
+          });
+        }
+
+        renderPresets() {
+          this._presetSel.innerHTML = '<option value="">Presets...</option>';
+          this._presets.forEach((p) => {
+            const opt = document.createElement("option");
+            opt.value = p.id;
+            opt.textContent = p.name;
+            this._presetSel.appendChild(opt);
+          });
+        }
+
+        renderQuick() {
+          const quicks = this._options.quickFilters || [];
+          if (quicks.length === 0) {
+            this._quickBar.style.display = "none";
+            return;
+          }
+          this._quickBar.style.display = "flex";
+          this._quickBar.innerHTML = "";
+          quicks.forEach((q) => {
+            const pill = document.createElement("button");
+            pill.className = "aft-quick-pill";
+            pill.textContent = q.label;
+            pill.addEventListener("click", () => {
+              this.expression = JSON.parse(JSON.stringify(q.expression));
+            });
+            this._quickBar.appendChild(pill);
+          });
+        }
+
+        renderChips() {
+          const rules = this._expression.rules;
+          if (rules.length === 0) {
+            this._chipsBar.style.display = "none";
+            return;
+          }
+          this._chipsBar.style.display = "flex";
+          this._chipsBar.innerHTML = "";
+          rules.forEach((r) => {
+            const chip = document.createElement("span");
+            chip.className = "aft-chip";
+            chip.innerHTML = `<span>${r.field} ${r.operator} ${typeof r.value === "object" ? JSON.stringify(r.value) : r.value}</span>`;
+            const btn = document.createElement("button");
+            btn.className = "aft-chip-del";
+            btn.innerHTML = "&times;";
+            btn.addEventListener("click", () => this.removeRule(r.id));
+            chip.appendChild(btn);
+            this._chipsBar.appendChild(chip);
+          });
+          const clr = document.createElement("button");
+          clr.style.cssText =
+            "background:none;border:none;font-size:0.75rem;color:#ef4444;cursor:pointer;";
+          clr.textContent = "Clear all";
+          clr.addEventListener("click", () => this.clearAll());
+          this._chipsBar.appendChild(clr);
+        }
+
+        renderBuilder() {
+          this._builder.innerHTML = `
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div style="display:flex;gap:0.5rem;align-items:center;">
+              <span style="font-weight:600;font-size:0.8rem;">Match:</span>
+              <button class="aft-btn logic-btn" style="${this._expression.logic === "AND" ? "background:#3b82f6;color:white;" : ""}">AND</button>
+              <button class="aft-btn logic-btn" style="${this._expression.logic === "OR" ? "background:#3b82f6;color:white;" : ""}">OR</button>
+            </div>
+            <button class="aft-btn add-rule">+ Add Rule</button>
+          </div>
+          <div class="rules-wrap" style="display:flex;flex-direction:column;gap:0.4rem;"></div>
+        `;
+          this._builder.querySelectorAll(".logic-btn").forEach((btn) => {
+            btn.addEventListener("click", () => {
+              this.setLogic(btn.textContent);
+              this.renderBuilder();
+            });
+          });
+          this._builder
+            .querySelector(".add-rule")
+            ?.addEventListener("click", () => {
+              const col = this._columns[0]?.key || "id";
+              this.addRule({
+                id: `r-${Date.now()}`,
+                field: col,
+                operator: "contains",
+                value: "",
+              });
+              this.renderBuilder();
+            });
+
+          const wrap = this._builder.querySelector(".rules-wrap");
+          this._expression.rules.forEach((r) => {
+            const row = document.createElement("div");
+            row.style.cssText =
+              "display:flex;gap:0.5rem;align-items:center;background:#ffffff;padding:0.5rem 0.75rem;border-radius:0.375rem;border:1px solid #cbd5e1;box-shadow:0 1px 2px rgba(0,0,0,0.04);";
+            row.innerHTML = `
+            <select class="f-sel" style="padding:0.35rem 0.6rem;font-size:0.8125rem;border:1px solid #cbd5e1;border-radius:0.375rem;background:#ffffff;outline:none;">
+              ${this._columns.map((c) => `<option value="${c.key}" ${c.key === r.field ? "selected" : ""}>${c.header}</option>`).join("")}
+            </select>
+            <select class="op-sel" style="padding:0.35rem 0.6rem;font-size:0.8125rem;border:1px solid #cbd5e1;border-radius:0.375rem;background:#ffffff;outline:none;">
+              <option value="contains" ${r.operator === "contains" ? "selected" : ""}>contains</option>
+              <option value="equals" ${r.operator === "equals" ? "selected" : ""}>equals</option>
+              <option value="greaterThan" ${r.operator === "greaterThan" ? "selected" : ""}>&gt;</option>
+              <option value="lessThan" ${r.operator === "lessThan" ? "selected" : ""}>&lt;</option>
+            </select>
+            <input type="text" class="v-inp" value="${r.value || ""}" style="padding:0.35rem 0.6rem;font-size:0.8125rem;border:1px solid #cbd5e1;border-radius:0.375rem;outline:none;flex:1;min-width:140px;" />
+            <button class="aft-btn del-btn" style="color:#ef4444;border-color:#fca5a5;padding:0.3rem 0.5rem;">&times;</button>
+          `;
+            row.querySelector(".f-sel")?.addEventListener("change", (e) => {
+              r.field = e.target.value;
+              this.expression = { ...this._expression };
+            });
+            row.querySelector(".op-sel")?.addEventListener("change", (e) => {
+              r.operator = e.target.value;
+              this.expression = { ...this._expression };
+            });
+            row.querySelector(".v-inp")?.addEventListener("change", (e) => {
+              r.value = e.target.value;
+              this.expression = { ...this._expression };
+            });
+            row.querySelector(".del-btn")?.addEventListener("click", () => {
+              this.removeRule(r.id);
+              this.renderBuilder();
+            });
+            wrap.appendChild(row);
+          });
+        }
+
+        refresh() {
+          this.renderBody();
+        }
+
+        renderBody() {
+          this._tbody.innerHTML = "";
+          let list = [...this._rows];
+
+          // Global Search
+          if (this._search) {
+            const q = this._search.toLowerCase();
+            list = list.filter((r) =>
+              Object.values(r).some(
+                (v) => v != null && String(v).toLowerCase().includes(q),
+              ),
+            );
+          }
+
+          // Advanced Filter Rules
+          list = list.filter((r) => evalGroup(r, this._expression));
+
+          // In-Column Filters
+          if (this._columnFilters.size > 0) {
+            list = list.filter((r) => {
+              for (const [colKey, fVal] of this._columnFilters.entries()) {
+                const raw = r[colKey];
+                if (typeof fVal === "object" && fVal !== null) {
+                  const num = Number(raw);
+                  if (isNaN(num)) return false;
+                  if (
+                    fVal.min !== "" &&
+                    fVal.min != null &&
+                    num < Number(fVal.min)
+                  )
+                    return false;
+                  if (
+                    fVal.max !== "" &&
+                    fVal.max != null &&
+                    num > Number(fVal.max)
+                  )
+                    return false;
+                } else if (typeof fVal === "string") {
+                  const col = this._columns.find((c) => c.key === colKey);
+                  if (col?.filter?.type === "select") {
+                    if (String(raw) !== fVal) return false;
+                  } else {
+                    if (
+                      !String(raw || "")
+                        .toLowerCase()
+                        .includes(fVal.toLowerCase())
+                    )
+                      return false;
+                  }
+                }
+              }
+              return true;
+            });
+          }
+
+          // Column Sorting (numeric & string aware)
+          if (this._sort) {
+            const { column, direction } = this._sort;
+            list.sort((a, b) => {
+              const va = a[column];
+              const vb = b[column];
+              if (va === vb) return 0;
+              if (va == null) return 1;
+              if (vb == null) return -1;
+              const cmp =
+                typeof va === "number" && typeof vb === "number"
+                  ? va - vb
+                  : String(va).localeCompare(String(vb), undefined, {
+                      numeric: true,
+                      sensitivity: "base",
+                    });
+              return direction === "asc" ? cmp : -cmp;
+            });
+          }
+
+          const activeCols = this.visibleColumns;
+          const totalCols = activeCols.length;
+          const groupCols = this._groupBy || [];
+
+          if (list.length === 0) {
+            this._tbody.innerHTML = `<tr><td colspan="${totalCols}" style="text-align:center;padding:2.5rem 1rem;color:var(--aft-text-muted);">No matching records found.</td></tr>`;
+            this.renderPagination(0, 1, 0, 0);
+            return;
+          }
+
+          // Helper: format cells & expandable detail row
+          const renderRowAndDetail = (row, frag, indentPx = 0) => {
+            const rowId = row.id;
+            const isRowExpanded = this._expandedRowIds.has(rowId);
+
+            const tr = document.createElement("tr");
+            tr.className = `aft-tr ${isRowExpanded ? "aft-row-expanded" : ""}`;
+            tr.style.cursor = "pointer";
+
+            tr.addEventListener("click", (e) => {
+              if (
+                e.target.closest("button, input, select, .aft-editor-wrapper")
+              )
+                return;
+              this.toggleRowExpand(rowId, row);
+            });
+
+            activeCols.forEach((c, idx) => {
+              const td = document.createElement("td");
+              td.className = `aft-td ${idx === 0 ? "aft-col-sticky" : ""}`;
+              if (idx === 0) {
+                if (indentPx > 0) td.style.paddingLeft = `${indentPx}px`;
+
+                const expBtn = document.createElement("button");
+                expBtn.className = "aft-expand-btn";
+                expBtn.type = "button";
+                expBtn.textContent = "▶";
+                expBtn.title = isRowExpanded
+                  ? "Collapse item details"
+                  : "Expand item details";
+                expBtn.addEventListener("click", (e) => {
+                  e.stopPropagation();
+                  this.toggleRowExpand(rowId, row);
+                });
+                td.appendChild(expBtn);
+              }
+
+              const val = row[c.key];
+              const isEditing =
+                this._editing &&
+                this._editing.rowId === rowId &&
+                this._editing.columnKey === c.key;
+
+              if (isEditing) {
+                td.classList.add("aft-cell-editing");
+                const wrapper = document.createElement("div");
+                wrapper.className = "aft-editor-wrapper";
+
+                if (this._validationError) {
+                  const bubble = document.createElement("div");
+                  bubble.className = "aft-validation-error-bubble";
+                  bubble.textContent = this._validationError;
+                  wrapper.appendChild(bubble);
+                }
+
+                let input;
+                if (c.editor?.type === "select") {
+                  input = document.createElement("select");
+                  input.className = "aft-select";
+                  input.innerHTML = (c.editor.options || [])
+                    .map(
+                      (o) =>
+                        `<option value="${o.value}" ${val === o.value ? "selected" : ""}>${o.label}</option>`,
+                    )
+                    .join("");
+                } else if (c.editor?.type === "number") {
+                  input = document.createElement("input");
+                  input.className = "aft-input";
+                  input.type = "number";
+                  input.value = val == null ? "" : val;
+                } else {
+                  input = document.createElement("input");
+                  input.className = "aft-input";
+                  input.type = "text";
+                  input.value = val == null ? "" : val;
+                }
+
+                const commit = async () => {
+                  const rawVal =
+                    c.editor?.type === "number"
+                      ? Number(input.value)
+                      : input.value;
+                  if (c.validator) {
+                    const err = await c.validator(rawVal, val, row, c);
+                    if (err) {
+                      this._validationError = err;
+                      this.renderBody();
+                      return;
+                    }
+                  }
+                  const oldVal = row[c.key];
+                  row[c.key] = rawVal;
+                  this._editing = null;
+                  this._validationError = null;
+
+                  this.dispatchEvent(
+                    new CustomEvent("advanced-filter:cell-edit", {
+                      detail: {
+                        rowId,
+                        columnKey: c.key,
+                        oldValue: oldVal,
+                        newValue: rawVal,
+                        row,
+                      },
+                      bubbles: true,
+                      composed: true,
+                    }),
+                  );
+
+                  if (this._options.onSave) {
+                    try {
+                      await this._options.onSave({
+                        rowId,
+                        columnKey: c.key,
+                        oldValue: oldVal,
+                        newValue: rawVal,
+                        row,
+                      });
+                    } catch (err) {
+                      row[c.key] = oldVal; // rollback
+                    }
+                  }
+                  this.refresh();
+                };
+
+                input.addEventListener("keydown", (e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    commit();
+                  } else if (e.key === "Escape") {
+                    this._editing = null;
+                    this._validationError = null;
+                    this.renderBody();
+                  }
+                });
+
+                wrapper.appendChild(input);
+
+                const saveBtn = document.createElement("button");
+                saveBtn.className = "aft-btn-save";
+                saveBtn.type = "button";
+                saveBtn.textContent = "✓";
+                saveBtn.title = "Save (Enter)";
+                saveBtn.addEventListener("click", (e) => {
+                  e.stopPropagation();
+                  commit();
+                });
+
+                const cancelBtn = document.createElement("button");
+                cancelBtn.className = "aft-btn-cancel";
+                cancelBtn.type = "button";
+                cancelBtn.textContent = "✕";
+                cancelBtn.title = "Cancel (Esc)";
+                cancelBtn.addEventListener("click", (e) => {
+                  e.stopPropagation();
+                  this._editing = null;
+                  this._validationError = null;
+                  this.renderBody();
+                });
+
+                wrapper.appendChild(saveBtn);
+                wrapper.appendChild(cancelBtn);
+                td.appendChild(wrapper);
+
+                setTimeout(() => input.focus(), 10);
+              } else {
+                if (c.editable) {
+                  td.classList.add("aft-cell-editable");
+                  td.title = "Double-click to inline edit";
+                  td.addEventListener("dblclick", (e) => {
+                    e.stopPropagation();
+                    this._editing = { rowId, columnKey: c.key };
+                    this._validationError = null;
+                    this.renderBody();
+                  });
+                }
+
+                const spanVal = document.createElement("span");
+                if (c.key === "price") {
+                  spanVal.textContent =
+                    row[c.key] != null
+                      ? `$${Number(row[c.key]).toLocaleString()}`
+                      : "—";
+                } else {
+                  spanVal.textContent =
+                    row[c.key] !== undefined ? String(row[c.key]) : "—";
+                }
+                td.appendChild(spanVal);
+              }
+              tr.appendChild(td);
+            });
+            frag.appendChild(tr);
+
+            // Sub-Detail Dossier row
+            if (isRowExpanded) {
+              const trDetail = document.createElement("tr");
+              trDetail.className = "aft-detail-row";
+              const tdDetail = document.createElement("td");
+              tdDetail.colSpan = totalCols;
+              tdDetail.className = "aft-td";
+              tdDetail.style.padding = "0";
+
+              const contentDiv = document.createElement("div");
+              contentDiv.className = "aft-detail-content";
+              if (indentPx > 0)
+                contentDiv.style.marginLeft = `${indentPx + 8}px`;
+
+              if (this._asyncDetailLoading.has(rowId)) {
+                contentDiv.innerHTML =
+                  '<span><span class="aft-spinner"></span>Fetching live telemetry &amp; warehouse dossier...</span>';
+              } else {
+                const res =
+                  this._asyncDetailCache.get(rowId) ||
+                  (this._options.detailRenderer
+                    ? this._options.detailRenderer(row)
+                    : "");
+                if (typeof res === "string") contentDiv.innerHTML = res;
+                else contentDiv.appendChild(res);
+              }
+
+              tdDetail.appendChild(contentDiv);
+              trDetail.appendChild(tdDetail);
+              frag.appendChild(trDetail);
+            }
+          };
+
+          // Helper: calculate aggregates for a set of rows
+          const calcGroupStats = (rows) => {
+            const count = rows.length;
+            const totalStock = rows.reduce(
+              (acc, r) => acc + (Number(r.stock) || 0),
+              0,
+            );
+            const totalPrice = rows.reduce(
+              (acc, r) => acc + (Number(r.price) || 0),
+              0,
+            );
+            const avgPrice = count > 0 ? Math.round(totalPrice / count) : 0;
+            return { count, totalStock, avgPrice, totalPrice };
+          };
+
+          // FLAT MODE (No Row Grouping)
+          if (groupCols.length === 0) {
+            const totalRows = list.length;
+            const totalPages = Math.max(
+              1,
+              Math.ceil(totalRows / this._pageSize),
+            );
+            if (this._currentPage > totalPages) this._currentPage = totalPages;
+            if (this._currentPage < 1) this._currentPage = 1;
+
+            const startIndex = (this._currentPage - 1) * this._pageSize;
+            const endIndex = Math.min(startIndex + this._pageSize, totalRows);
+            const pagedRows = list.slice(startIndex, endIndex);
+
+            const frag = document.createDocumentFragment();
+            pagedRows.forEach((r) => {
+              renderRowAndDetail(r, frag, 0);
+            });
+            this._tbody.appendChild(frag);
+            this.renderPagination(
+              totalRows,
+              totalPages,
+              startIndex + 1,
+              endIndex,
+              false,
+            );
+            return;
+          }
+
+          // ROW GROUPING MODE (Single or Multi-Level)
+          const groups = new Map();
+          list.forEach((r) => {
+            const gKey = r[groupCols[0]] || "(Blank)";
+            if (!groups.has(gKey)) groups.set(gKey, []);
+            groups.get(gKey).push(r);
+          });
+
+          const groupKeys = Array.from(groups.keys());
+          const totalGroups = groupKeys.length;
+          const totalPages = Math.max(
+            1,
+            Math.ceil(totalGroups / this._pageSize),
+          );
+          if (this._currentPage > totalPages) this._currentPage = totalPages;
+          if (this._currentPage < 1) this._currentPage = 1;
+
+          const startIndex = (this._currentPage - 1) * this._pageSize;
+          const endIndex = Math.min(startIndex + this._pageSize, totalGroups);
+          const pagedGroupKeys = groupKeys.slice(startIndex, endIndex);
+
+          const frag = document.createDocumentFragment();
+
+          pagedGroupKeys.forEach((gVal) => {
+            const gRows = groups.get(gVal);
+            const isExp = this._expandedGroups.get(gVal) !== false; // expanded by default
+
+            // Level 0 Group Header
+            const trG = document.createElement("tr");
+            trG.className = `aft-group-header-row ${isExp ? "aft-group-expanded" : ""}`;
+            const tdG = document.createElement("td");
+            tdG.className = "aft-td";
+            tdG.colSpan = totalCols;
+
+            const innerG = document.createElement("div");
+            innerG.className = "aft-group-header-inner";
+
+            const chev = document.createElement("span");
+            chev.className = "aft-group-chevron";
+            chev.textContent = "▶";
+            innerG.appendChild(chev);
+
+            const lbl = document.createElement("span");
+            lbl.innerHTML = `<strong>${groupCols[0].toUpperCase()}:</strong> ${gVal}`;
+            innerG.appendChild(lbl);
+
+            const cnt = document.createElement("span");
+            cnt.className = "aft-group-badge-count";
+            cnt.textContent = `${gRows.length} items`;
+            innerG.appendChild(cnt);
+
+            const stats = calcGroupStats(gRows);
+            const aggWrap = document.createElement("div");
+            aggWrap.className = "aft-group-aggregates";
+            aggWrap.innerHTML = `
+            <span>Stock: <strong>${stats.totalStock.toLocaleString()} units</strong></span>
+            <span>Avg Price: <strong>$${stats.avgPrice.toLocaleString()}</strong></span>
+          `;
+            innerG.appendChild(aggWrap);
+
+            trG.addEventListener("click", () => {
+              this._expandedGroups.set(gVal, !isExp);
+              this.refresh();
+            });
+
+            tdG.appendChild(innerG);
+            trG.appendChild(tdG);
+            frag.appendChild(trG);
+
+            if (isExp) {
+              if (groupCols.length > 1) {
+                // Level 1 Nested Sub-groups
+                const subMap = new Map();
+                gRows.forEach((sr) => {
+                  const sKey = sr[groupCols[1]] || "(Blank)";
+                  if (!subMap.has(sKey)) subMap.set(sKey, []);
+                  subMap.get(sKey).push(sr);
+                });
+
+                subMap.forEach((subRows, subVal) => {
+                  const subKey = `${gVal} > ${subVal}`;
+                  const isSubExp = this._expandedGroups.get(subKey) !== false; // expanded by default
+
+                  const trSub = document.createElement("tr");
+                  trSub.className = `aft-group-header-row ${isSubExp ? "aft-group-expanded" : ""}`;
+                  trSub.setAttribute("data-level", "1");
+
+                  const tdSub = document.createElement("td");
+                  tdSub.className = "aft-td";
+                  tdSub.colSpan = totalCols;
+
+                  const subInner = document.createElement("div");
+                  subInner.className = "aft-group-header-inner";
+                  subInner.style.paddingLeft = "1.75rem";
+
+                  const subChev = document.createElement("span");
+                  subChev.className = "aft-group-chevron";
+                  subChev.textContent = "▶";
+                  subInner.appendChild(subChev);
+
+                  const subLbl = document.createElement("span");
+                  subLbl.innerHTML = `<strong>${groupCols[1].toUpperCase()}:</strong> ${subVal}`;
+                  subInner.appendChild(subLbl);
+
+                  const subCnt = document.createElement("span");
+                  subCnt.className = "aft-group-badge-count";
+                  subCnt.textContent = `${subRows.length}`;
+                  subInner.appendChild(subCnt);
+
+                  const subStats = calcGroupStats(subRows);
+                  const subAgg = document.createElement("div");
+                  subAgg.className = "aft-group-aggregates";
+                  subAgg.innerHTML = `
+                  <span>Stock: <strong>${subStats.totalStock}</strong></span>
+                  <span>Avg: <strong>$${subStats.avgPrice.toLocaleString()}</strong></span>
+                `;
+                  subInner.appendChild(subAgg);
+
+                  trSub.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    this._expandedGroups.set(subKey, !isSubExp);
+                    this.refresh();
+                  });
+
+                  tdSub.appendChild(subInner);
+                  trSub.appendChild(tdSub);
+                  frag.appendChild(trSub);
+
+                  if (isSubExp) {
+                    subRows.forEach((row) => {
+                      renderRowAndDetail(row, frag, 48);
+                    });
+                  }
+                });
+              } else {
+                // Single Level Child Rows
+                gRows.forEach((row) => {
+                  renderRowAndDetail(row, frag, 28);
+                });
+              }
+            }
+          });
+
+          this._tbody.appendChild(frag);
+          this.renderPagination(
+            totalGroups,
+            totalPages,
+            startIndex + 1,
+            endIndex,
+            true,
+          );
+        }
+
+        renderPagination(
+          totalCount,
+          totalPages,
+          start,
+          end,
+          isGrouped = false,
+        ) {
+          if (!this._pagination) return;
+          this._pagination.innerHTML = "";
+
+          if (totalCount === 0) {
+            this._pagination.innerHTML = `<span class="aft-page-info">No entries</span>`;
+            return;
+          }
+
+          const unit = isGrouped ? "groups" : "entries";
+          const info = document.createElement("span");
+          info.className = "aft-page-info";
+          info.textContent = `Showing ${start}–${end} of ${totalCount} ${unit} (Page ${this._currentPage} of ${totalPages})`;
+          this._pagination.appendChild(info);
+
+          const controls = document.createElement("div");
+          controls.className = "aft-page-controls";
+
+          // First
+          const firstBtn = document.createElement("button");
+          firstBtn.className = "aft-page-btn";
+          firstBtn.textContent = "«";
+          firstBtn.title = "First Page";
+          firstBtn.disabled = this._currentPage === 1;
+          firstBtn.addEventListener("click", () => {
+            this._currentPage = 1;
+            this.refresh();
+          });
+          controls.appendChild(firstBtn);
+
+          // Prev
+          const prevBtn = document.createElement("button");
+          prevBtn.className = "aft-page-btn";
+          prevBtn.textContent = "‹ Prev";
+          prevBtn.disabled = this._currentPage === 1;
+          prevBtn.addEventListener("click", () => {
+            if (this._currentPage > 1) {
+              this._currentPage--;
+              this.refresh();
+            }
+          });
+          controls.appendChild(prevBtn);
+
+          // Numeric Page buttons
+          for (let p = 1; p <= totalPages; p++) {
+            const pBtn = document.createElement("button");
+            pBtn.className = `aft-page-btn ${p === this._currentPage ? "is-active" : ""}`;
+            pBtn.textContent = String(p);
+            pBtn.addEventListener("click", () => {
+              this._currentPage = p;
+              this.refresh();
+            });
+            controls.appendChild(pBtn);
+          }
+
+          // Next
+          const nextBtn = document.createElement("button");
+          nextBtn.className = "aft-page-btn";
+          nextBtn.textContent = "Next ›";
+          nextBtn.disabled = this._currentPage >= totalPages;
+          nextBtn.addEventListener("click", () => {
+            if (this._currentPage < totalPages) {
+              this._currentPage++;
+              this.refresh();
+            }
+          });
+          controls.appendChild(nextBtn);
+
+          // Last
+          const lastBtn = document.createElement("button");
+          lastBtn.className = "aft-page-btn";
+          lastBtn.textContent = "»";
+          lastBtn.title = "Last Page";
+          lastBtn.disabled = this._currentPage >= totalPages;
+          lastBtn.addEventListener("click", () => {
+            this._currentPage = totalPages;
+            this.refresh();
+          });
+          controls.appendChild(lastBtn);
+
+          this._pagination.appendChild(controls);
+        }
+      }
+
+      if (!customElements.get("advanced-filter-data-table")) {
+        customElements.define(
+          "advanced-filter-data-table",
+          AdvancedFilterDataTableElement,
+        );
+      }
+
+      // --- App Setup ---
+      const table = document.getElementById("advTable");
+
+      const sampleBikes = [
+        {
+          id: "BK-101",
+          model: "Trek Domane SL 7",
+          category: "Road",
+          brand: "Trek",
+          price: 6999,
+          stock: 12,
+          rating: 4.8,
+        },
+        {
+          id: "BK-102",
+          model: "Specialized Stumpjumper EVO",
+          category: "Mountain",
+          brand: "Specialized",
+          price: 5499,
+          stock: 8,
+          rating: 4.9,
+        },
+        {
+          id: "BK-103",
+          model: "Cannondale Topstone Carbon",
+          category: "Gravel",
+          brand: "Cannondale",
+          price: 3400,
+          stock: 15,
+          rating: 4.6,
+        },
+        {
+          id: "BK-104",
+          model: "Giant Defy Advanced Pro",
+          category: "Road",
+          brand: "Giant",
+          price: 4200,
+          stock: 5,
+          rating: 4.7,
+        },
+        {
+          id: "BK-105",
+          model: "Santa Cruz Hightower CC",
+          category: "Mountain",
+          brand: "Santa Cruz",
+          price: 8299,
+          stock: 3,
+          rating: 5.0,
+        },
+        {
+          id: "BK-106",
+          model: "Trek Checkpoint ALR 5",
+          category: "Gravel",
+          brand: "Trek",
+          price: 2499,
+          stock: 22,
+          rating: 4.5,
+        },
+        {
+          id: "BK-107",
+          model: "Specialized Tarmac SL8",
+          category: "Road",
+          brand: "Specialized",
+          price: 8500,
+          stock: 4,
+          rating: 4.9,
+        },
+        {
+          id: "BK-108",
+          model: "Cervelo Aspero GRX",
+          category: "Gravel",
+          brand: "Cervelo",
+          price: 3200,
+          stock: 11,
+          rating: 4.7,
+        },
+        {
+          id: "BK-109",
+          model: "Yeti SB140 Turq Edition",
+          category: "Mountain",
+          brand: "Yeti Cycles",
+          price: 9100,
+          stock: 2,
+          rating: 5.0,
+        },
+        {
+          id: "BK-110",
+          model: "BMC Roadmachine 01",
+          category: "Road",
+          brand: "BMC",
+          price: 7800,
+          stock: 6,
+          rating: 4.8,
+        },
+        {
+          id: "BK-111",
+          model: "Pinarello Dogma F Dura-Ace",
+          category: "Road",
+          brand: "Pinarello",
+          price: 13500,
+          stock: 1,
+          rating: 4.9,
+        },
+        {
+          id: "BK-112",
+          model: "Cannondale Scalpel HT",
+          category: "Mountain",
+          brand: "Cannondale",
+          price: 4800,
+          stock: 9,
+          rating: 4.6,
+        },
+        {
+          id: "BK-113",
+          model: "Giant Revolt Advanced 1",
+          category: "Gravel",
+          brand: "Giant",
+          price: 2950,
+          stock: 18,
+          rating: 4.5,
+        },
+        {
+          id: "BK-114",
+          model: "Pivot Switchblade Pro",
+          category: "Mountain",
+          brand: "Pivot",
+          price: 7400,
+          stock: 5,
+          rating: 4.9,
+        },
+        {
+          id: "BK-115",
+          model: "Trek Fuel EXe Electric",
+          category: "Mountain",
+          brand: "Trek",
+          price: 9500,
+          stock: 4,
+          rating: 4.8,
+        },
+      ];
+
+      table.columns = [
+        {
+          key: "id",
+          header: "Item ID",
+          width: "100px",
+          required: true,
+          filter: { type: "text" },
+        },
+        {
+          key: "model",
+          header: "Bicycle Model",
+          width: "250px",
+          required: true,
+          editable: true,
+          filter: { type: "text" },
+          validator: async (val) => {
+            if (!val || String(val).trim().length < 3)
+              return "Model must be at least 3 characters.";
+            return null;
+          },
+        },
+        {
+          key: "category",
+          header: "Category",
+          width: "140px",
+          editable: true,
+          filter: {
+            type: "select",
+            options: [
+              { value: "Road", label: "Road" },
+              { value: "Mountain", label: "Mountain" },
+              { value: "Gravel", label: "Gravel" },
+            ],
+          },
+          editor: {
+            type: "select",
+            options: [
+              { value: "Road", label: "Road" },
+              { value: "Mountain", label: "Mountain" },
+              { value: "Gravel", label: "Gravel" },
+            ],
+          },
+        },
+        {
+          key: "brand",
+          header: "Brand",
+          width: "140px",
+          editable: true,
+          filter: { type: "text" },
+        },
+        {
+          key: "price",
+          header: "Price ($)",
+          width: "150px",
+          editable: true,
+          filter: { type: "number-range" },
+          editor: { type: "number" },
+          validator: async (val) => {
+            if (isNaN(val) || Number(val) <= 0)
+              return "Price must be greater than $0.";
+            return null;
+          },
+        },
+        {
+          key: "stock",
+          header: "Stock Qty",
+          width: "140px",
+          editable: true,
+          filter: { type: "number-range" },
+          editor: { type: "number" },
+          validator: async (val) => {
+            if (isNaN(val) || Number(val) < 0)
+              return "Stock cannot be negative.";
+            return null;
+          },
+        },
+        {
+          key: "rating",
+          header: "Rating",
+          width: "100px",
+          filter: { type: "number-range" },
+        },
+      ];
+
+      table.options = {
+        multiExpand: true,
+        asyncDetailRenderer: async (bike) => {
+          // Simulate real-world 280ms network fetch for sub-telemetry & warehouse dossier
+          await new Promise((r) => setTimeout(r, 280));
+          return `
+          <div style="margin-bottom:0.75rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;">
+            <div>
+              <span style="font-weight:700;font-size:0.95rem;color:var(--aft-text-main);">Technical Dossier &amp; Inventory Profile: ${bike.model}</span>
+              <span style="font-size:0.75rem;color:var(--aft-text-muted);margin-left:0.5rem;">(SKU: ${bike.id})</span>
+            </div>
+            <span style="font-size:0.75rem;background:#10b98120;color:#10b981;padding:0.2rem 0.5rem;border-radius:9999px;font-weight:600;">In Stock &bull; Active Listing</span>
+          </div>
+          <div class="aft-detail-grid">
+            <div class="aft-detail-stat">
+              <div class="aft-detail-stat-lbl">Frame Geometry</div>
+              <div class="aft-detail-stat-val">Ultra-Light Monocoque Carbon</div>
+            </div>
+            <div class="aft-detail-stat">
+              <div class="aft-detail-stat-lbl">Drivetrain Group</div>
+              <div class="aft-detail-stat-val">Electronic Wireless 12-Speed</div>
+            </div>
+            <div class="aft-detail-stat">
+              <div class="aft-detail-stat-lbl">Braking System</div>
+              <div class="aft-detail-stat-val">Hydraulic Flat-Mount 160mm</div>
+            </div>
+            <div class="aft-detail-stat">
+              <div class="aft-detail-stat-lbl">Primary Fulfillment Hub</div>
+              <div class="aft-detail-stat-val">North American Central Distribution</div>
+            </div>
+          </div>
+        `;
+        },
+        presets: [
+          {
+            id: "preset-high-end",
+            name: "Premium Bikes ($5,000+)",
+            expression: {
+              id: "p-1",
+              logic: "AND",
+              rules: [
+                {
+                  id: "r-1",
+                  field: "price",
+                  operator: "greaterThan",
+                  value: 5000,
+                },
+              ],
+            },
+          },
+          {
+            id: "preset-gravel-road",
+            name: "Road & Gravel (Under $4,500)",
+            expression: {
+              id: "p-2",
+              logic: "AND",
+              rules: [
+                {
+                  id: "r-2",
+                  field: "price",
+                  operator: "lessThan",
+                  value: 4500,
+                },
+              ],
+            },
+          },
+        ],
+        quickFilters: [
+          {
+            id: "q-mountain",
+            label: "Mountain Bikes",
+            expression: {
+              id: "qm",
+              logic: "AND",
+              rules: [
+                {
+                  id: "rm",
+                  field: "category",
+                  operator: "equals",
+                  value: "Mountain",
+                },
+              ],
+            },
+          },
+          {
+            id: "q-trek",
+            label: "Trek Brand",
+            expression: {
+              id: "qt",
+              logic: "AND",
+              rules: [
+                { id: "rt", field: "brand", operator: "equals", value: "Trek" },
+              ],
+            },
+          },
+        ],
+      };
+
+      table.data = sampleBikes;
+
+      // Logging & Controls
+      const logList = document.getElementById("logList");
+      table.addEventListener("advanced-filter:expression-change", (e) => {
+        const entry = document.createElement("div");
+        entry.innerHTML = `&gt; Expression Evaluated: Rules [${e.detail.expression.rules.length}], Logic: ${e.detail.expression.logic}`;
+        logList.insertBefore(entry, logList.firstChild);
+      });
+
+      table.addEventListener("advanced-filter:group-change", (e) => {
+        const entry = document.createElement("div");
+        const gDesc =
+          e.detail.groupBy.length > 0
+            ? e.detail.groupBy.join(" &gt; ")
+            : "None (Flat)";
+        entry.innerHTML = `&gt; Row Grouping Changed: [${gDesc}]`;
+        logList.insertBefore(entry, logList.firstChild);
+      });
+
+      table.addEventListener("advanced-filter:cell-edit", (e) => {
+        const entry = document.createElement("div");
+        entry.innerHTML = `&gt; [Saved Cell Edit] Item: <strong>${e.detail.rowId}</strong>, Field: <code>${e.detail.columnKey}</code>, New Value: <strong>${e.detail.newValue}</strong> (was ${e.detail.oldValue})`;
+        logList.insertBefore(entry, logList.firstChild);
+      });
+
+      const btnGroupNone = document.getElementById("btnGroupNone");
+      const btnGroupCategory = document.getElementById("btnGroupCategory");
+      const btnGroupMulti = document.getElementById("btnGroupMulti");
+
+      function updateGroupButtons(activeBtn) {
+        [btnGroupNone, btnGroupCategory, btnGroupMulti].forEach((b) =>
+          b.classList.remove("active"),
+        );
+        activeBtn.classList.add("active");
+      }
+
+      btnGroupNone.addEventListener("click", () => {
+        updateGroupButtons(btnGroupNone);
+        table.groupBy = [];
+      });
+
+      btnGroupCategory.addEventListener("click", () => {
+        updateGroupButtons(btnGroupCategory);
+        table.groupBy = ["category"];
+      });
+
+      btnGroupMulti.addEventListener("click", () => {
+        updateGroupButtons(btnGroupMulti);
+        table.groupBy = ["category", "brand"];
+      });
+
+      document
+        .getElementById("btnClearAllFilters")
+        .addEventListener("click", () => table.clearAll());
+      document
+        .getElementById("toggleStickyFirst")
+        .addEventListener("change", (e) => {
+          if (e.target.checked)
+            table.setAttribute("sticky-first-column", "true");
+          else table.removeAttribute("sticky-first-column");
+          const entry = document.createElement("div");
+          entry.innerHTML = `&gt; Sticky First Column: <strong>${e.target.checked ? "Pinned Left" : "Unpinned (Free Scroll)"}</strong>`;
+          logList.insertBefore(entry, logList.firstChild);
+        });
+      document
+        .getElementById("toggleMultiExpand")
+        .addEventListener("change", (e) => {
+          table.options = { ...table.options, multiExpand: e.target.checked };
+          const entry = document.createElement("div");
+          entry.innerHTML = `&gt; Multi-Row Expansion: <strong>${e.target.checked ? "Enabled" : "Disabled (Accordion Single)"}</strong>`;
+          logList.insertBefore(entry, logList.firstChild);
+        });
+      document.getElementById("btnSavePreset").addEventListener("click", () => {
+        const name = prompt("Enter preset name:", "My Custom Preset");
+        if (name) table.savePreset(name);
+      });
+      document.getElementById("toggleTheme").addEventListener("change", (e) => {
+        if (e.target.checked) table.setAttribute("theme", "dark");
+        else table.removeAttribute("theme");
+      });
+    </script>
+  </body>
+</html>

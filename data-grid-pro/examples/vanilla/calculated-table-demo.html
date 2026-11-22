@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calculated Payroll Data Table Demo (Sticky Employee & Net Pay)</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --border: #334155;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #3b82f6;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      padding: 2rem;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1360px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    header {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    p.subtitle {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      max-width: 900px;
+      line-height: 1.5;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.25rem 1.5rem;
+    }
+
+    .controls-grid {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .controls-group {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .toggle-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      color: #e2e8f0;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .btn {
+      padding: 0.45rem 0.9rem;
+      border-radius: 0.375rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: #334155;
+      color: white;
+      transition: background 0.15s ease;
+    }
+
+    .btn:hover {
+      background: #475569;
+    }
+
+    .table-container-wrap {
+      background: #ffffff;
+      border-radius: 0.5rem;
+      overflow: hidden;
+    }
+
+    .log-panel {
+      margin-top: 1rem;
+      background: #090d16;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      font-family: monospace;
+      font-size: 0.8rem;
+      color: #38bdf8;
+      max-height: 160px;
+      overflow-y: auto;
+    }
+
+    .log-title {
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.7rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>Calculated Payroll Data Table (Enterprise Compensation Studio)</h1>
+      <p class="subtitle">
+        A professional, real-time reactive compensation &amp; payroll calculation table. Edit <strong>Base Salary</strong>, <strong>Bonus %</strong>, <strong>Overtime Hours</strong>, or <strong>401(k) Contribution</strong> to instantly recalculate Gross Compensation, Tax Withholdings, Benefit Deductions, and final Net Take-Home Pay.
+      </p>
+    </header>
+
+    <div class="card">
+      <div class="controls-grid">
+        <div class="controls-group">
+          <label class="toggle-label">
+            <input type="checkbox" id="toggleStickyFirst" checked />
+            <span>Sticky Employee ID (First Edge)</span>
+          </label>
+          <label class="toggle-label">
+            <input type="checkbox" id="toggleStickyLast" checked />
+            <span>Sticky Net Pay (Last Edge)</span>
+          </label>
+          <label class="toggle-label">
+            <input type="checkbox" id="toggleRtl" />
+            <span>Right-to-Left (RTL) Layout</span>
+          </label>
+          <label class="toggle-label">
+            <input type="checkbox" id="toggleDarkMode" />
+            <span>Dark Theme</span>
+          </label>
+        </div>
+
+        <div class="controls-group">
+          <button class="btn" id="btnResetData">Reset Default Payroll</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-container-wrap">
+      <calculated-data-table id="payrollTable"></calculated-data-table>
+    </div>
+
+    <!-- Usage Guide Section -->
+    <section class="card" style="margin-top: 0.5rem;" aria-label="Calculated Payroll Usage Guide">
+      <h3 style="margin: 0 0 0.75rem 0; font-size: 1.15rem; font-weight: 700; color: #ffffff; display: flex; align-items: center; gap: 0.5rem;">
+        <span>💡 How to Use Calculated Tables</span>
+      </h3>
+      <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.25rem; line-height: 1.5;">
+        Calculated tables execute reactive mathematical formulas across row fields whenever editable dependencies change.
+      </p>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+        <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border); border-radius: 0.375rem; padding: 1rem;">
+          <h4 style="margin: 0 0 0.5rem 0; font-size: 0.875rem; font-weight: 700; color: var(--primary);">1. Reactive Calculated Columns</h4>
+          <p style="margin: 0; font-size: 0.8125rem; color: var(--text-muted); line-height: 1.5;">
+            Assign a <code>calculate: (row) =&gt; number</code> function to compute values dynamically from editable inputs.
+          </p>
+          <pre style="background: #090d16; color: #38bdf8; padding: 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-top: 0.5rem; overflow-x: auto;"><code>{
+  key: 'grossComp',
+  header: 'Gross Compensation',
+  calculate: (r) => r.baseSalary + (r.baseSalary * (r.bonusPct / 100))
+}</code></pre>
+        </div>
+
+        <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border); border-radius: 0.375rem; padding: 1rem;">
+          <h4 style="margin: 0 0 0.5rem 0; font-size: 0.875rem; font-weight: 700; color: var(--primary);">2. Dual Sticky Pinned Columns</h4>
+          <p style="margin: 0; font-size: 0.8125rem; color: var(--text-muted); line-height: 1.5;">
+            Lock both the first column (Employee) and the final calculated column (Net Take-Home Pay) for seamless wide comparison.
+          </p>
+          <pre style="background: #090d16; color: #38bdf8; padding: 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-top: 0.5rem; overflow-x: auto;"><code>table.options = {
+  sticky: { stickyFirst: true, stickyLast: true }
+};</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <div class="log-panel" id="logOutput">
+      <div class="log-title">Reactive Recalculation Event Stream:</div>
+      <div id="logList">&gt; Waiting for payroll adjustments... Edit Base Salary, Bonus %, OT Hours, or 401(k) above.</div>
+    </div>
+  </div>
+
+  <script>
+    // --- Embedded Standalone Calculated Data Table Web Component ---
+    function safeFormatNumber(val, decimals = 2, prefix = '', suffix = '') {
+      if (val === null || val === undefined || isNaN(val)) return '—';
+      const num = Number(val);
+      if (!isFinite(num)) return '—';
+      return `${prefix}${num.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}${suffix}`;
+    }
+
+    class CalculatedDataTableElement extends HTMLElement {
+      constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        this._columns = [];
+        this._rows = [];
+        this._computedRows = [];
+        this._options = {
+          sticky: { stickyFirst: true, stickyLast: true },
+          pagination: { enabled: true, pageSize: 8 },
+          sorting: { enabled: true, initialSort: null },
+          search: { enabled: true, placeholder: 'Search employee name, department, role...' },
+          dir: 'ltr'
+        };
+        this._currentPage = 1;
+        this._pageSize = 8;
+        this._searchTerm = '';
+        this._sortRule = null;
+        this._totalRows = 0;
+      }
+
+      connectedCallback() {
+        this.renderDom();
+        this.setupEvents();
+        this.recalculateAll();
+        this.refresh();
+      }
+
+      get columns() { return this._columns; }
+      set columns(val) {
+        this._columns = val || [];
+        this.recalculateAll();
+        if (this.shadowRoot) { this.renderHeader(); this.refresh(); }
+      }
+
+      get data() { return this._rows; }
+      set data(val) {
+        this._rows = val || [];
+        this.recalculateAll();
+        if (this.shadowRoot) { this.refresh(); }
+      }
+
+      get options() { return this._options; }
+      set options(val) {
+        this._options = { ...this._options, ...val, sticky: { ...this._options.sticky, ...val.sticky } };
+        if (this.shadowRoot) { this.renderHeader(); this.refresh(); }
+      }
+
+      recalculateAll() {
+        this._computedRows = this._rows.map((row, idx) => {
+          const comp = { ...row };
+          for (const col of this._columns) {
+            if (typeof col.calculate === 'function') {
+              try { comp[col.key] = col.calculate(comp, idx); }
+              catch (e) { comp[col.key] = NaN; }
+            }
+          }
+          return comp;
+        });
+        this._totalRows = this._computedRows.length;
+      }
+
+      updateCellValue(rowIndex, colKey, newVal) {
+        if (rowIndex < 0 || rowIndex >= this._rows.length) return;
+        const sourceRow = this._rows[rowIndex];
+        const oldVal = sourceRow[colKey];
+        if (oldVal === newVal) return;
+
+        sourceRow[colKey] = newVal;
+        const comp = { ...sourceRow };
+        const recalcFields = [];
+
+        for (const col of this._columns) {
+          if (typeof col.calculate === 'function') {
+            const deps = col.dependencies;
+            if (!deps || deps.includes(colKey)) {
+              try {
+                comp[col.key] = col.calculate(comp, rowIndex);
+                recalcFields.push(col.key);
+              } catch (e) { comp[col.key] = NaN; }
+            }
+          }
+        }
+
+        this._rows[rowIndex] = comp;
+        this._computedRows[rowIndex] = comp;
+        this.renderBody();
+        this.renderFooter();
+
+        this.dispatchEvent(new CustomEvent('calculated-table:cell-change', {
+          detail: {
+            rowIndex,
+            columnKey: colKey,
+            oldValue: oldVal,
+            newValue: newVal,
+            updatedRow: comp,
+            recalculatedFields: recalcFields
+          },
+          bubbles: true,
+          composed: true
+        }));
+      }
+
+      setSearchTerm(term) {
+        this._searchTerm = term;
+        this._currentPage = 1;
+        this.refresh();
+      }
+
+      setSortRule(rule) {
+        this._sortRule = rule;
+        this.renderHeader();
+        this.refresh();
+      }
+
+      setPage(p) {
+        const maxPage = Math.max(1, Math.ceil(this._totalRows / this._pageSize));
+        this._currentPage = Math.max(1, Math.min(p, maxPage));
+        this.refresh();
+      }
+
+      renderDom() {
+        this.shadowRoot.innerHTML = `
+          <style>
+            :host {
+              display: block;
+              width: 100%;
+              --calc-primary: #2563eb;
+              --calc-bg: #ffffff;
+              --calc-header-bg: #f8fafc;
+              --calc-header-sticky-bg: #f1f5f9;
+              --calc-row-hover: #f1f5f9;
+              --calc-row-alt: #fdfdfe;
+              --calc-cell-sticky-bg: #ffffff;
+              --calc-cell-sticky-alt-bg: #fdfdfe;
+              --calc-border-color: #e2e8f0;
+              --calc-text-main: #0f172a;
+              --calc-text-muted: #64748b;
+              --calc-font-family: inherit;
+              --calc-font-size: 0.875rem;
+              --calc-sticky-shadow-start: 4px 0 6px -1px rgba(0, 0, 0, 0.08);
+              --calc-sticky-shadow-end: -4px 0 6px -1px rgba(0, 0, 0, 0.08);
+            }
+            :host([theme="dark"]) {
+              --calc-primary: #3b82f6;
+              --calc-bg: #0f172a;
+              --calc-header-bg: #1e293b;
+              --calc-header-sticky-bg: #334155;
+              --calc-row-hover: #1e293b;
+              --calc-row-alt: #0b1120;
+              --calc-cell-sticky-bg: #0f172a;
+              --calc-cell-sticky-alt-bg: #0b1120;
+              --calc-border-color: #334155;
+              --calc-text-main: #f8fafc;
+              --calc-text-muted: #94a3b8;
+              --calc-sticky-shadow-start: 4px 0 8px rgba(0, 0, 0, 0.4);
+              --calc-sticky-shadow-end: -4px 0 8px rgba(0, 0, 0, 0.4);
+            }
+            .calc-container {
+              font-family: var(--calc-font-family);
+              font-size: var(--calc-font-size);
+              color: var(--calc-text-main);
+              background: var(--calc-bg);
+              border: 1px solid var(--calc-border-color);
+              border-radius: 0.5rem;
+              display: flex;
+              flex-direction: column;
+              overflow: hidden;
+            }
+            .calc-toolbar {
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              padding: 0.75rem 1rem;
+              gap: 1rem;
+              border-bottom: 1px solid var(--calc-border-color);
+            }
+            .calc-search-input {
+              padding: 0.45rem 0.75rem;
+              border: 1px solid var(--calc-border-color);
+              border-radius: 0.375rem;
+              outline: none;
+              font-size: var(--calc-font-size);
+              min-width: 280px;
+              background: var(--calc-bg);
+              color: var(--calc-text-main);
+              transition: border-color 0.15s ease, box-shadow 0.15s ease;
+            }
+            .calc-search-input:focus {
+              border-color: var(--calc-primary);
+              box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+            }
+            .calc-viewport {
+              overflow-x: auto;
+              overflow-y: auto;
+              position: relative;
+              max-height: 520px;
+            }
+            .calc-table {
+              width: 100%;
+              border-collapse: separate;
+              border-spacing: 0;
+              text-align: start;
+            }
+            .calc-thead {
+              position: sticky;
+              top: 0;
+              z-index: 20;
+              background: var(--calc-header-bg);
+            }
+            .calc-th {
+              padding: 0.75rem 1rem;
+              font-weight: 600;
+              font-size: 0.75rem;
+              text-transform: uppercase;
+              letter-spacing: 0.05em;
+              color: var(--calc-text-muted);
+              background: var(--calc-header-bg);
+              border-bottom: 1px solid var(--calc-border-color);
+              white-space: nowrap;
+              user-select: none;
+              cursor: pointer;
+            }
+            .calc-th:hover {
+              background: #f1f5f9;
+            }
+            .calc-td {
+              padding: 0.65rem 0.9rem;
+              border-bottom: 1px solid var(--calc-border-color);
+              white-space: nowrap;
+              vertical-align: middle;
+            }
+            .calc-tr:hover { background: var(--calc-row-hover); }
+            .calc-tr.alt { background: var(--calc-row-alt); }
+            .calc-tr.alt:hover { background: var(--calc-row-hover); }
+
+            /* Sticky Columns */
+            .calc-sticky-first {
+              position: sticky;
+              inset-inline-start: 0;
+              z-index: 10;
+              background-color: var(--calc-cell-sticky-bg) !important;
+            }
+            .calc-th.calc-sticky-first {
+              z-index: 30;
+              background-color: var(--calc-header-sticky-bg) !important;
+            }
+            .calc-sticky-last {
+              position: sticky;
+              inset-inline-end: 0;
+              z-index: 10;
+              background-color: var(--calc-cell-sticky-bg) !important;
+            }
+            .calc-th.calc-sticky-last {
+              z-index: 30;
+              background-color: var(--calc-header-sticky-bg) !important;
+            }
+            .calc-viewport.scrolled-left .calc-sticky-first {
+              box-shadow: var(--calc-sticky-shadow-start);
+            }
+            .calc-viewport.scrolled-right .calc-sticky-last {
+              box-shadow: var(--calc-sticky-shadow-end);
+            }
+
+            .calc-tfoot {
+              position: sticky;
+              bottom: 0;
+              z-index: 25;
+              background: var(--calc-header-bg);
+              box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.05);
+            }
+            .calc-tfoot-row {
+              background: var(--calc-header-bg);
+              font-weight: 700;
+            }
+            .calc-tfoot-td {
+              padding: 0.75rem 1rem;
+              border-top: 2px solid var(--calc-border-color);
+              border-bottom: 1px solid var(--calc-border-color);
+              white-space: nowrap;
+              vertical-align: middle;
+              color: var(--calc-text-main);
+              background: var(--calc-header-bg);
+            }
+            .calc-tfoot-td.calc-sticky-first {
+              z-index: 35;
+              background-color: var(--calc-header-sticky-bg) !important;
+            }
+            .calc-tfoot-td.calc-sticky-last {
+              z-index: 35;
+              background-color: var(--calc-header-sticky-bg) !important;
+            }
+
+            /* Professional Editable Textboxes */
+            .calc-input-group {
+              position: relative;
+              display: inline-flex;
+              align-items: center;
+              width: 100%;
+              max-width: 130px;
+            }
+            .calc-input-affix {
+              position: absolute;
+              left: 0.5rem;
+              font-size: 0.75rem;
+              color: var(--calc-text-muted);
+              pointer-events: none;
+              font-weight: 600;
+            }
+            .calc-input-affix-suffix {
+              position: absolute;
+              right: 0.5rem;
+              font-size: 0.75rem;
+              color: var(--calc-text-muted);
+              pointer-events: none;
+              font-weight: 600;
+            }
+            .calc-cell-editor {
+              width: 100%;
+              padding: 0.35rem 0.5rem;
+              font-size: 0.8125rem;
+              font-weight: 500;
+              font-variant-numeric: tabular-nums;
+              border: 1px solid var(--calc-border-color);
+              border-radius: 0.375rem;
+              background: #ffffff;
+              color: var(--calc-text-main);
+              transition: all 0.15s ease-in-out;
+              box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+            }
+            :host([theme="dark"]) .calc-cell-editor {
+              background: #1e293b;
+              border-color: #334155;
+            }
+            .calc-cell-editor.has-prefix {
+              padding-left: 1.25rem;
+            }
+            .calc-cell-editor.has-suffix {
+              padding-right: 1.5rem;
+            }
+            .calc-cell-editor:hover {
+              border-color: #94a3b8;
+            }
+            .calc-cell-editor:focus {
+              outline: none;
+              border-color: var(--calc-primary);
+              box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+              background: #ffffff;
+            }
+            :host([theme="dark"]) .calc-cell-editor:focus {
+              background: #0f172a;
+            }
+
+            .calc-pagination {
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              padding: 0.75rem 1rem;
+              border-top: 1px solid var(--calc-border-color);
+              font-size: 0.8125rem;
+              color: var(--calc-text-muted);
+            }
+            .calc-btn {
+              padding: 0.3rem 0.65rem;
+              border-radius: 0.375rem;
+              border: 1px solid var(--calc-border-color);
+              background: var(--calc-bg);
+              color: var(--calc-text-main);
+              font-size: 0.8125rem;
+              font-weight: 500;
+              cursor: pointer;
+            }
+            .calc-btn:hover:not(:disabled) { background: var(--calc-row-hover); }
+            .calc-btn.active {
+              background: var(--calc-primary);
+              color: white;
+              border-color: var(--calc-primary);
+            }
+            .calc-btn:disabled {
+              opacity: 0.5;
+              cursor: not-allowed;
+            }
+            .calc-badge {
+              padding: 0.2rem 0.55rem;
+              font-size: 0.75rem;
+              font-weight: 600;
+              border-radius: 9999px;
+              background: #eff6ff;
+              color: var(--calc-primary);
+              border: 1px solid rgba(37, 99, 235, 0.2);
+            }
+          </style>
+
+          <div class="calc-container">
+            <div class="calc-toolbar">
+              <input type="text" class="calc-search-input" placeholder="Search employee name, department, role..." />
+              <span class="calc-badge calc-meta">0 records</span>
+            </div>
+            <div class="calc-viewport">
+              <table class="calc-table">
+                <thead class="calc-thead"><tr class="calc-header-row"></tr></thead>
+                <tbody class="calc-tbody"></tbody>
+                <tfoot class="calc-tfoot"><tr class="calc-tfoot-row"></tr></tfoot>
+              </table>
+            </div>
+            <div class="calc-pagination"></div>
+          </div>
+        `;
+
+        this._viewport = this.shadowRoot.querySelector('.calc-viewport');
+        this._headerRow = this.shadowRoot.querySelector('.calc-header-row');
+        this._tbody = this.shadowRoot.querySelector('.calc-tbody');
+        this._tfootRow = this.shadowRoot.querySelector('.calc-tfoot-row');
+        this._pagination = this.shadowRoot.querySelector('.calc-pagination');
+        this._meta = this.shadowRoot.querySelector('.calc-meta');
+        this._searchInput = this.shadowRoot.querySelector('.calc-search-input');
+      }
+
+      setupEvents() {
+        this._searchInput.addEventListener('input', (e) => this.setSearchTerm(e.target.value.trim()));
+        
+        const checkShadows = () => {
+          const sl = Math.abs(this._viewport.scrollLeft);
+          const max = this._viewport.scrollWidth - this._viewport.clientWidth;
+          this._viewport.classList.toggle('scrolled-left', sl > 2);
+          this._viewport.classList.toggle('scrolled-right', max - sl > 2);
+        };
+        this._viewport.addEventListener('scroll', checkShadows, { passive: true });
+        setTimeout(checkShadows, 50);
+      }
+
+      renderHeader() {
+        this._headerRow.innerHTML = '';
+        const n = this._columns.length;
+        this._columns.forEach((col, idx) => {
+          const th = document.createElement('th');
+          th.className = 'calc-th';
+          if (idx === 0 && this._options.sticky?.stickyFirst !== false) th.classList.add('calc-sticky-first');
+          if (idx === n - 1 && this._options.sticky?.stickyLast !== false) th.classList.add('calc-sticky-last');
+          if (col.width) th.style.width = col.width;
+
+          let label = col.header;
+          if (this._sortRule?.column === col.key) {
+            label += ` ${this._sortRule.direction === 'asc' ? '▲' : '▼'}`;
+          }
+          th.textContent = label;
+
+          th.addEventListener('click', () => {
+            const next = this._sortRule?.column === col.key && this._sortRule.direction === 'asc' ? 'desc' : 'asc';
+            this.setSortRule({ column: col.key, direction: next });
+          });
+          this._headerRow.appendChild(th);
+        });
+      }
+
+      refresh() {
+        this.renderBody();
+        this.renderFooter();
+        this.renderPagination();
+        this._meta.textContent = `${this._totalRows} records`;
+      }
+
+      renderBody() {
+        this._tbody.innerHTML = '';
+        let list = [...this._computedRows];
+
+        if (this._searchTerm) {
+          const q = this._searchTerm.toLowerCase();
+          list = list.filter(r => Object.values(r).some(v => String(v).toLowerCase().includes(q)));
+        }
+
+        if (this._sortRule) {
+          const { column, direction } = this._sortRule;
+          list.sort((a, b) => {
+            const va = a[column]; const vb = b[column];
+            if (va === vb) return 0;
+            return (va > vb ? 1 : -1) * (direction === 'asc' ? 1 : -1);
+          });
+        }
+
+        this._totalRows = list.length;
+        const start = (this._currentPage - 1) * this._pageSize;
+        const pageItems = list.slice(start, start + this._pageSize);
+
+        if (pageItems.length === 0) {
+          this._tbody.innerHTML = `<tr><td colspan="${this._columns.length}" style="text-align:center;padding:2rem;color:#64748b;">No employee records match</td></tr>`;
+          return;
+        }
+
+        const n = this._columns.length;
+        const frag = document.createDocumentFragment();
+
+        pageItems.forEach((row, rIdx) => {
+          const globalIdx = start + rIdx;
+          const tr = document.createElement('tr');
+          tr.className = `calc-tr ${rIdx % 2 === 1 ? 'alt' : ''}`;
+
+          this._columns.forEach((col, cIdx) => {
+            const td = document.createElement('td');
+            td.className = 'calc-td';
+            if (cIdx === 0 && this._options.sticky?.stickyFirst !== false) td.classList.add('calc-sticky-first');
+            if (cIdx === n - 1 && this._options.sticky?.stickyLast !== false) td.classList.add('calc-sticky-last');
+            if (col.width) td.style.width = col.width;
+
+            const val = row[col.key];
+
+            if (col.editable) {
+              const group = document.createElement('div');
+              group.className = 'calc-input-group';
+
+              if (col.editorPrefix) {
+                const prefix = document.createElement('span');
+                prefix.className = 'calc-input-affix';
+                prefix.textContent = col.editorPrefix;
+                group.appendChild(prefix);
+              }
+
+              const inp = document.createElement('input');
+              inp.className = `calc-cell-editor ${col.editorPrefix ? 'has-prefix' : ''} ${col.editorSuffix ? 'has-suffix' : ''}`;
+              inp.type = col.editorType === 'number' ? 'number' : 'text';
+              if (col.editorMin !== undefined) inp.min = String(col.editorMin);
+              if (col.editorStep !== undefined) inp.step = String(col.editorStep);
+              inp.value = val !== undefined ? val : '';
+
+              inp.addEventListener('change', (e) => {
+                const nv = col.editorType === 'number' ? Number(e.target.value) : e.target.value;
+                this.updateCellValue(globalIdx, col.key, nv);
+              });
+              group.appendChild(inp);
+
+              if (col.editorSuffix) {
+                const suffix = document.createElement('span');
+                suffix.className = 'calc-input-affix-suffix';
+                suffix.textContent = col.editorSuffix;
+                group.appendChild(suffix);
+              }
+
+              td.appendChild(group);
+            } else if (col.formatter) {
+              td.innerHTML = String(col.formatter(val, row));
+            } else {
+              td.textContent = val !== undefined ? String(val) : '—';
+            }
+            tr.appendChild(td);
+          });
+          frag.appendChild(tr);
+        });
+
+        this._tbody.appendChild(frag);
+      }
+
+      renderFooter() {
+        if (!this._tfootRow) return;
+        this._tfootRow.innerHTML = '';
+        const n = this._columns.length;
+        const rows = this._computedRows || [];
+
+        // Precompute column aggregates across the entire dataset
+        const totals = {};
+        for (const col of this._columns) {
+          if (typeof col.footerSummary === 'function') {
+            totals[col.key] = col.footerSummary(rows, this._columns);
+          } else if (['baseSalary', 'bonusAmount', 'overtimePay', 'grossPay', 'taxWithholding', 'benefitsDeduction', 'retirement401k', 'netPay'].includes(col.key)) {
+            const sum = rows.reduce((acc, r) => acc + (Number(r[col.key]) || 0), 0);
+            totals[col.key] = sum;
+          }
+        }
+
+        this._columns.forEach((col, cIdx) => {
+          const td = document.createElement('td');
+          td.className = 'calc-tfoot-td';
+          if (cIdx === 0 && this._options.sticky?.stickyFirst !== false) td.classList.add('calc-sticky-first');
+          if (cIdx === n - 1 && this._options.sticky?.stickyLast !== false) td.classList.add('calc-sticky-last');
+          if (col.width) td.style.width = col.width;
+
+          if (cIdx === 0) {
+            td.innerHTML = '<span style="font-weight:700; text-transform:uppercase; font-size:0.75rem; letter-spacing:0.05em; color:var(--calc-text-muted);">Payroll Totals</span>';
+          } else if (col.footerFormatter) {
+            td.innerHTML = String(col.footerFormatter(totals[col.key], totals, rows));
+          } else if (totals[col.key] !== undefined) {
+            td.innerHTML = `<strong>${safeFormatNumber(totals[col.key], 2, '$')}</strong>`;
+          } else {
+            td.textContent = '';
+          }
+          this._tfootRow.appendChild(td);
+        });
+      }
+
+      renderPagination() {
+        const totalPages = Math.max(1, Math.ceil(this._totalRows / this._pageSize));
+        this._pagination.innerHTML = `
+          <div>Page <strong>${this._currentPage}</strong> of <strong>${totalPages}</strong> (${this._totalRows} total employees)</div>
+          <div style="display:flex;gap:0.25rem;">
+            <button class="calc-btn prev" ${this._currentPage <= 1 ? 'disabled' : ''}>Prev</button>
+            <span class="calc-btn active">${this._currentPage}</span>
+            <button class="calc-btn next" ${this._currentPage >= totalPages ? 'disabled' : ''}>Next</button>
+          </div>
+        `;
+        this._pagination.querySelector('.prev')?.addEventListener('click', () => this.setPage(this._currentPage - 1));
+        this._pagination.querySelector('.next')?.addEventListener('click', () => this.setPage(this._currentPage + 1));
+      }
+    }
+
+    if (!customElements.get('calculated-data-table')) {
+      customElements.define('calculated-data-table', CalculatedDataTableElement);
+    }
+
+    // --- Payroll Data Setup ---
+    const table = document.getElementById('payrollTable');
+
+    const defaultPayrollData = [
+      { empId: 'EMP-1001', name: 'Alice Freeman', department: 'Engineering', role: 'Staff UI Architect', baseSalary: 165000, bonusPct: 15, otHours: 4, benefitTier: 450, k401kPct: 8 },
+      { empId: 'EMP-1002', name: 'Bob Henderson', department: 'Cloud Infra', role: 'DevOps Lead', baseSalary: 152000, bonusPct: 12, otHours: 12, benefitTier: 520, k401kPct: 6 },
+      { empId: 'EMP-1003', name: 'Clara Oswald', department: 'Product Design', role: 'Principal Designer', baseSalary: 148000, bonusPct: 10, otHours: 0, benefitTier: 380, k401kPct: 10 },
+      { empId: 'EMP-1004', name: 'David Kim', department: 'Engineering', role: 'Senior React Engineer', baseSalary: 135000, bonusPct: 8, otHours: 8, benefitTier: 420, k401kPct: 5 },
+      { empId: 'EMP-1005', name: 'Elena Rostova', department: 'Product Design', role: 'UX Lead', baseSalary: 128000, bonusPct: 10, otHours: 2, benefitTier: 380, k401kPct: 7 },
+      { empId: 'EMP-1006', name: 'Frank Zhang', department: 'Sales & Growth', role: 'VP Enterprise Sales', baseSalary: 195000, bonusPct: 25, otHours: 0, benefitTier: 600, k401kPct: 9 },
+      { empId: 'EMP-1007', name: 'Grace Hopper', department: 'Cloud Infra', role: 'Principal SRE', baseSalary: 178000, bonusPct: 15, otHours: 16, benefitTier: 500, k401kPct: 8 },
+      { empId: 'EMP-1008', name: 'Henry Ford', department: 'Operations', role: 'Operations Director', baseSalary: 142000, bonusPct: 12, otHours: 6, benefitTier: 450, k401kPct: 6 },
+      { empId: 'EMP-1009', name: 'Iris West', department: 'Sales & Growth', role: 'Senior Account Exec', baseSalary: 118000, bonusPct: 20, otHours: 5, benefitTier: 380, k401kPct: 5 },
+      { empId: 'EMP-1010', name: 'James Wilson', department: 'Operations', role: 'Workplace Manager', baseSalary: 105000, bonusPct: 6, otHours: 10, benefitTier: 350, k401kPct: 4 },
+      { empId: 'EMP-1011', name: 'Katherine Pierce', department: 'Engineering', role: 'Security Architect', baseSalary: 168000, bonusPct: 14, otHours: 6, benefitTier: 480, k401kPct: 8 },
+      { empId: 'EMP-1012', name: 'Liam Gallagher', department: 'Product Design', role: 'Motion Designer', baseSalary: 112000, bonusPct: 8, otHours: 0, benefitTier: 350, k401kPct: 5 },
+      { empId: 'EMP-1013', name: 'Maya Lin', department: 'Engineering', role: 'Fullstack Dev', baseSalary: 124000, bonusPct: 10, otHours: 14, benefitTier: 380, k401kPct: 6 },
+      { empId: 'EMP-1014', name: 'Nathan Drake', department: 'Operations', role: 'Procurement Specialist', baseSalary: 98000, bonusPct: 5, otHours: 8, benefitTier: 350, k401kPct: 4 },
+      { empId: 'EMP-1015', name: 'Olivia Dunham', department: 'Cloud Infra', role: 'Platform Engineer', baseSalary: 146000, bonusPct: 10, otHours: 4, benefitTier: 420, k401kPct: 7 },
+      { empId: 'EMP-1016', name: 'Peter Parker', department: 'Engineering', role: 'Frontend Junior', baseSalary: 92000, bonusPct: 6, otHours: 15, benefitTier: 320, k401kPct: 5 }
+    ];
+
+    table.columns = [
+      // Pinned First Edge: Employee ID
+      { key: 'empId', header: 'Emp ID', width: '110px' },
+
+      // Identity Info
+      { key: 'name', header: 'Employee Name', width: '180px' },
+      { key: 'department', header: 'Department', width: '140px' },
+      { key: 'role', header: 'Position / Role', width: '170px' },
+
+      // Professional Editable Source Columns
+      {
+        key: 'baseSalary',
+        header: 'Base Salary',
+        width: '140px',
+        editable: true,
+        editorType: 'number',
+        editorPrefix: '$',
+        editorStep: 1000,
+        editorMin: 30000,
+        footerFormatter: (val) => `<strong style="color:#2563eb;">${safeFormatNumber(val, 0, '$')}</strong>`
+      },
+      {
+        key: 'bonusPct',
+        header: 'Bonus %',
+        width: '110px',
+        editable: true,
+        editorType: 'number',
+        editorSuffix: '%',
+        editorStep: 1,
+        editorMin: 0,
+        footerFormatter: (_, __, rows) => {
+          const avg = rows.reduce((acc, r) => acc + (Number(r.bonusPct) || 0), 0) / (rows.length || 1);
+          return `<span style="font-size:0.8rem; color:var(--calc-text-muted);">Avg: ${safeFormatNumber(avg, 1, '', '%')}</span>`;
+        }
+      },
+      {
+        key: 'otHours',
+        header: 'OT Hours',
+        width: '110px',
+        editable: true,
+        editorType: 'number',
+        editorSuffix: 'hrs',
+        editorStep: 1,
+        editorMin: 0,
+        footerFormatter: (val) => `<strong style="color:#38bdf8;">${safeFormatNumber(val, 0)} hrs</strong>`
+      },
+      {
+        key: 'k401kPct',
+        header: '401(k) %',
+        width: '110px',
+        editable: true,
+        editorType: 'number',
+        editorSuffix: '%',
+        editorStep: 0.5,
+        editorMin: 0,
+        footerFormatter: (_, __, rows) => {
+          const avg = rows.reduce((acc, r) => acc + (Number(r.k401kPct) || 0), 0) / (rows.length || 1);
+          return `<span style="font-size:0.8rem; color:var(--calc-text-muted);">Avg: ${safeFormatNumber(avg, 1, '', '%')}</span>`;
+        }
+      },
+
+      // Reactive Calculated Compensation Fields
+      {
+        key: 'bonusAmount',
+        header: 'Bonus Pay',
+        width: '130px',
+        dependencies: ['baseSalary', 'bonusPct'],
+        calculate: (row) => (row.baseSalary * ((row.bonusPct || 0) / 100)),
+        formatter: (val) => safeFormatNumber(val, 2, '$'),
+        footerFormatter: (val) => `<strong>${safeFormatNumber(val, 2, '$')}</strong>`
+      },
+      {
+        key: 'overtimePay',
+        header: 'Overtime Pay',
+        width: '130px',
+        dependencies: ['baseSalary', 'otHours'],
+        calculate: (row) => {
+          // Standard FLSA hourly equivalent: (Base / 2080 hours) * 1.5x OT rate * OT Hours
+          const hourlyRate = (row.baseSalary || 0) / 2080;
+          return hourlyRate * 1.5 * (row.otHours || 0);
+        },
+        formatter: (val) => safeFormatNumber(val, 2, '$'),
+        footerFormatter: (val) => `<strong>${safeFormatNumber(val, 2, '$')}</strong>`
+      },
+      {
+        key: 'grossPay',
+        header: 'Gross Total',
+        width: '140px',
+        dependencies: ['baseSalary', 'bonusAmount', 'overtimePay', 'bonusPct', 'otHours'],
+        calculate: (row) => {
+          const bonus = row.baseSalary * ((row.bonusPct || 0) / 100);
+          const hourlyRate = (row.baseSalary || 0) / 2080;
+          const ot = hourlyRate * 1.5 * (row.otHours || 0);
+          return (Number(row.baseSalary) || 0) + bonus + ot;
+        },
+        formatter: (val) => `<strong style="color:#0f172a;">${safeFormatNumber(val, 2, '$')}</strong>`,
+        footerFormatter: (val) => `<strong style="color:#2563eb; font-size:0.95rem;">${safeFormatNumber(val, 2, '$')}</strong>`
+      },
+      {
+        key: 'taxWithholding',
+        header: 'Tax Deductions',
+        width: '140px',
+        dependencies: ['grossPay', 'baseSalary', 'bonusPct', 'otHours'],
+        calculate: (row) => {
+          // Progressive blended tax calculation: ~24% effective federal/state withholding
+          const bonus = row.baseSalary * ((row.bonusPct || 0) / 100);
+          const hourlyRate = (row.baseSalary || 0) / 2080;
+          const ot = hourlyRate * 1.5 * (row.otHours || 0);
+          const gross = (Number(row.baseSalary) || 0) + bonus + ot;
+          return gross * 0.245;
+        },
+        formatter: (val) => `<span style="color:#ef4444;">${safeFormatNumber(val, 2, '-$')}</span>`,
+        footerFormatter: (val) => `<strong style="color:#ef4444;">${safeFormatNumber(val, 2, '-$')}</strong>`
+      },
+      {
+        key: 'retirement401k',
+        header: '401(k) Contribution',
+        width: '140px',
+        dependencies: ['baseSalary', 'k401kPct'],
+        calculate: (row) => (row.baseSalary * ((row.k401kPct || 0) / 100)),
+        formatter: (val) => `<span style="color:#d97706;">${safeFormatNumber(val, 2, '-$')}</span>`,
+        footerFormatter: (val) => `<strong style="color:#d97706;">${safeFormatNumber(val, 2, '-$')}</strong>`
+      },
+
+      // Pinned Last Edge: Net Take-Home Pay
+      {
+        key: 'netPay',
+        header: 'Net Take-Home',
+        width: '160px',
+        dependencies: ['grossPay', 'taxWithholding', 'benefitTier', 'retirement401k', 'baseSalary', 'bonusPct', 'otHours', 'k401kPct'],
+        calculate: (row) => {
+          const bonus = row.baseSalary * ((row.bonusPct || 0) / 100);
+          const hourlyRate = (row.baseSalary || 0) / 2080;
+          const ot = hourlyRate * 1.5 * (row.otHours || 0);
+          const gross = (Number(row.baseSalary) || 0) + bonus + ot;
+          const tax = gross * 0.245;
+          const k401 = row.baseSalary * ((row.k401kPct || 0) / 100);
+          const health = (row.benefitTier || 0) * 12; // Annualized benefits
+          return gross - tax - k401 - health;
+        },
+        formatter: (val) => `<strong style="color:#16a34a; font-size:0.95rem;">${safeFormatNumber(val, 2, '$')}</strong>`,
+        footerFormatter: (val) => `<strong style="color:#16a34a; font-size:1.05rem;">${safeFormatNumber(val, 2, '$')}</strong>`
+      }
+    ];
+
+    table.data = defaultPayrollData;
+
+    // Listen to real-time recalculations
+    const logList = document.getElementById('logList');
+    table.addEventListener('calculated-table:cell-change', (e) => {
+      const { rowIndex, columnKey, oldValue, newValue, updatedRow, recalculatedFields } = e.detail;
+      const entry = document.createElement('div');
+      entry.innerHTML = `&gt; [Employee ${updatedRow.empId} &bull; ${updatedRow.name}]: Adjusted <strong>${columnKey}</strong> from <code>${oldValue}</code> &rarr; <code>${newValue}</code> &bull; Recalculated: [${recalculatedFields.join(', ')}] &rarr; New Net Take-Home: <strong style="color:#16a34a;">${safeFormatNumber(updatedRow.netPay, 2, '$')}</strong>`;
+      logList.insertBefore(entry, logList.firstChild);
+    });
+
+    // Control Toggles
+    document.getElementById('toggleStickyFirst').addEventListener('change', (e) => {
+      table.options = { sticky: { stickyFirst: e.target.checked } };
+    });
+
+    document.getElementById('toggleStickyLast').addEventListener('change', (e) => {
+      table.options = { sticky: { stickyLast: e.target.checked } };
+    });
+
+    document.getElementById('toggleRtl').addEventListener('change', (e) => {
+      const isRtl = e.target.checked;
+      table.setAttribute('dir', isRtl ? 'rtl' : 'ltr');
+      table.options = { dir: isRtl ? 'rtl' : 'ltr' };
+    });
+
+    document.getElementById('toggleDarkMode').addEventListener('change', (e) => {
+      if (e.target.checked) table.setAttribute('theme', 'dark');
+      else table.removeAttribute('theme');
+    });
+
+    document.getElementById('btnResetData').addEventListener('click', () => {
+      table.data = JSON.parse(JSON.stringify(defaultPayrollData));
+      logList.innerHTML = `&gt; Restored default payroll records.`;
+    });
+  </script>
+</body>
+</html>

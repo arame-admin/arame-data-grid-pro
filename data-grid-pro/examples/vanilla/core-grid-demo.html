@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Core Data Grid Demo — arame-data-grid-pro</title>
+  <style>
+    :root, [data-theme="light"] {
+      --pdg-primary: #2563eb;
+      --pdg-primary-hover: #1d4ed8;
+      --pdg-bg-surface: #ffffff;
+      --pdg-bg-subtle: #f8fafc;
+      --pdg-bg-hover: #f1f5f9;
+      --pdg-text-main: #0f172a;
+      --pdg-text-muted: #64748b;
+      --pdg-border-color: #e2e8f0;
+      --pdg-focus-ring: rgba(37, 99, 235, 0.35);
+      --pdg-radius: 0.5rem;
+      --pdg-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+      --pdg-cell-py: 0.75rem;
+      --pdg-cell-px: 1rem;
+    }
+
+    [data-theme="dark"] {
+      --pdg-primary: #3b82f6;
+      --pdg-primary-hover: #60a5fa;
+      --pdg-bg-surface: #0f172a;
+      --pdg-bg-subtle: #1e293b;
+      --pdg-bg-hover: #334155;
+      --pdg-text-main: #f8fafc;
+      --pdg-text-muted: #94a3b8;
+      --pdg-border-color: #334155;
+      --pdg-focus-ring: rgba(59, 130, 246, 0.4);
+      --pdg-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
+    }
+
+    body {
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      padding: 2rem;
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+
+    .demo-header {
+      margin-bottom: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .demo-header h1 {
+      margin: 0 0 0.5rem 0;
+      font-size: 1.5rem;
+    }
+    .demo-header p {
+      margin: 0;
+      color: #64748b;
+      font-size: 0.875rem;
+    }
+    .demo-links {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+    }
+    .demo-links a {
+      color: var(--pdg-primary);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 600;
+      padding: 0.4rem 0.8rem;
+      border: 1px solid var(--pdg-border-color);
+      background: #ffffff;
+      border-radius: 0.375rem;
+    }
+    .demo-links a:hover {
+      background: var(--pdg-bg-hover);
+    }
+
+    pro-data-grid {
+      display: block;
+      color: var(--pdg-text-main);
+      background-color: var(--pdg-bg-surface);
+      border: 1px solid var(--pdg-border-color);
+      border-radius: var(--pdg-radius);
+      box-shadow: var(--pdg-shadow);
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+
+    pro-data-grid * {
+      box-sizing: border-box;
+    }
+
+    pro-data-grid[density="compact"] {
+      --pdg-cell-py: 0.375rem;
+      --pdg-cell-px: 0.75rem;
+      font-size: 0.8125rem;
+    }
+    pro-data-grid[density="comfortable"] {
+      --pdg-cell-py: 0.75rem;
+      --pdg-cell-px: 1rem;
+      font-size: 0.875rem;
+    }
+    pro-data-grid[density="spacious"] {
+      --pdg-cell-py: 1.125rem;
+      --pdg-cell-px: 1.25rem;
+      font-size: 1rem;
+    }
+
+    .pdg-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      background-color: var(--pdg-bg-subtle);
+      border-bottom: 1px solid var(--pdg-border-color);
+    }
+    .pdg-toolbar-left, .pdg-toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* Polished Form Controls */
+    .pdg-search-input {
+      height: 2.25rem;
+      padding: 0.375rem 0.75rem;
+      font-size: 0.875rem;
+      font-family: inherit;
+      border: 1px solid var(--pdg-border-color);
+      border-radius: var(--pdg-radius);
+      background-color: var(--pdg-bg-surface);
+      color: var(--pdg-text-main);
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      min-width: 260px;
+    }
+    .pdg-search-input:focus {
+      border-color: var(--pdg-primary);
+      box-shadow: 0 0 0 3px var(--pdg-focus-ring);
+    }
+    .pdg-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 2.25rem;
+      padding: 0.375rem 0.875rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      border-radius: var(--pdg-radius);
+      border: 1px solid var(--pdg-border-color);
+      background-color: var(--pdg-bg-surface);
+      color: var(--pdg-text-main);
+      cursor: pointer;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
+    .pdg-btn:hover:not(:disabled) {
+      background-color: var(--pdg-bg-hover);
+      border-color: #cbd5e1;
+    }
+    .pdg-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .pdg-btn:focus-visible {
+      outline: 2px solid var(--pdg-primary);
+      outline-offset: 1px;
+    }
+    .pdg-btn-sm {
+      height: 1.875rem;
+      padding: 0.25rem 0.5rem;
+      font-size: 0.8125rem;
+    }
+
+    .pdg-checkbox {
+      width: 1.125rem;
+      height: 1.125rem;
+      cursor: pointer;
+      accent-color: var(--pdg-primary);
+      border-radius: 0.25rem;
+    }
+
+    .pdg-table-container {
+      overflow-x: auto;
+      max-width: 100%;
+    }
+    .pdg-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+    .pdg-thead {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background-color: var(--pdg-bg-subtle);
+      border-bottom: 2px solid var(--pdg-border-color);
+    }
+    .pdg-th {
+      padding: var(--pdg-cell-py) var(--pdg-cell-px);
+      font-weight: 600;
+      color: var(--pdg-text-muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      user-select: none;
+      white-space: nowrap;
+    }
+    .pdg-th-inner {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .pdg-sort-icon {
+      font-size: 0.75rem;
+      color: var(--pdg-text-muted);
+    }
+    .pdg-sortable {
+      cursor: pointer;
+    }
+    .pdg-sortable:hover {
+      color: var(--pdg-text-main);
+    }
+    .pdg-tbody .pdg-row {
+      border-bottom: 1px solid var(--pdg-border-color);
+      transition: background-color 0.15s ease;
+    }
+    .pdg-tbody .pdg-row:hover {
+      background-color: var(--pdg-bg-hover);
+    }
+    .pdg-tbody .pdg-row.pdg-row-selected {
+      background-color: rgba(37, 99, 235, 0.08);
+    }
+    .pdg-td {
+      padding: var(--pdg-cell-py) var(--pdg-cell-px);
+      color: var(--pdg-text-main);
+      vertical-align: middle;
+    }
+    .pdg-detail-row {
+      background-color: var(--pdg-bg-subtle);
+      border-bottom: 1px solid var(--pdg-border-color);
+    }
+    .pdg-footer {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1rem;
+      border-top: 1px solid var(--pdg-border-color);
+      background-color: var(--pdg-bg-subtle);
+      gap: 0.5rem;
+    }
+    .pdg-pagination-info {
+      font-size: 0.875rem;
+      color: var(--pdg-text-muted);
+    }
+    .pdg-pagination-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    @media (max-width: 640px) {
+      pro-data-grid[mobile-layout="card"] .pdg-table,
+      pro-data-grid[mobile-layout="card"] .pdg-thead,
+      pro-data-grid[mobile-layout="card"] .pdg-tbody,
+      pro-data-grid[mobile-layout="card"] .pdg-th,
+      pro-data-grid[mobile-layout="card"] .pdg-td,
+      pro-data-grid[mobile-layout="card"] .pdg-row {
+        display: block;
+      }
+      pro-data-grid[mobile-layout="card"] .pdg-thead {
+        display: none;
+      }
+      pro-data-grid[mobile-layout="card"] .pdg-row {
+        margin: 0.75rem;
+        border: 1px solid var(--pdg-border-color);
+        border-radius: var(--pdg-radius);
+        padding: 0.5rem;
+        box-shadow: var(--pdg-shadow);
+      }
+      pro-data-grid[mobile-layout="card"] .pdg-td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px dashed var(--pdg-border-color);
+        padding: 0.5rem 0.25rem;
+      }
+      pro-data-grid[mobile-layout="card"] .pdg-td:last-child {
+        border-bottom: none;
+      }
+      pro-data-grid[mobile-layout="card"] .pdg-td::before {
+        content: attr(data-header);
+        font-weight: 600;
+        color: var(--pdg-text-muted);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="demo-header">
+    <div>
+      <h1>Enterprise Fleet Management Grid</h1>
+      <p>Standalone live demo running pure TypeScript Web Components with zero CORS / server dependencies.</p>
+    </div>
+    <div class="demo-links">
+      <a href="index.html">&larr; Demo Gallery</a>
+      <a href="configurable-table-demo.html">⚙️ Configurable Studio</a>
+      <a href="docs.html">📖 Documentation</a>
+    </div>
+  </div>
+
+  <pro-data-grid id="fleet-grid" density="comfortable"></pro-data-grid>
+
+  <!-- Usage & Developer Integration Guide -->
+  <section style="margin-top: 2rem; background: #ffffff; border: 1px solid var(--pdg-border-color); border-radius: var(--pdg-radius); padding: 1.5rem; box-shadow: var(--pdg-shadow);" aria-label="Core Grid Usage Guide">
+    <h2 style="margin: 0 0 0.75rem 0; font-size: 1.25rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 0.5rem;">
+      <span>💡 How to Use the Core Grid</span>
+    </h2>
+    <p style="color: #64748b; font-size: 0.875rem; margin-bottom: 1.25rem; line-height: 1.5;">
+      The Core Grid provides the foundational, zero-dependency Web Component implementation for high-volume enterprise data tables. Below is how its primary capabilities are initialized and configured in code:
+    </p>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+      <div style="background: #f8fafc; border: 1px solid var(--pdg-border-color); border-radius: 0.375rem; padding: 1rem;">
+        <h3 style="margin: 0 0 0.5rem 0; font-size: 0.875rem; font-weight: 700; color: var(--pdg-primary);">1. Initialize &amp; Bind Columns</h3>
+        <p style="margin: 0; font-size: 0.8125rem; color: #475569; line-height: 1.5;">
+          Define column definitions with <code>id</code>, <code>header</code>, <code>field</code>, and optional flags like <code>sortable</code>, <code>renderer</code>, and <code>formatter</code>.
+        </p>
+        <pre style="background: #0f172a; color: #38bdf8; padding: 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-top: 0.5rem; overflow-x: auto;"><code>const grid = document.getElementById('grid');
+grid.columns = [
+  { id: 'vin', header: 'VIN', field: 'vin', sortable: true },
+  { id: 'status', header: 'Status', field: 'status', renderer: renderBadge }
+];
+grid.rows = dataset;</code></pre>
+      </div>
+
+      <div style="background: #f8fafc; border: 1px solid var(--pdg-border-color); border-radius: 0.375rem; padding: 1rem;">
+        <h3 style="margin: 0 0 0.5rem 0; font-size: 0.875rem; font-weight: 700; color: var(--pdg-primary);">2. Selection &amp; Master-Detail</h3>
+        <p style="margin: 0; font-size: 0.8125rem; color: #475569; line-height: 1.5;">
+          Configure row selection checkboxes and expandable detail accordions via <code>grid.options</code>.
+        </p>
+        <pre style="background: #0f172a; color: #38bdf8; padding: 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-top: 0.5rem; overflow-x: auto;"><code>grid.options = {
+  selectable: true,
+  multiSelect: true,
+  expandable: true,
+  rowDetailRenderer: (row) => `&lt;div&gt;VIN: ${row.vin}&lt;/div&gt;`
+};</code></pre>
+      </div>
+
+      <div style="background: #f8fafc; border: 1px solid var(--pdg-border-color); border-radius: 0.375rem; padding: 1rem;">
+        <h3 style="margin: 0 0 0.5rem 0; font-size: 0.875rem; font-weight: 700; color: var(--pdg-primary);">3. Sorting &amp; Search Engine</h3>
+        <p style="margin: 0; font-size: 0.8125rem; color: #475569; line-height: 1.5;">
+          Click any sortable column header to toggle ascending/descending, and type in the search bar for instant debounced global filtering.
+        </p>
+        <pre style="background: #0f172a; color: #38bdf8; padding: 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-top: 0.5rem; overflow-x: auto;"><code>grid.addEventListener('pdg:select', (e) => {
+  console.log('Selected IDs:', e.detail.selectedIds);
+});</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    // --- Data Engine Functions ---
+    function resolveValue(row, fieldPath) {
+      if (!fieldPath) return undefined;
+      const path = String(fieldPath);
+      if (!path.includes('.')) return row[path];
+      return path.split('.').reduce((acc, part) => (acc ? acc[part] : undefined), row);
+    }
+
+    function filterRows(rows, filters, globalSearch, columns) {
+      let filtered = [...rows];
+      if (globalSearch && globalSearch.trim().length > 0) {
+        const query = globalSearch.toLowerCase().trim();
+        filtered = filtered.filter((row) => {
+          return columns.some((col) => {
+            if (col.searchable === false || !col.field) return false;
+            const val = resolveValue(row, col.field);
+            return val != null && String(val).toLowerCase().includes(query);
+          });
+        });
+      }
+      return filtered;
+    }
+
+    function sortRows(rows, sortCriteria, columns) {
+      if (!sortCriteria || sortCriteria.length === 0) return [...rows];
+      const sorted = [...rows];
+      const colMap = new Map(columns.map((c) => [c.id, c]));
+
+      sorted.sort((a, b) => {
+        for (const crit of sortCriteria) {
+          const col = colMap.get(crit.columnId);
+          if (!col || !col.field) continue;
+          let valA = resolveValue(a, col.field);
+          let valB = resolveValue(b, col.field);
+
+          if (valA === valB) continue;
+          if (valA == null) return crit.direction === 'asc' ? 1 : -1;
+          if (valB == null) return crit.direction === 'asc' ? -1 : 1;
+
+          let comp = 0;
+          if (typeof valA === 'number' && typeof valB === 'number') {
+            comp = valA - valB;
+          } else {
+            comp = String(valA).localeCompare(String(valB), undefined, { numeric: true, sensitivity: 'base' });
+          }
+          if (comp !== 0) return crit.direction === 'asc' ? comp : -comp;
+        }
+        return 0;
+      });
+      return sorted;
+    }
+
+    function paginateRows(rows, pageIndex, pageSize) {
+      const totalPages = Math.max(1, Math.ceil(rows.length / pageSize));
+      const clampedPage = Math.min(Math.max(0, pageIndex), totalPages - 1);
+      const start = clampedPage * pageSize;
+      const pagedRows = rows.slice(start, start + pageSize);
+      return { pagedRows, totalPages };
+    }
+
+    function exportToCSV(rows, columns, filename = 'export.csv') {
+      const visibleColumns = columns.filter((col) => col.visible !== false && col.field);
+      const headers = visibleColumns.map((col) => `"${col.header.replace(/"/g, '""')}"`);
+      const lines = [headers.join(',')];
+
+      for (const row of rows) {
+        const values = visibleColumns.map((col) => {
+          const val = col.formatter ? col.formatter(resolveValue(row, col.field), row) : resolveValue(row, col.field);
+          const strVal = val == null ? '' : String(val);
+          return `"${strVal.replace(/"/g, '""')}"`;
+        });
+        lines.push(values.join(','));
+      }
+
+      const csvContent = lines.join('\r\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.setAttribute('download', filename);
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function createElement(tagName, className, attrs) {
+      const el = document.createElement(tagName);
+      if (className) el.className = className;
+      if (attrs) {
+        for (const [key, value] of Object.entries(attrs)) {
+          if (typeof value === 'boolean') {
+            if (value) el.setAttribute(key, '');
+            else el.removeAttribute(key);
+          } else {
+            el.setAttribute(key, String(value));
+          }
+        }
+      }
+      return el;
+    }
+
+    function removeAllChildren(parent) {
+      while (parent.firstChild) {
+        parent.removeChild(parent.firstChild);
+      }
+    }
+
+    // --- Web Component Definition ---
+    class ProDataGrid extends HTMLElement {
+      constructor() {
+        super();
+        this._rows = [];
+        this._columns = [];
+        this._options = {
+          rowIdKey: 'id',
+          multiSort: false,
+          selectable: true,
+          multiSelect: true,
+          expandable: true,
+          rowHeight: 48,
+          density: 'comfortable',
+          mobileLayout: 'card'
+        };
+        this._sortCriteria = [];
+        this._columnFilters = [];
+        this._globalSearch = '';
+        this._pagination = { pageIndex: 0, pageSize: 10, totalRows: 0, totalPages: 1 };
+        this._selectedIds = new Set();
+        this._expandedIds = new Set();
+      }
+
+      get rows() { return this._rows; }
+      set rows(val) {
+        this._rows = Array.isArray(val) ? val : [];
+        this._pagination.pageIndex = 0;
+        this.render();
+      }
+
+      get columns() { return this._columns; }
+      set columns(val) {
+        this._columns = Array.isArray(val) ? val : [];
+        this.render();
+      }
+
+      get options() { return this._options; }
+      set options(opts) {
+        this._options = Object.assign({}, this._options, opts);
+        if (this._options.density) this.setAttribute('density', this._options.density);
+        if (this._options.mobileLayout) this.setAttribute('mobile-layout', this._options.mobileLayout);
+        this.render();
+      }
+
+      connectedCallback() {
+        if (!this.containerEl) {
+          this.containerEl = createElement('div', 'pdg-wrapper');
+          this.toolbarEl = createElement('div', 'pdg-toolbar');
+          this.tableContainerEl = createElement('div', 'pdg-table-container');
+          this.tableEl = createElement('table', 'pdg-table');
+          this.theadEl = createElement('thead', 'pdg-thead');
+          this.tbodyEl = createElement('tbody', 'pdg-tbody');
+          this.footerEl = createElement('div', 'pdg-footer');
+
+          this.tableEl.appendChild(this.theadEl);
+          this.tableEl.appendChild(this.tbodyEl);
+          this.tableContainerEl.appendChild(this.tableEl);
+          this.containerEl.appendChild(this.toolbarEl);
+          this.containerEl.appendChild(this.tableContainerEl);
+          this.containerEl.appendChild(this.footerEl);
+          this.appendChild(this.containerEl);
+        }
+        this.render();
+      }
+
+      getProcessedData() {
+        const filtered = filterRows(this._rows, this._columnFilters, this._globalSearch, this._columns);
+        const sorted = sortRows(filtered, this._sortCriteria, this._columns);
+        return { processed: sorted, totalFilteredCount: sorted.length };
+      }
+
+      render() {
+        if (!this.containerEl) return;
+        this.renderToolbar();
+        this.renderHeader();
+        this.renderBody();
+        this.renderFooter();
+      }
+
+      renderToolbar() {
+        removeAllChildren(this.toolbarEl);
+        const left = createElement('div', 'pdg-toolbar-left');
+        const searchInput = createElement('input', 'pdg-search-input', {
+          type: 'search',
+          placeholder: 'Search vehicles...',
+          value: this._globalSearch
+        });
+        searchInput.addEventListener('input', (e) => {
+          this._globalSearch = e.target.value;
+          this._pagination.pageIndex = 0;
+          this.render();
+        });
+        left.appendChild(searchInput);
+
+        const right = createElement('div', 'pdg-toolbar-right');
+        const exportBtn = createElement('button', 'pdg-btn', { type: 'button' });
+        exportBtn.textContent = 'Export CSV';
+        exportBtn.addEventListener('click', () => {
+          const { processed } = this.getProcessedData();
+          exportToCSV(processed, this._columns);
+        });
+        right.appendChild(exportBtn);
+
+        this.toolbarEl.appendChild(left);
+        this.toolbarEl.appendChild(right);
+      }
+
+      renderHeader() {
+        removeAllChildren(this.theadEl);
+        const tr = createElement('tr', 'pdg-header-row');
+
+        if (this._options.selectable) {
+          const thSel = createElement('th', 'pdg-th pdg-th-select');
+          if (this._options.multiSelect) {
+            const chk = createElement('input', 'pdg-checkbox', { type: 'checkbox' });
+            const { processed } = this.getProcessedData();
+            chk.checked = processed.length > 0 && this._selectedIds.size === processed.length;
+            chk.indeterminate = this._selectedIds.size > 0 && this._selectedIds.size < processed.length;
+            chk.addEventListener('change', () => {
+              if (chk.checked) {
+                processed.forEach((r) => this._selectedIds.add(r[this._options.rowIdKey || 'id']));
+              } else {
+                this._selectedIds.clear();
+              }
+              this.dispatchEvent(new CustomEvent('pdg:select', { detail: { selectedIds: Array.from(this._selectedIds) } }));
+              this.renderBody();
+            });
+            thSel.appendChild(chk);
+          }
+          tr.appendChild(thSel);
+        }
+
+        if (this._options.expandable) {
+          tr.appendChild(createElement('th', 'pdg-th pdg-th-expand'));
+        }
+
+        for (const col of this._columns) {
+          if (col.visible === false) continue;
+          const th = createElement('th', 'pdg-th');
+          if (col.width) th.style.width = col.width;
+          const inner = createElement('div', 'pdg-th-inner');
+          const title = createElement('span', 'pdg-th-title');
+          title.textContent = col.header;
+          inner.appendChild(title);
+
+          if (col.sortable) {
+            th.classList.add('pdg-sortable');
+            const active = this._sortCriteria.find((c) => c.columnId === col.id);
+            const icon = createElement('span', 'pdg-sort-icon');
+            icon.textContent = active?.direction === 'asc' ? ' ▲' : active?.direction === 'desc' ? ' ▼' : ' ⇅';
+            inner.appendChild(icon);
+            th.addEventListener('click', () => {
+              const cur = this._sortCriteria.find((c) => c.columnId === col.id);
+              let next = 'asc';
+              if (cur && cur.direction === 'asc') next = 'desc';
+              else if (cur && cur.direction === 'desc') next = null;
+              this._sortCriteria = next ? [{ columnId: col.id, direction: next }] : [];
+              this.render();
+            });
+          }
+          th.appendChild(inner);
+          tr.appendChild(th);
+        }
+        this.theadEl.appendChild(tr);
+      }
+
+      renderBody() {
+        removeAllChildren(this.tbodyEl);
+        const { processed, totalFilteredCount } = this.getProcessedData();
+        const { pagedRows, totalPages } = paginateRows(processed, this._pagination.pageIndex, this._pagination.pageSize);
+        this._pagination.totalPages = totalPages;
+        this._pagination.totalRows = totalFilteredCount;
+
+        if (pagedRows.length === 0) {
+          const tr = createElement('tr', 'pdg-row');
+          const td = createElement('td', 'pdg-td', { colspan: 10 });
+          td.style.textAlign = 'center';
+          td.textContent = 'No records found.';
+          tr.appendChild(td);
+          this.tbodyEl.appendChild(tr);
+          return;
+        }
+
+        for (let i = 0; i < pagedRows.length; i++) {
+          const row = pagedRows[i];
+          const rowId = row[this._options.rowIdKey || 'id'];
+          const isSelected = this._selectedIds.has(rowId);
+          const isExpanded = this._expandedIds.has(rowId);
+          const tr = createElement('tr', `pdg-row ${isSelected ? 'pdg-row-selected' : ''}`);
+
+          if (this._options.selectable) {
+            const tdSel = createElement('td', 'pdg-td pdg-td-select');
+            const chk = createElement('input', 'pdg-checkbox', { type: 'checkbox' });
+            chk.checked = isSelected;
+            chk.addEventListener('change', () => {
+              if (chk.checked) this._selectedIds.add(rowId);
+              else this._selectedIds.delete(rowId);
+              this.dispatchEvent(new CustomEvent('pdg:select', { detail: { selectedIds: Array.from(this._selectedIds) } }));
+              this.render();
+            });
+            tdSel.appendChild(chk);
+            tr.appendChild(tdSel);
+          }
+
+          if (this._options.expandable) {
+            const tdExp = createElement('td', 'pdg-td pdg-td-expand');
+            const btnExp = createElement('button', 'pdg-btn', { type: 'button' });
+            btnExp.style.padding = '0.2rem 0.4rem';
+            btnExp.textContent = isExpanded ? '▼' : '▶';
+            btnExp.addEventListener('click', () => {
+              if (isExpanded) this._expandedIds.delete(rowId);
+              else this._expandedIds.add(rowId);
+              this.renderBody();
+            });
+            tdExp.appendChild(btnExp);
+            tr.appendChild(tdExp);
+          }
+
+          for (const col of this._columns) {
+            if (col.visible === false) continue;
+            const td = createElement('td', 'pdg-td', { 'data-header': col.header });
+            const val = resolveValue(row, col.field);
+            if (col.renderer) {
+              const rendered = col.renderer(val, row, i);
+              if (typeof rendered === 'string') td.innerHTML = rendered;
+              else td.appendChild(rendered);
+            } else if (col.formatter) {
+              td.textContent = col.formatter(val, row);
+            } else {
+              td.textContent = val == null ? '' : String(val);
+            }
+            tr.appendChild(td);
+          }
+          this.tbodyEl.appendChild(tr);
+
+          if (this._options.expandable && isExpanded && this._options.rowDetailRenderer) {
+            const trDetail = createElement('tr', 'pdg-detail-row');
+            const tdDetail = createElement('td', 'pdg-detail-td', { colspan: 10 });
+            tdDetail.style.padding = '1rem';
+            const detailContent = this._options.rowDetailRenderer(row);
+            if (typeof detailContent === 'string') tdDetail.innerHTML = detailContent;
+            else tdDetail.appendChild(detailContent);
+            trDetail.appendChild(tdDetail);
+            this.tbodyEl.appendChild(trDetail);
+          }
+        }
+      }
+
+      renderFooter() {
+        removeAllChildren(this.footerEl);
+        const info = createElement('div', 'pdg-pagination-info');
+        const total = this._pagination.totalRows;
+        const start = total > 0 ? this._pagination.pageIndex * this._pagination.pageSize + 1 : 0;
+        const end = Math.min((this._pagination.pageIndex + 1) * this._pagination.pageSize, total);
+        info.textContent = `Showing ${start} to ${end} of ${total} entries (Page ${this._pagination.pageIndex + 1} of ${this._pagination.totalPages})`;
+
+        const controls = createElement('div', 'pdg-pagination-controls');
+
+        // First button
+        const firstBtn = createElement('button', 'pdg-btn pdg-btn-sm', { type: 'button', disabled: this._pagination.pageIndex === 0 });
+        firstBtn.textContent = '«';
+        firstBtn.title = 'First Page';
+        firstBtn.addEventListener('click', () => this.goToPage(0));
+        controls.appendChild(firstBtn);
+
+        // Prev button
+        const prevBtn = createElement('button', 'pdg-btn pdg-btn-sm', { type: 'button', disabled: this._pagination.pageIndex === 0 });
+        prevBtn.textContent = '‹ Prev';
+        prevBtn.addEventListener('click', () => {
+          if (this._pagination.pageIndex > 0) this.goToPage(this._pagination.pageIndex - 1);
+        });
+        controls.appendChild(prevBtn);
+
+        // Page number buttons
+        const totalPages = this._pagination.totalPages;
+        const curPage = this._pagination.pageIndex;
+        const pageWindow = 2;
+
+        for (let p = 0; p < totalPages; p++) {
+          if (p === 0 || p === totalPages - 1 || (p >= curPage - pageWindow && p <= curPage + pageWindow)) {
+            const pageBtn = createElement('button', 'pdg-btn pdg-btn-sm', { type: 'button' });
+            pageBtn.textContent = String(p + 1);
+            if (p === curPage) {
+              pageBtn.style.backgroundColor = 'var(--pdg-primary)';
+              pageBtn.style.color = '#ffffff';
+              pageBtn.style.fontWeight = 'bold';
+            }
+            const target = p;
+            pageBtn.addEventListener('click', () => this.goToPage(target));
+            controls.appendChild(pageBtn);
+          } else if ((p === curPage - pageWindow - 1 && p > 0) || (p === curPage + pageWindow + 1 && p < totalPages - 1)) {
+            const ellipsis = createElement('span');
+            ellipsis.textContent = '…';
+            ellipsis.style.padding = '0 0.35rem';
+            ellipsis.style.color = 'var(--pdg-text-muted)';
+            controls.appendChild(ellipsis);
+          }
+        }
+
+        // Next button
+        const nextBtn = createElement('button', 'pdg-btn pdg-btn-sm', { type: 'button', disabled: this._pagination.pageIndex >= this._pagination.totalPages - 1 });
+        nextBtn.textContent = 'Next ›';
+        nextBtn.addEventListener('click', () => {
+          if (this._pagination.pageIndex < this._pagination.totalPages - 1) this.goToPage(this._pagination.pageIndex + 1);
+        });
+        controls.appendChild(nextBtn);
+
+        // Last button
+        const lastBtn = createElement('button', 'pdg-btn pdg-btn-sm', { type: 'button', disabled: this._pagination.pageIndex >= this._pagination.totalPages - 1 });
+        lastBtn.textContent = '»';
+        lastBtn.title = 'Last Page';
+        lastBtn.addEventListener('click', () => this.goToPage(this._pagination.totalPages - 1));
+        controls.appendChild(lastBtn);
+
+        this.footerEl.appendChild(info);
+        this.footerEl.appendChild(controls);
+      }
+
+      goToPage(p) {
+        this._pagination.pageIndex = p;
+        this.render();
+      }
+    }
+
+    if (!window.customElements.get('pro-data-grid')) {
+      window.customElements.define('pro-data-grid', ProDataGrid);
+    }
+
+    // --- Demo Initialization ---
+    const grid = document.getElementById('fleet-grid');
+    grid.columns = [
+      { id: 'vin', header: 'VIN', field: 'vin', sortable: true },
+      { id: 'model', header: 'Model', field: 'model', sortable: true },
+      { 
+        id: 'status', 
+        header: 'Status', 
+        field: 'status',
+        renderer: (val) => {
+          const badge = document.createElement('span');
+          badge.textContent = val;
+          badge.style.padding = '0.2rem 0.5rem';
+          badge.style.borderRadius = '9999px';
+          badge.style.fontSize = '0.75rem';
+          badge.style.background = val === 'Active' ? '#dcfce7' : '#fee2e2';
+          badge.style.color = val === 'Active' ? '#15803d' : '#b91c1c';
+          return badge;
+        }
+      },
+      { 
+        id: 'efficiency', 
+        header: 'Efficiency', 
+        field: 'kwhPerMile',
+        formatter: (val) => `${val} kWh/mi`
+      }
+    ];
+
+    grid.rows = [
+      { id: 1, vin: '1HGCR2F83HA', model: 'Model 3 LR', status: 'Active', kwhPerMile: 0.24 },
+      { id: 2, vin: '2HGCR2F84HB', model: 'Ioniq 5 AWD', status: 'Maintenance', kwhPerMile: 0.29 },
+      { id: 3, vin: '3HGCR2F85HC', model: 'Taycan 4S', status: 'Active', kwhPerMile: 0.36 },
+      { id: 4, vin: '4HGCR2F86HD', model: 'Rivian R1T', status: 'Active', kwhPerMile: 0.48 },
+      { id: 5, vin: '5HGCR2F87HE', model: 'Lucid Air GT', status: 'Active', kwhPerMile: 0.26 }
+    ];
+
+    grid.options = {
+      selectable: true,
+      expandable: true,
+      rowDetailRenderer: (row) => `
+        <div style="font-size: 0.875rem; color: #475569;">
+          <strong>Diagnostic telemetry:</strong> Battery health 98%, last pinged 2 minutes ago. VIN: ${row.vin}.
+        </div>
+      `
+    };
+
+    grid.addEventListener('pdg:select', (e) => {
+      console.log('Selection changed:', e.detail.selectedIds);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Universal Default Features Demo (Pagination, Sorting, Search)</title>
+    <style>
+      body {
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        padding: 2rem;
+        background: #f8fafc;
+        color: #0f172a;
+      }
+      .demo-section {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      }
+      .tbl-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        background: #f8fafc;
+        border-bottom: 1px solid #e2e8f0;
+      }
+      .tbl-search-input {
+        border: 1px solid #cbd5e1;
+        border-radius: 0.375rem;
+        padding: 0.4rem 0.75rem;
+        font-size: 0.875rem;
+        min-width: 250px;
+      }
+      .tbl-pagination-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        background: #f8fafc;
+        border-top: 1px solid #e2e8f0;
+        font-size: 0.875rem;
+      }
+      .tbl-btn {
+        padding: 0.25rem 0.5rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 0.25rem;
+        background: #ffffff;
+        cursor: pointer;
+        font-size: 0.8125rem;
+        margin: 0 0.15rem;
+      }
+      .tbl-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .tbl-btn-active {
+        background: #2563eb;
+        color: #ffffff;
+        font-weight: bold;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+      }
+      th,
+      td {
+        padding: 0.65rem 1rem;
+        border-bottom: 1px solid #e2e8f0;
+        font-size: 0.875rem;
+      }
+      th {
+        background: #f8fafc;
+        font-weight: 600;
+        color: #64748b;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        cursor: pointer;
+        user-select: none;
+      }
+      tr:hover {
+        background: #f1f5f9;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>
+      Universal Defaults Demo (Pagination, Sorting, Search Active by Default)
+    </h1>
+    <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 2rem">
+      Every table in the library provides global search, single-column sorting,
+      and responsive numbered pagination out-of-the-box without requiring
+      individual configuration flags.
+    </p>
+
+    <!-- Table 1: Default Client-Side Behavior -->
+    <div class="demo-section">
+      <h3>1. Client-Side (Zero Config Required)</h3>
+      <p style="font-size: 0.8125rem; color: #64748b">
+        Includes 50 mock items automatically paginated (10 per page), sorted on
+        column click, and searched in real time.
+      </p>
+
+      <div id="table-client-wrapper"></div>
+    </div>
+
+    <!-- Table 2: Server-Side Mode -->
+    <div class="demo-section">
+      <h3>2. Server-Side Mode (DataLoader)</h3>
+      <p style="font-size: 0.8125rem; color: #64748b">
+        Passes page, pageSize, search term, and sort rules to backend API
+        callback with auto-cancellation.
+      </p>
+      <div
+        id="server-status"
+        style="
+          font-family: monospace;
+          font-size: 0.8rem;
+          color: #2563eb;
+          margin-bottom: 0.5rem;
+        "
+      >
+        Ready.
+      </div>
+      <div id="table-server-wrapper"></div>
+    </div>
+
+    <script type="module">
+      import {
+        BaseTableController,
+        createElement,
+        removeAllChildren,
+      } from "../../src/common/base-table-controller.js";
+
+      // Mock 50 records
+      const sampleData = Array.from({ length: 50 }, (_, i) => ({
+        id: i + 1,
+        name: `Asset Node ${String(i + 1).padStart(2, "0")}`,
+        type: ["Server", "Database", "Cache", "Gateway"][i % 4],
+        uptime: `${99.0 + (i % 10) * 0.1}%`,
+      }));
+
+      const columns = [
+        { id: "name", header: "Asset Name", field: "name", sortable: true },
+        {
+          id: "type",
+          header: "Infrastructure Type",
+          field: "type",
+          sortable: true,
+        },
+        {
+          id: "uptime",
+          header: "Monthly Uptime",
+          field: "uptime",
+          sortable: true,
+        },
+      ];
+
+      // Helper to render table UI bound to BaseTableController
+      function renderUniversalTable(targetEl, controller, isServer = false) {
+        removeAllChildren(targetEl);
+
+        const container = createElement("div", "tbl-container");
+
+        // Top Toolbar: Search
+        const toolbar = createElement("div", "tbl-toolbar");
+        const search = createElement("input", "tbl-search-input", {
+          type: "search",
+          placeholder: "Search all records...",
+          value: controller.globalSearch,
+        });
+        search.addEventListener("input", () =>
+          controller.setGlobalSearch(search.value),
+        );
+        toolbar.appendChild(search);
+        container.appendChild(toolbar);
+
+        // Table View
+        const table = createElement("table");
+        const thead = createElement("thead");
+        const trHead = createElement("tr");
+
+        columns.forEach((col) => {
+          const th = createElement("th");
+          const active = controller.sortCriteria.find(
+            (c) => c.columnId === col.id,
+          );
+          const icon =
+            active?.direction === "asc"
+              ? " ▲"
+              : active?.direction === "desc"
+                ? " ▼"
+                : " ⇅";
+          th.textContent = `${col.header} ${icon}`;
+          th.addEventListener("click", () =>
+            controller.handleSort(col.id, columns),
+          );
+          trHead.appendChild(th);
+        });
+        thead.appendChild(trHead);
+        table.appendChild(thead);
+
+        const tbody = createElement("tbody");
+        const rows = isServer
+          ? controller.serverRows || []
+          : controller.processClientData(sampleData, columns);
+
+        if (rows.length === 0) {
+          const tr = createElement("tr");
+          const td = createElement("td", "", { colspan: columns.length });
+          td.style.textAlign = "center";
+          td.textContent = "No matching records found.";
+          tr.appendChild(td);
+          tbody.appendChild(tr);
+        } else {
+          rows.forEach((r) => {
+            const tr = createElement("tr");
+            columns.forEach((c) => {
+              const td = createElement("td");
+              td.textContent = r[c.field] || "";
+              tr.appendChild(td);
+            });
+            tbody.appendChild(tr);
+          });
+        }
+        table.appendChild(tbody);
+        container.appendChild(table);
+
+        // Pagination Footer
+        const footer = createElement("div", "tbl-pagination-footer");
+        controller.renderPaginationFooter(footer);
+        container.appendChild(footer);
+
+        targetEl.appendChild(container);
+      }
+
+      // Initialize 1. Client Table
+      const clientWrapper = document.getElementById("table-client-wrapper");
+      const clientCtrl = new BaseTableController(
+        () => ({}), // default options: search: true, sorting: true, pagination: true
+        () => renderUniversalTable(clientWrapper, clientCtrl, false),
+        () => {},
+      );
+      renderUniversalTable(clientWrapper, clientCtrl, false);
+
+      // Initialize 2. Server Table
+      const serverWrapper = document.getElementById("table-server-wrapper");
+      const serverStatus = document.getElementById("server-status");
+      const serverCtrl = new BaseTableController(
+        () => ({
+          serverSide: true,
+          serverDataLoader: async (params) => {
+            serverStatus.textContent = `[Fetching Backend] Page ${params.pageIndex + 1}, Search="${params.globalSearch}", Sort=${JSON.stringify(params.sortCriteria)}`;
+            await new Promise((r) => setTimeout(r, 300));
+
+            let filtered = sampleData;
+            if (params.globalSearch) {
+              filtered = filtered.filter((i) =>
+                i.name
+                  .toLowerCase()
+                  .includes(params.globalSearch.toLowerCase()),
+              );
+            }
+            if (params.sortCriteria.length > 0) {
+              const crit = params.sortCriteria[0];
+              filtered = [...filtered].sort((a, b) => {
+                if (a[crit.columnId] < b[crit.columnId])
+                  return crit.direction === "asc" ? -1 : 1;
+                if (a[crit.columnId] > b[crit.columnId])
+                  return crit.direction === "asc" ? 1 : -1;
+                return 0;
+              });
+            }
+            const start = params.pageIndex * params.pageSize;
+            serverStatus.textContent = `[Success] Received ${Math.min(params.pageSize, filtered.length - start)} rows.`;
+            return {
+              rows: filtered.slice(start, start + params.pageSize),
+              totalRows: filtered.length,
+            };
+          },
+        }),
+        () => renderUniversalTable(serverWrapper, serverCtrl, true),
+        () => {},
+      );
+
+      // Initial server fetch
+      serverCtrl.triggerServerLoad().then((rows) => {
+        serverCtrl.serverRows = rows;
+        renderUniversalTable(serverWrapper, serverCtrl, true);
+      });
+    </script>
+  </body>
+</html>

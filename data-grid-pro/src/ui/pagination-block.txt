@@ -1,0 +1,144 @@
+  private renderFooter(): void {
+    removeAllChildren(this.footerEl);
+
+    const info = createElement('div', 'pdg-pagination-info');
+    const total = this._pagination.totalRows;
+    const start = total > 0 ? this._pagination.pageIndex * this._pagination.pageSize + 1 : 0;
+    const end = Math.min((this._pagination.pageIndex + 1) * this._pagination.pageSize, total);
+    info.textContent = `Showing ${start} to ${end} of ${total} entries (Page ${this._pagination.pageIndex + 1} of ${this._pagination.totalPages})`;
+
+    const controls = createElement('div', 'pdg-pagination-controls');
+
+    // First Page Button (<<)
+    const firstBtn = createElement('button', 'pdg-btn pdg-btn-sm', {
+      type: 'button',
+      title: 'First Page',
+      disabled: this._pagination.pageIndex === 0
+    });
+    firstBtn.textContent = '«';
+    firstBtn.addEventListener('click', () => {
+      if (this._pagination.pageIndex > 0) {
+        this.goToPage(0);
+      }
+    });
+    controls.appendChild(firstBtn);
+
+    // Previous Page Button (<)
+    const prevBtn = createElement('button', 'pdg-btn pdg-btn-sm', {
+      type: 'button',
+      title: 'Previous Page',
+      disabled: this._pagination.pageIndex === 0
+    });
+    prevBtn.textContent = '‹ Prev';
+    prevBtn.addEventListener('click', () => {
+      if (this._pagination.pageIndex > 0) {
+        this.goToPage(this._pagination.pageIndex - 1);
+      }
+    });
+    controls.appendChild(prevBtn);
+
+    // Numbered Page Buttons with Ellipses
+    const totalPages = this._pagination.totalPages;
+    const curPage = this._pagination.pageIndex;
+    const pageWindow = 2; // Show 2 pages on either side of current page
+
+    for (let p = 0; p < totalPages; p++) {
+      if (
+        p === 0 ||
+        p === totalPages - 1 ||
+        (p >= curPage - pageWindow && p <= curPage + pageWindow)
+      ) {
+        const pageBtn = createElement('button', 'pdg-btn pdg-btn-sm', {
+          type: 'button',
+          'aria-label': `Page ${p + 1}`
+        });
+        pageBtn.textContent = String(p + 1);
+        if (p === curPage) {
+          pageBtn.classList.add('pdg-btn-active');
+          pageBtn.style.backgroundColor = 'var(--pdg-primary)';
+          pageBtn.style.color = '#ffffff';
+          pageBtn.style.fontWeight = 'bold';
+        }
+        const targetPage = p;
+        pageBtn.addEventListener('click', () => this.goToPage(targetPage));
+        controls.appendChild(pageBtn);
+      } else if (
+        (p === curPage - pageWindow - 1 && p > 0) ||
+        (p === curPage + pageWindow + 1 && p < totalPages - 1)
+      ) {
+        const ellipsis = createElement('span', 'pdg-pagination-ellipsis');
+        ellipsis.textContent = '…';
+        ellipsis.style.padding = '0 0.35rem';
+        ellipsis.style.color = 'var(--pdg-text-muted)';
+        controls.appendChild(ellipsis);
+      }
+    }
+
+    // Next Page Button (>)
+    const nextBtn = createElement('button', 'pdg-btn pdg-btn-sm', {
+      type: 'button',
+      title: 'Next Page',
+      disabled: this._pagination.pageIndex >= this._pagination.totalPages - 1
+    });
+    nextBtn.textContent = 'Next ›';
+    nextBtn.addEventListener('click', () => {
+      if (this._pagination.pageIndex < this._pagination.totalPages - 1) {
+        this.goToPage(this._pagination.pageIndex + 1);
+      }
+    });
+    controls.appendChild(nextBtn);
+
+    // Last Page Button (>>)
+    const lastBtn = createElement('button', 'pdg-btn pdg-btn-sm', {
+      type: 'button',
+      title: 'Last Page',
+      disabled: this._pagination.pageIndex >= this._pagination.totalPages - 1
+    });
+    lastBtn.textContent = '»';
+    lastBtn.addEventListener('click', () => {
+      if (this._pagination.pageIndex < this._pagination.totalPages - 1) {
+        this.goToPage(this._pagination.totalPages - 1);
+      }
+    });
+    controls.appendChild(lastBtn);
+
+    // Page Size Selector
+    const sizeSelectWrapper = createElement('div', 'pdg-page-size-selector');
+    sizeSelectWrapper.style.marginLeft = '0.5rem';
+    sizeSelectWrapper.style.display = 'inline-flex';
+    sizeSelectWrapper.style.alignItems = 'center';
+    sizeSelectWrapper.style.gap = '0.25rem';
+    sizeSelectWrapper.style.fontSize = '0.8125rem';
+
+    const selectEl = createElement('select', 'pdg-select pdg-btn pdg-btn-sm') as HTMLSelectElement;
+    [10, 25, 50, 100].forEach((sz) => {
+      const opt = createElement('option');
+      opt.value = String(sz);
+      opt.textContent = `${sz} / page`;
+      if (sz === this._pagination.pageSize) opt.selected = true;
+      selectEl.appendChild(opt);
+    });
+    selectEl.addEventListener('change', () => {
+      this._pagination.pageSize = Number(selectEl.value);
+      this._pagination.pageIndex = 0;
+      this.goToPage(0);
+    });
+    sizeSelectWrapper.appendChild(selectEl);
+    controls.appendChild(sizeSelectWrapper);
+
+    this.footerEl.appendChild(info);
+    this.footerEl.appendChild(controls);
+  }
+
+  public goToPage(index: number): void {
+    this._pagination.pageIndex = index;
+    this.dispatchGridEvent('pdg:page', {
+      pageIndex: this._pagination.pageIndex,
+      pageSize: this._pagination.pageSize
+    });
+    if (this._options.serverSide) {
+      this.triggerServerLoad(false);
+    } else {
+      this.render();
+    }
+  }

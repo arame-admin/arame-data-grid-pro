@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tree Data Table Demo (Hierarchical Web Component)</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --border: #334155;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #3b82f6;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      padding: 2rem;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    header { display: flex; flex-direction: column; gap: 0.5rem; }
+    h1 { font-size: 1.75rem; font-weight: 700; color: #ffffff; }
+    p.subtitle { color: var(--text-muted); font-size: 0.95rem; max-width: 880px; line-height: 1.5; }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.25rem 1.5rem;
+    }
+
+    .controls-grid {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .controls-group {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .toggle-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      color: #e2e8f0;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .btn {
+      padding: 0.45rem 0.9rem;
+      border-radius: 0.375rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: #334155;
+      color: white;
+      transition: background 0.15s ease;
+    }
+
+    .btn:hover { background: #475569; }
+
+    .table-container-wrap {
+      background: #ffffff;
+      border-radius: 0.5rem;
+      overflow: hidden;
+      color: #0f172a;
+    }
+
+    .log-panel {
+      margin-top: 1rem;
+      background: #090d16;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      font-family: monospace;
+      font-size: 0.8rem;
+      color: #38bdf8;
+      max-height: 160px;
+      overflow-y: auto;
+    }
+
+    .log-title {
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.7rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>Tree Data Table (Hierarchical Web Component)</h1>
+      <p class="subtitle">
+        Displays multi-level nested records with expandable and collapsible relationships, sticky parent headers during scroll, drag-and-drop row reordering, cascading checkbox selection, global search across hierarchy, and CSV export.
+      </p>
+    </header>
+
+    <div class="card">
+      <div class="controls-grid">
+        <div class="controls-group">
+          <label class="toggle-label">
+            <input type="checkbox" id="toggleStickyParents" checked />
+            <span>Sticky Parent Headers</span>
+          </label>
+          <label class="toggle-label">
+            <input type="checkbox" id="toggleDnd" checked />
+            <span>Drag &amp; Drop Reordering</span>
+          </label>
+          <label class="toggle-label">
+            <input type="checkbox" id="toggleTheme" />
+            <span>Dark Theme</span>
+          </label>
+        </div>
+
+        <div class="controls-group">
+          <button class="btn" id="btnExpandAll">Expand All</button>
+          <button class="btn" id="btnCollapseAll">Collapse All</button>
+          <button class="btn" id="btnExportCsv">Export CSV</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-container-wrap">
+      <tree-data-table id="projectTreeTable"></tree-data-table>
+    </div>
+
+    <!-- Usage Guide Section -->
+    <section class="card" style="margin-top: 0.5rem;" aria-label="Tree Table Usage Guide">
+      <h3 style="margin: 0 0 0.75rem 0; font-size: 1.15rem; font-weight: 700; color: #ffffff; display: flex; align-items: center; gap: 0.5rem;">
+        <span>💡 How to Use the Tree Data Table</span>
+      </h3>
+      <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.25rem; line-height: 1.5;">
+        Tree tables represent nested hierarchical data (e.g. Work Breakdown Structures, File Trees, Nested Project Tasks) with expanding nodes, drag and drop, and cascading selection.
+      </p>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+        <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border); border-radius: 0.375rem; padding: 1rem;">
+          <h4 style="margin: 0 0 0.5rem 0; font-size: 0.875rem; font-weight: 700; color: var(--primary);">1. Hierarchical Data Structure</h4>
+          <p style="margin: 0; font-size: 0.8125rem; color: var(--text-muted); line-height: 1.5;">
+            Data can be passed as nested arrays using a <code>children</code> property, or as a flat list with <code>parentId</code> pointers.
+          </p>
+          <pre style="background: #090d16; color: #38bdf8; padding: 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-top: 0.5rem; overflow-x: auto;"><code>const data = [
+  { id: '1', title: 'Phase 1', children: [{ id: '1.1', title: 'Scoping' }] }
+];
+treeTable.data = data;</code></pre>
+        </div>
+
+        <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border); border-radius: 0.375rem; padding: 1rem;">
+          <h4 style="margin: 0 0 0.5rem 0; font-size: 0.875rem; font-weight: 700; color: var(--primary);">2. Cascading Selection &amp; Reordering</h4>
+          <p style="margin: 0; font-size: 0.8125rem; color: var(--text-muted); line-height: 1.5;">
+            Checking a parent node automatically cascades selection down through its children with indeterminate state representation on partial selection.
+          </p>
+          <pre style="background: #090d16; color: #38bdf8; padding: 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-top: 0.5rem; overflow-x: auto;"><code>treeTable.options = {
+  cascadingSelect: true,
+  dragAndDrop: true
+};</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <div class="log-panel" id="logOutput">
+      <div class="log-title">Tree Interaction &amp; Reorder Event Log:</div>
+      <div id="logList">&gt; Ready. Try expanding folders, selecting checkboxes, dragging rows to reorder, or exporting CSV.</div>
+    </div>
+  </div>
+
+  <script>
+    // --- Embedded Standalone TreeDataTable Web Component ---
+    function flatten(nodes, expanded, selected, search, sortRule, level = 0, path = []) {
+      let res = [];
+      const q = (search || '').toLowerCase().trim();
+
+      function matches(n) {
+        if (!q) return true;
+        const direct = Object.values(n).some(v => v && typeof v !== 'object' && String(v).toLowerCase().includes(q));
+        if (direct) return true;
+        return (n.children || []).some(matches);
+      }
+
+      let sorted = [...nodes];
+      if (sortRule) {
+        sorted.sort((a, b) => {
+          const va = a[sortRule.column]; const vb = b[sortRule.column];
+          if (va === vb) return 0;
+          return (va > vb ? 1 : -1) * (sortRule.direction === 'asc' ? 1 : -1);
+        });
+      }
+
+      sorted.forEach(node => {
+        if (q && !matches(node)) return;
+        const id = String(node.id);
+        const hasChildren = Boolean(node.children && node.children.length > 0);
+        const isExp = q ? true : expanded.has(id);
+        const isSel = selected.has(id);
+
+        res.push({
+          data: node,
+          meta: { id, level, hasChildren, isExpanded: isExp, isSelected: isSel, parentPath: path }
+        });
+
+        if (hasChildren && isExp) {
+          res.push(...flatten(node.children, expanded, selected, search, sortRule, level + 1, [...path, node.name || id]));
+        }
+      });
+      return res;
+    }
+
+    class TreeDataTableElement extends HTMLElement {
+      constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        this._columns = [];
+        this._roots = [];
+        this._expanded = new Set();
+        this._selected = new Set();
+        this._options = { stickyParentRows: true, dragAndDrop: true, pagination: { pageSize: 12 } };
+        this._currentPage = 1;
+        this._pageSize = 12;
+        this._search = '';
+        this._sort = null;
+        this._draggedId = null;
+      }
+
+      connectedCallback() {
+        this.renderDom();
+        this.setupEvents();
+        this.refresh();
+      }
+
+      get columns() { return this._columns; }
+      set columns(v) { this._columns = v || []; if (this.shadowRoot) { this.renderHeader(); this.refresh(); } }
+
+      get data() { return this._roots; }
+      set data(v) { this._roots = v || []; if (this.shadowRoot) { this.refresh(); } }
+
+      get options() { return this._options; }
+      set options(v) { this._options = { ...this._options, ...v }; if (this.shadowRoot) { this.refresh(); } }
+
+      toggleExpand(id) {
+        if (this._expanded.has(id)) this._expanded.delete(id);
+        else this._expanded.add(id);
+        this.dispatchEvent(new CustomEvent('tree-table:expansion-change', { detail: { nodeId: id, expandedIds: Array.from(this._expanded) }, bubbles: true, composed: true }));
+        this.refresh();
+      }
+
+      expandAll() {
+        const trv = (nodes) => {
+          nodes.forEach(n => {
+            if (n.children && n.children.length > 0) {
+              this._expanded.add(String(n.id));
+              trv(n.children);
+            }
+          });
+        };
+        trv(this._roots);
+        this.refresh();
+      }
+
+      collapseAll() {
+        this._expanded.clear();
+        this.refresh();
+      }
+
+      toggleSelect(id) {
+        if (this._selected.has(id)) this._selected.delete(id);
+        else this._selected.add(id);
+        this.dispatchEvent(new CustomEvent('tree-table:selection-change', { detail: { selectedIds: Array.from(this._selected), lastToggledId: id }, bubbles: true, composed: true }));
+        this.refresh();
+      }
+
+      exportCsv() {
+        const rows = flatten(this._roots, this._expanded, this._selected, this._search, this._sort);
+        const headers = ['"Level"', '"Path"', ...this._columns.map(c => `"${c.header}"`)];
+        const lines = [headers.join(',')];
+        rows.forEach(r => {
+          const l = [`"${r.meta.level}"`, `"${r.meta.parentPath.join(' / ')}"`];
+          this._columns.forEach(c => l.push(`"${String(r.data[c.key] ?? '').replace(/"/g, '""')}"`));
+          lines.push(l.join(','));
+        });
+        const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'tree-export.csv'; a.click();
+      }
+
+      renderDom() {
+        this.shadowRoot.innerHTML = `
+          <style>
+            :host {
+              display: block; width: 100%;
+              --tree-primary: #3b82f6; --tree-bg: #ffffff; --tree-header-bg: #f8fafc;
+              --tree-row-hover: #f1f5f9; --tree-row-selected: #eff6ff;
+              --tree-row-sticky-bg: #ffffff; --tree-border-color: #e2e8f0;
+              --tree-text-main: #0f172a; --tree-text-muted: #64748b;
+              --tree-font-family: inherit; --tree-font-size: 0.875rem;
+              --tree-sticky-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
+            }
+            :host([theme="dark"]) {
+              --tree-primary: #60a5fa; --tree-bg: #0f172a; --tree-header-bg: #1e293b;
+              --tree-row-hover: #1e293b; --tree-row-selected: #1e293b;
+              --tree-row-sticky-bg: #0f172a; --tree-border-color: #334155;
+              --tree-text-main: #f8fafc; --tree-text-muted: #94a3b8;
+              --tree-sticky-shadow: 0 4px 10px rgba(0, 0, 0, 0.45);
+            }
+            .tree-container {
+              font-family: var(--tree-font-family); font-size: var(--tree-font-size);
+              color: var(--tree-text-main); background: var(--tree-bg);
+              border: 1px solid var(--tree-border-color); border-radius: 0.5rem;
+              display: flex; flex-direction: column; overflow: hidden;
+            }
+            .tree-toolbar {
+              display: flex; align-items: center; justify-content: space-between;
+              padding: 0.75rem 1rem; border-bottom: 1px solid var(--tree-border-color);
+            }
+            .tree-search-input {
+              padding: 0.35rem 0.6rem; border: 1px solid var(--tree-border-color);
+              border-radius: 0.375rem; outline: none; font-size: var(--tree-font-size);
+              background: var(--tree-bg); color: var(--tree-text-main); min-width: 260px;
+            }
+            .tree-viewport { overflow: auto; max-height: 540px; }
+            .tree-table { width: 100%; border-collapse: separate; border-spacing: 0; text-align: left; }
+            .tree-thead { position: sticky; top: 0; z-index: 30; background: var(--tree-header-bg); }
+            .tree-th {
+              padding: 0.65rem 0.85rem; font-weight: 600; color: var(--tree-text-main);
+              border-bottom: 1px solid var(--tree-border-color); user-select: none; cursor: pointer;
+            }
+            .tree-tr {
+              background: var(--tree-bg);
+              transition: background-color 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+            }
+            .tree-tr:hover { background: var(--tree-row-hover); }
+            .tree-tr.selected { background: var(--tree-row-selected); }
+            .tree-tr.sticky-parent {
+              position: sticky; top: 38px; z-index: 20;
+              background-color: var(--tree-row-sticky-bg) !important;
+              box-shadow: var(--tree-sticky-shadow);
+            }
+            .tree-tr.dragging {
+              opacity: 0.65;
+              background: var(--tree-row-hover) !important;
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 0 0 1px var(--tree-primary);
+            }
+            .tree-tr.drag-over-top {
+              position: relative;
+              background-color: rgba(59, 130, 246, 0.05);
+            }
+            .tree-tr.drag-over-top::before {
+              content: '';
+              position: absolute;
+              top: -2px; left: 0; right: 0; height: 3px;
+              background-color: var(--tree-primary);
+              box-shadow: 0 0 6px var(--tree-primary);
+              z-index: 15; pointer-events: none; border-radius: 2px;
+            }
+            .tree-tr.drag-over-bottom {
+              position: relative;
+              background-color: rgba(59, 130, 246, 0.05);
+            }
+            .tree-tr.drag-over-bottom::after {
+              content: '';
+              position: absolute;
+              bottom: -2px; left: 0; right: 0; height: 3px;
+              background-color: var(--tree-primary);
+              box-shadow: 0 0 6px var(--tree-primary);
+              z-index: 15; pointer-events: none; border-radius: 2px;
+            }
+            .tree-tr.tree-drag-not-allowed {
+              cursor: not-allowed !important;
+              background-color: rgba(239, 68, 68, 0.08) !important;
+              outline: 1px dashed #ef4444 !important;
+            }
+            @keyframes tree-drop-success {
+              0% { background-color: rgba(16, 185, 129, 0.25); box-shadow: inset 0 0 0 2px #10b981; }
+              100% { background-color: transparent; box-shadow: none; }
+            }
+            .tree-tr.tree-drop-success {
+              animation: tree-drop-success 0.6s ease-out forwards;
+            }
+            @media (prefers-reduced-motion: reduce) {
+              .tree-tr, .tree-drop-success, .tree-drag-handle {
+                animation: none !important;
+                transition: none !important;
+                transform: none !important;
+              }
+            }
+            .tree-td { padding: 0.6rem 0.85rem; border-bottom: 1px solid var(--tree-border-color); white-space: nowrap; }
+            .tree-expander-btn {
+              width: 1.25rem; height: 1.25rem; border: 1px solid var(--tree-border-color);
+              border-radius: 0.25rem; background: var(--tree-bg); cursor: pointer;
+              display: inline-flex; align-items: center; justify-content: center;
+              font-size: 0.7rem; color: var(--tree-text-muted); margin-right: 0.35rem;
+            }
+            .tree-indent { display: inline-block; width: 1.25rem; }
+            .tree-drag-handle { cursor: grab; color: var(--tree-text-muted); margin-right: 0.35rem; }
+            .tree-pagination {
+              display: flex; align-items: center; justify-content: space-between;
+              padding: 0.75rem 1rem; border-top: 1px solid var(--tree-border-color);
+              font-size: 0.8125rem; color: var(--tree-text-muted);
+            }
+          </style>
+
+          <div class="tree-container">
+            <div class="tree-toolbar">
+              <input type="text" class="tree-search-input" placeholder="Search tree..." />
+              <span class="meta-badge" style="font-size:0.75rem;color:var(--tree-text-muted);">0 items</span>
+            </div>
+            <div class="tree-viewport">
+              <table class="tree-table">
+                <thead class="tree-thead"><tr class="tree-header-tr"></tr></thead>
+                <tbody class="tree-tbody"></tbody>
+              </table>
+            </div>
+            <div class="tree-pagination"></div>
+          </div>
+        `;
+
+        this._headerTr = this.shadowRoot.querySelector('.tree-header-tr');
+        this._tbody = this.shadowRoot.querySelector('.tree-tbody');
+        this._pagination = this.shadowRoot.querySelector('.tree-pagination');
+        this._metaBadge = this.shadowRoot.querySelector('.meta-badge');
+        this._searchInput = this.shadowRoot.querySelector('.tree-search-input');
+      }
+
+      setupEvents() {
+        this._searchInput.addEventListener('input', (e) => {
+          this._search = e.target.value.trim();
+          this.refresh();
+        });
+      }
+
+      renderHeader() {
+        this._headerTr.innerHTML = '<th class="tree-th" style="width:40px;"><input type="checkbox" class="select-all" /></th>';
+        this._columns.forEach(col => {
+          const th = document.createElement('th');
+          th.className = 'tree-th';
+          if (col.width) th.style.width = col.width;
+          let label = col.header;
+          if (this._sort?.column === col.key) label += ` ${this._sort.direction === 'asc' ? '▲' : '▼'}`;
+          th.textContent = label;
+          th.addEventListener('click', () => {
+            const next = this._sort?.column === col.key && this._sort.direction === 'asc' ? 'desc' : 'asc';
+            this._sort = { column: col.key, direction: next };
+            this.renderHeader();
+            this.refresh();
+          });
+          this._headerTr.appendChild(th);
+        });
+      }
+
+      refresh() {
+        this.renderBody();
+      }
+
+      renderBody() {
+        this._tbody.innerHTML = '';
+        const flattened = flatten(this._roots, this._expanded, this._selected, this._search, this._sort);
+        this._metaBadge.textContent = `${flattened.length} items visible`;
+
+        if (flattened.length === 0) {
+          this._tbody.innerHTML = `<tr><td colspan="${this._columns.length + 1}" style="text-align:center;padding:2.5rem;color:#64748b;">No matching tree nodes</td></tr>`;
+          return;
+        }
+
+        const frag = document.createDocumentFragment();
+        flattened.forEach((row) => {
+          const { data, meta } = row;
+          const tr = document.createElement('tr');
+          tr.className = `tree-tr ${meta.isSelected ? 'selected' : ''}`;
+          if (this._options.stickyParentRows && meta.hasChildren && meta.isExpanded) tr.classList.add('sticky-parent');
+
+          // DND
+          if (this._options.dragAndDrop) {
+            tr.draggable = true;
+            tr.addEventListener('dragstart', (e) => {
+              this._draggedId = meta.id;
+              tr.classList.add('dragging');
+              if (e.dataTransfer) {
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', meta.id);
+              }
+            });
+            tr.addEventListener('dragend', () => {
+              this._draggedId = null;
+              tr.classList.remove('dragging');
+              this._tbody.querySelectorAll('.tree-tr').forEach(r => r.classList.remove('drag-over-top', 'drag-over-bottom', 'tree-drag-not-allowed'));
+            });
+            tr.addEventListener('dragover', (e) => {
+              e.preventDefault();
+              if (!this._draggedId) return;
+              if (this._draggedId === meta.id) {
+                if (e.dataTransfer) e.dataTransfer.dropEffect = 'none';
+                tr.classList.add('tree-drag-not-allowed');
+                tr.classList.remove('drag-over-top', 'drag-over-bottom');
+                return;
+              }
+              if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+              tr.classList.remove('tree-drag-not-allowed');
+
+              const rect = tr.getBoundingClientRect();
+              const relY = e.clientY - rect.top;
+              if (relY < rect.height / 2) {
+                tr.classList.add('drag-over-top');
+                tr.classList.remove('drag-over-bottom');
+              } else {
+                tr.classList.add('drag-over-bottom');
+                tr.classList.remove('drag-over-top');
+              }
+            });
+            tr.addEventListener('dragleave', () => {
+              tr.classList.remove('drag-over-top', 'drag-over-bottom', 'tree-drag-not-allowed');
+            });
+            tr.addEventListener('drop', (e) => {
+              e.preventDefault();
+              const draggedId = this._draggedId;
+              tr.classList.remove('drag-over-top', 'drag-over-bottom', 'tree-drag-not-allowed', 'dragging');
+              if (draggedId && draggedId !== meta.id) {
+                tr.classList.add('tree-drop-success');
+                setTimeout(() => tr.classList.remove('tree-drop-success'), 600);
+                this.dispatchEvent(new CustomEvent('tree-table:reorder', { detail: { draggedId, targetId: meta.id }, bubbles: true, composed: true }));
+              }
+              this._draggedId = null;
+            });
+          }
+
+          // Checkbox cell
+          const tdChk = document.createElement('td');
+          tdChk.className = 'tree-td';
+          const chk = document.createElement('input');
+          chk.type = 'checkbox';
+          chk.checked = meta.isSelected;
+          chk.addEventListener('change', () => this.toggleSelect(meta.id));
+          tdChk.appendChild(chk);
+          tr.appendChild(tdChk);
+
+          // Data cells
+          this._columns.forEach((col, idx) => {
+            const td = document.createElement('td');
+            td.className = 'tree-td';
+            if (col.width) td.style.width = col.width;
+
+            if (idx === 0 || col.isTreeColumn) {
+              const wrap = document.createElement('div');
+              wrap.style.display = 'inline-flex';
+              wrap.style.alignItems = 'center';
+
+              for (let i = 0; i < meta.level; i++) {
+                const ind = document.createElement('span'); ind.className = 'tree-indent'; wrap.appendChild(ind);
+              }
+
+              if (this._options.dragAndDrop) {
+                const dragH = document.createElement('span'); dragH.className = 'tree-drag-handle'; dragH.innerHTML = '⋮⋮'; wrap.appendChild(dragH);
+              }
+
+              if (meta.hasChildren) {
+                const btn = document.createElement('button');
+                btn.className = 'tree-expander-btn';
+                btn.innerHTML = meta.isExpanded ? '▼' : '▶';
+                btn.addEventListener('click', () => this.toggleExpand(meta.id));
+                wrap.appendChild(btn);
+              } else {
+                const spc = document.createElement('span'); spc.style.display = 'inline-block'; spc.style.width = '1.6rem'; wrap.appendChild(spc);
+              }
+
+              const span = document.createElement('span');
+              span.textContent = data[col.key];
+              wrap.appendChild(span);
+              td.appendChild(wrap);
+            } else {
+              td.textContent = data[col.key] !== undefined ? String(data[col.key]) : '—';
+            }
+            tr.appendChild(td);
+          });
+          frag.appendChild(tr);
+        });
+
+        this._tbody.appendChild(frag);
+      }
+    }
+
+    if (!customElements.get('tree-data-table')) {
+      customElements.define('tree-data-table', TreeDataTableElement);
+    }
+
+    // --- App Setup ---
+    const table = document.getElementById('projectTreeTable');
+
+    const sampleWorkspace = [
+      {
+        id: 'dir-src',
+        name: 'src',
+        type: 'Directory',
+        size: '1.2 MB',
+        owner: 'System',
+        modified: '2024-05-18',
+        children: [
+          {
+            id: 'dir-components',
+            name: 'components',
+            type: 'Directory',
+            size: '840 KB',
+            owner: 'Frontend Team',
+            modified: '2024-05-18',
+            children: [
+              { id: 'file-table', name: 'DataTable.ts', type: 'TypeScript', size: '142 KB', owner: 'Alice', modified: '2024-05-17' },
+              { id: 'file-modal', name: 'ModalDialog.ts', type: 'TypeScript', size: '64 KB', owner: 'Bob', modified: '2024-05-16' },
+              { id: 'file-tree', name: 'TreeTable.ts', type: 'TypeScript', size: '185 KB', owner: 'Charlie', modified: '2024-05-18' }
+            ]
+          },
+          {
+            id: 'dir-utils',
+            name: 'utils',
+            type: 'Directory',
+            size: '220 KB',
+            owner: 'Core Team',
+            modified: '2024-05-15',
+            children: [
+              { id: 'file-format', name: 'formatters.ts', type: 'TypeScript', size: '32 KB', owner: 'David', modified: '2024-05-12' },
+              { id: 'file-dom', name: 'domHelper.ts', type: 'TypeScript', size: '48 KB', owner: 'Alice', modified: '2024-05-15' },
+              { id: 'file-math', name: 'mathParser.ts', type: 'TypeScript', size: '56 KB', owner: 'David', modified: '2024-05-16' },
+              { id: 'file-crypto', name: 'cryptoHash.ts', type: 'TypeScript', size: '28 KB', owner: 'Sarah', modified: '2024-05-17' }
+            ]
+          },
+          {
+            id: 'dir-styles',
+            name: 'styles',
+            type: 'Directory',
+            size: '180 KB',
+            owner: 'Design System',
+            modified: '2024-05-16',
+            children: [
+              { id: 'file-theme', name: 'theme.tokens.css', type: 'CSS Tokens', size: '38 KB', owner: 'Elena', modified: '2024-05-14' },
+              { id: 'file-grid-css', name: 'grid.layout.css', type: 'CSS Layout', size: '92 KB', owner: 'Elena', modified: '2024-05-16' }
+            ]
+          },
+          { id: 'file-index', name: 'index.ts', type: 'TypeScript', size: '12 KB', owner: 'Alice', modified: '2024-05-18' }
+        ]
+      },
+      {
+        id: 'dir-tests',
+        name: 'tests',
+        type: 'Directory',
+        size: '560 KB',
+        owner: 'QA Team',
+        modified: '2024-05-18',
+        children: [
+          { id: 'file-table-spec', name: 'data-table.test.ts', type: 'Test Spec', size: '110 KB', owner: 'Diana', modified: '2024-05-18' },
+          { id: 'file-tree-spec', name: 'tree-table.test.ts', type: 'Test Spec', size: '125 KB', owner: 'Diana', modified: '2024-05-18' },
+          { id: 'file-calc-spec', name: 'calculated-table.test.ts', type: 'Test Spec', size: '95 KB', owner: 'Diana', modified: '2024-05-17' },
+          { id: 'file-filter-spec', name: 'filter-matrix.test.ts', type: 'Test Spec', size: '84 KB', owner: 'Alex', modified: '2024-05-16' }
+        ]
+      },
+      {
+        id: 'dir-docs',
+        name: 'docs',
+        type: 'Directory',
+        size: '340 KB',
+        owner: 'Doc Team',
+        modified: '2024-05-19',
+        children: [
+          { id: 'file-api-guide', name: 'API_REFERENCE.md', type: 'Markdown', size: '120 KB', owner: 'Charlie', modified: '2024-05-19' },
+          { id: 'file-quickstart', name: 'GETTING_STARTED.md', type: 'Markdown', size: '45 KB', owner: 'Charlie', modified: '2024-05-18' },
+          { id: 'file-contributing', name: 'CONTRIBUTING.md', type: 'Markdown', size: '28 KB', owner: 'Admin', modified: '2024-05-15' }
+        ]
+      },
+      { id: 'file-pkg', name: 'package.json', type: 'JSON Config', size: '4.2 KB', owner: 'Admin', modified: '2024-05-18' },
+      { id: 'file-tsconfig', name: 'tsconfig.json', type: 'JSON Config', size: '2.8 KB', owner: 'Admin', modified: '2024-05-18' },
+      { id: 'file-readme', name: 'README.md', type: 'Markdown', size: '18 KB', owner: 'Charlie', modified: '2024-05-18' }
+    ];
+
+    table.columns = [
+      { key: 'name', header: 'File / Folder Name', width: '320px', isTreeColumn: true },
+      { key: 'type', header: 'Type', width: '140px' },
+      { key: 'size', header: 'Size', width: '110px' },
+      { key: 'owner', header: 'Owner', width: '150px' },
+      { key: 'modified', header: 'Last Modified', width: '130px' }
+    ];
+
+    table.data = sampleWorkspace;
+
+    // Logging & Actions
+    const logList = document.getElementById('logList');
+    table.addEventListener('tree-table:expansion-change', (e) => {
+      const entry = document.createElement('div');
+      entry.innerHTML = `&gt; Toggled Node: <strong>${e.detail.nodeId}</strong> (Expanded total: ${e.detail.expandedIds.length})`;
+      logList.insertBefore(entry, logList.firstChild);
+    });
+
+    table.addEventListener('tree-table:selection-change', (e) => {
+      const entry = document.createElement('div');
+      entry.innerHTML = `&gt; Selection Changed: ${e.detail.selectedIds.length} nodes selected (last toggled: ${e.detail.lastToggledId})`;
+      logList.insertBefore(entry, logList.firstChild);
+    });
+
+    table.addEventListener('tree-table:reorder', (e) => {
+      const entry = document.createElement('div');
+      entry.innerHTML = `&gt; Drag &amp; Drop Reorder: Moved <strong>${e.detail.draggedId}</strong> &rarr; Target <strong>${e.detail.targetId}</strong>`;
+      logList.insertBefore(entry, logList.firstChild);
+    });
+
+    document.getElementById('btnExpandAll').addEventListener('click', () => table.expandAll());
+    document.getElementById('btnCollapseAll').addEventListener('click', () => table.collapseAll());
+    document.getElementById('btnExportCsv').addEventListener('click', () => table.exportCsv());
+    document.getElementById('toggleTheme').addEventListener('change', (e) => {
+      if (e.target.checked) table.setAttribute('theme', 'dark');
+      else table.removeAttribute('theme');
+    });
+  </script>
+</body>
+</html>

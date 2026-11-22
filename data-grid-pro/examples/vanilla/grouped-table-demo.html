@@ -1,0 +1,882 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Row-Grouped Data Table Demo</title>
+    <style>
+      :root,
+      [data-theme="light"] {
+        --gt-primary: #2563eb;
+        --gt-primary-hover: #1d4ed8;
+        --gt-bg-surface: #ffffff;
+        --gt-bg-header: #f8fafc;
+        --gt-bg-hover: #f1f5f9;
+        --gt-bg-group-0: #f1f5f9;
+        --gt-bg-group-1: #f8fafc;
+        --gt-text-main: #0f172a;
+        --gt-text-muted: #64748b;
+        --gt-border-color: #e2e8f0;
+        --gt-focus-ring: rgba(37, 99, 235, 0.35);
+        --gt-radius: 0.5rem;
+        --gt-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        --gt-cell-py: 0.65rem;
+        --gt-cell-px: 0.85rem;
+      }
+
+      body {
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        padding: 2rem;
+        background: #f1f5f9;
+        color: #0f172a;
+      }
+
+      .container {
+        max-width: 980px;
+        margin: 0 auto;
+        background: #ffffff;
+        padding: 1.5rem;
+        border-radius: 0.75rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      }
+
+      .group-controls {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        align-items: center;
+      }
+
+      .btn-group {
+        padding: 0.35rem 0.75rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 0.375rem;
+        background: #ffffff;
+        font-size: 0.8125rem;
+        cursor: pointer;
+        font-weight: 500;
+      }
+      .btn-group.active {
+        background: #2563eb;
+        color: #ffffff;
+        border-color: #2563eb;
+      }
+
+      grouped-data-table {
+        display: block;
+        color: var(--gt-text-main);
+        background-color: var(--gt-bg-surface);
+        border: 1px solid var(--gt-border-color);
+        border-radius: var(--gt-radius);
+        box-shadow: var(--gt-shadow);
+        position: relative;
+      }
+      grouped-data-table * {
+        box-sizing: border-box;
+      }
+
+      .gt-toolbar {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem 1rem;
+        background-color: var(--gt-bg-header);
+        border-bottom: 1px solid var(--gt-border-color);
+      }
+      .gt-search-input {
+        border: 1px solid var(--gt-border-color);
+        background-color: var(--gt-bg-surface);
+        color: var(--gt-text-main);
+        border-radius: 0.375rem;
+        padding: 0.4rem 0.75rem;
+        font-size: 0.875rem;
+        min-width: 250px;
+      }
+
+      .gt-table-container {
+        width: 100%;
+        overflow-x: auto;
+        max-height: 560px;
+      }
+      .gt-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+      }
+      .gt-thead {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background-color: var(--gt-bg-header);
+        border-bottom: 2px solid var(--gt-border-color);
+      }
+      .gt-th {
+        padding: var(--gt-cell-py) var(--gt-cell-px);
+        font-weight: 600;
+        color: var(--gt-text-muted);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        white-space: nowrap;
+      }
+
+      .gt-group-header-row {
+        background-color: var(--gt-bg-group-0);
+        border-bottom: 1px solid var(--gt-border-color);
+        cursor: pointer;
+        font-weight: 600;
+      }
+      .gt-group-header-row[data-level="1"] {
+        background-color: var(--gt-bg-group-1);
+      }
+      .gt-group-header-inner {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .gt-group-chevron {
+        font-size: 0.75rem;
+        color: var(--gt-text-muted);
+        transition: transform 0.2s ease;
+      }
+      .gt-group-expanded .gt-group-chevron {
+        transform: rotate(90deg);
+        color: var(--gt-primary);
+      }
+      .gt-group-badge-count {
+        font-size: 0.75rem;
+        color: var(--gt-text-muted);
+        background: var(--gt-bg-surface);
+        border: 1px solid var(--gt-border-color);
+        padding: 0.1rem 0.45rem;
+        border-radius: 9999px;
+        margin-left: 0.5rem;
+      }
+      .gt-group-aggregates {
+        margin-left: auto;
+        display: flex;
+        gap: 1.25rem;
+        font-size: 0.8125rem;
+        color: var(--gt-text-muted);
+      }
+
+      .gt-tbody .gt-row {
+        border-bottom: 1px solid var(--gt-border-color);
+      }
+      .gt-tbody .gt-row:hover {
+        background-color: var(--gt-bg-hover);
+      }
+      .gt-td {
+        padding: var(--gt-cell-py) var(--gt-cell-px);
+        color: var(--gt-text-main);
+        vertical-align: middle;
+      }
+
+      .gt-pagination-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        background: var(--gt-bg-header);
+        border-top: 1px solid var(--gt-border-color);
+        font-size: 0.875rem;
+      }
+      .tbl-btn {
+        padding: 0.25rem 0.5rem;
+        border: 1px solid var(--gt-border-color);
+        border-radius: 0.25rem;
+        background: #ffffff;
+        cursor: pointer;
+        font-size: 0.8125rem;
+        margin: 0 0.15rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Multi-Level Row-Grouped Data Table Demo</h2>
+      <p style="color: #64748b; font-size: 0.875rem; margin-bottom: 1rem">
+        Group rows dynamically by <strong>Department</strong>, or nested groups
+        by <strong>Department &gt; Team</strong>. Displays real-time group
+        counts and column aggregates (Total Payroll Sum &amp; Headcount), with
+        expand/collapse toggles, plus universal pagination, sorting, and global
+        search.
+      </p>
+
+      <div class="group-controls">
+        <span style="font-size: 0.8125rem; font-weight: 600; color: #475569"
+          >Group By:</span
+        >
+        <button id="btn-group-dept" class="btn-group active">Department</button>
+        <button id="btn-group-nested" class="btn-group">
+          Department &gt; Team (Nested)
+        </button>
+        <button id="btn-group-none" class="btn-group">None (Flat Table)</button>
+      </div>
+
+      <grouped-data-table id="org-table"></grouped-data-table>
+
+      <!-- Usage Guide Section -->
+      <section style="margin-top: 2rem; background: #f8fafc; border: 1px solid var(--gt-border-color); border-radius: 0.5rem; padding: 1.25rem;" aria-label="Row Grouping Usage Guide">
+        <h3 style="margin: 0 0 0.5rem 0; font-size: 1.1rem; font-weight: 700; color: var(--gt-text-main); display: flex; align-items: center; gap: 0.5rem;">
+          <span>💡 How to Use Row Grouping</span>
+        </h3>
+        <p style="color: var(--gt-text-muted); font-size: 0.85rem; margin-bottom: 1rem; line-height: 1.5;">
+          Hierarchical row grouping organizes flat tabular datasets into expandable branches with aggregate mathematical calculations across children.
+        </p>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem;">
+          <div style="background: #ffffff; border: 1px solid var(--gt-border-color); border-radius: 0.375rem; padding: 0.85rem;">
+            <h4 style="margin: 0 0 0.35rem 0; font-size: 0.85rem; font-weight: 700; color: var(--gt-primary);">1. Single or Multi-Level Grouping</h4>
+            <p style="margin: 0; font-size: 0.8rem; color: var(--gt-text-muted); line-height: 1.4;">
+              Pass an array of field names to <code>table.groupBy</code> to enable single or multi-tier grouping trees.
+            </p>
+            <pre style="background: #0f172a; color: #38bdf8; padding: 0.5rem; border-radius: 0.25rem; font-size: 0.725rem; margin-top: 0.4rem; overflow-x: auto;"><code>table.groupBy = ['department', 'team'];</code></pre>
+          </div>
+
+          <div style="background: #ffffff; border: 1px solid var(--gt-border-color); border-radius: 0.375rem; padding: 0.85rem;">
+            <h4 style="margin: 0 0 0.35rem 0; font-size: 0.85rem; font-weight: 700; color: var(--gt-primary);">2. Automatic Aggregate Summaries</h4>
+            <p style="margin: 0; font-size: 0.8rem; color: var(--gt-text-muted); line-height: 1.4;">
+              Define columns with <code>aggregate: 'sum' | 'avg' | 'count' | 'min' | 'max'</code> to calculate header and footer subtotals.
+            </p>
+            <pre style="background: #0f172a; color: #38bdf8; padding: 0.5rem; border-radius: 0.25rem; font-size: 0.725rem; margin-top: 0.4rem; overflow-x: auto;"><code>{ id: 'salary', aggregate: 'sum', formatter: formatCurrency }</code></pre>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      // Standalone implementation for zero-dependency file:// previewing
+      function resolveValue(row, path) {
+        if (!path) return undefined;
+        return String(path)
+          .split(".")
+          .reduce((acc, part) => (acc ? acc[part] : undefined), row);
+      }
+
+      function createElement(tag, cls, attrs) {
+        const el = document.createElement(tag);
+        if (cls) el.className = cls;
+        if (attrs) {
+          for (const [k, v] of Object.entries(attrs))
+            el.setAttribute(k, String(v));
+        }
+        return el;
+      }
+
+      function removeAllChildren(p) {
+        while (p.firstChild) p.removeChild(p.firstChild);
+      }
+
+      function computeAggregates(rows, columns) {
+        const res = {};
+        columns.forEach((col) => {
+          if (!col.aggregate) return;
+          if (col.aggregate.type === "sum") {
+            const sum = rows.reduce(
+              (acc, r) => acc + (Number(r[col.field]) || 0),
+              0,
+            );
+            res[col.id] = sum;
+          }
+        });
+        return res;
+      }
+
+      class GroupedDataTable extends HTMLElement {
+        constructor() {
+          super();
+          this._rows = [];
+          this._columns = [];
+          this._options = { groupBy: ["department"] };
+          this._expanded = new Map();
+          this._globalSearch = "";
+          this._sortCriteria = [];
+          this._pageIndex = 0;
+          this._pageSize = 5;
+        }
+
+        get rows() {
+          return this._rows;
+        }
+        set rows(v) {
+          this._rows = Array.isArray(v) ? v : [];
+          this.render();
+        }
+
+        get columns() {
+          return this._columns;
+        }
+        set columns(v) {
+          this._columns = Array.isArray(v) ? v : [];
+          this.render();
+        }
+
+        get options() {
+          return this._options;
+        }
+        set options(opts) {
+          this._options = Object.assign({}, this._options, opts);
+          this.render();
+        }
+
+        connectedCallback() {
+          if (!this.containerEl) {
+            this.containerEl = createElement("div", "gt-wrapper");
+            this.toolbarEl = createElement("div", "gt-toolbar");
+            this.tableContainerEl = createElement("div", "gt-table-container");
+            this.tableEl = createElement("table", "gt-table");
+            this.theadEl = createElement("thead", "gt-thead");
+            this.tbodyEl = createElement("tbody", "gt-tbody");
+            this.footerEl = createElement("div", "gt-pagination-footer");
+
+            this.tableEl.appendChild(this.theadEl);
+            this.tableEl.appendChild(this.tbodyEl);
+            this.tableContainerEl.appendChild(this.tableEl);
+            this.containerEl.appendChild(this.toolbarEl);
+            this.containerEl.appendChild(this.tableContainerEl);
+            this.containerEl.appendChild(this.footerEl);
+            this.appendChild(this.containerEl);
+          }
+          this.render();
+        }
+
+        render() {
+          if (!this.containerEl) return;
+          this.renderToolbar();
+          this.renderHeader();
+          this.renderBody();
+          this.renderFooter();
+        }
+
+        renderToolbar() {
+          removeAllChildren(this.toolbarEl);
+          const search = createElement("input", "gt-search-input", {
+            type: "search",
+            placeholder: "Search all employees...",
+            value: this._globalSearch,
+          });
+          search.addEventListener("input", () => {
+            this._globalSearch = search.value;
+            this._pageIndex = 0;
+            this.render();
+          });
+          this.toolbarEl.appendChild(search);
+        }
+
+        renderHeader() {
+          removeAllChildren(this.theadEl);
+          const tr = createElement("tr", "gt-header-row");
+          this._columns.forEach((col) => {
+            const th = createElement("th", "gt-th");
+            if (col.width) th.style.width = col.width;
+            const active = this._sortCriteria.find(
+              (c) => c.columnId === col.id,
+            );
+            const icon =
+              active?.direction === "asc"
+                ? " ▲"
+                : active?.direction === "desc"
+                  ? " ▼"
+                  : " ⇅";
+            th.textContent = `${col.header} ${icon}`;
+            th.style.cursor = "pointer";
+            th.style.userSelect = "none";
+            th.title = "Click to sort";
+            th.onclick = () => {
+              const cur = this._sortCriteria.find((c) => c.columnId === col.id);
+              let next = "asc";
+              if (cur && cur.direction === "asc") next = "desc";
+              else if (cur && cur.direction === "desc") next = null;
+              this._sortCriteria = next
+                ? [{ columnId: col.id, direction: next }]
+                : [];
+              this.render();
+            };
+            tr.appendChild(th);
+          });
+          this.theadEl.appendChild(tr);
+        }
+
+        renderBody() {
+          removeAllChildren(this.tbodyEl);
+          let items = [...this._rows];
+
+          if (this._globalSearch) {
+            const q = this._globalSearch.toLowerCase();
+            items = items.filter((r) =>
+              this._columns.some((c) =>
+                String(r[c.field] || "")
+                  .toLowerCase()
+                  .includes(q),
+              ),
+            );
+          }
+
+          // Sorting
+          if (this._sortCriteria.length > 0) {
+            const crit = this._sortCriteria[0];
+            const col = this._columns.find((c) => c.id === crit.columnId);
+            if (col && col.field) {
+              items.sort((a, b) => {
+                const valA = a[col.field];
+                const valB = b[col.field];
+                if (valA == null && valB == null) return 0;
+                if (valA == null) return crit.direction === "asc" ? -1 : 1;
+                if (valB == null) return crit.direction === "asc" ? 1 : -1;
+                if (typeof valA === "number" && typeof valB === "number") {
+                  return crit.direction === "asc" ? valA - valB : valB - valA;
+                }
+                const strA = String(valA).toLowerCase();
+                const strB = String(valB).toLowerCase();
+                if (strA < strB) return crit.direction === "asc" ? -1 : 1;
+                if (strA > strB) return crit.direction === "asc" ? 1 : -1;
+                return 0;
+              });
+            }
+          }
+
+          const totalCols = this._columns.length;
+          const groupCols = this._options.groupBy || [];
+
+          this._totalRows = items.length;
+          this._totalPages = Math.max(
+            1,
+            Math.ceil(this._totalRows / this._pageSize),
+          );
+          if (this._pageIndex >= this._totalPages)
+            this._pageIndex = Math.max(0, this._totalPages - 1);
+
+          if (groupCols.length === 0) {
+            const paged = items.slice(
+              this._pageIndex * this._pageSize,
+              (this._pageIndex + 1) * this._pageSize,
+            );
+            if (paged.length === 0) {
+              const tr = createElement("tr", "gt-row");
+              const td = createElement("td", "gt-td", { colspan: totalCols });
+              td.style.textAlign = "center";
+              td.style.padding = "2rem";
+              td.textContent = "No matching records found.";
+              tr.appendChild(td);
+              this.tbodyEl.appendChild(tr);
+              return;
+            }
+            paged.forEach((r) => {
+              const tr = createElement("tr", "gt-row");
+              this._columns.forEach((c) => {
+                const td = createElement("td", "gt-td");
+                td.textContent = c.formatter
+                  ? c.formatter(r[c.field], r)
+                  : r[c.field] || "";
+                tr.appendChild(td);
+              });
+              this.tbodyEl.appendChild(tr);
+            });
+            return;
+          }
+
+          // Build 1 or 2-level groups
+          const groups = new Map();
+          items.forEach((r) => {
+            const gKey = r[groupCols[0]] || "(Blank)";
+            if (!groups.has(gKey)) groups.set(gKey, []);
+            groups.get(gKey).push(r);
+          });
+
+          // Group pagination: paginate top-level groups
+          const groupKeys = Array.from(groups.keys());
+          this._totalGroups = groupKeys.length;
+          this._totalPages = Math.max(
+            1,
+            Math.ceil(this._totalGroups / this._pageSize),
+          );
+          if (this._pageIndex >= this._totalPages)
+            this._pageIndex = Math.max(0, this._totalPages - 1);
+
+          const pagedGroupKeys = groupKeys.slice(
+            this._pageIndex * this._pageSize,
+            (this._pageIndex + 1) * this._pageSize,
+          );
+
+          if (pagedGroupKeys.length === 0) {
+            const tr = createElement("tr", "gt-row");
+            const td = createElement("td", "gt-td", { colspan: totalCols });
+            td.style.textAlign = "center";
+            td.style.padding = "2rem";
+            td.textContent = "No matching groups found.";
+            tr.appendChild(td);
+            this.tbodyEl.appendChild(tr);
+            return;
+          }
+
+          pagedGroupKeys.forEach((gVal) => {
+            const gRows = groups.get(gVal);
+            const isExp = this._expanded.get(gVal) !== false;
+            const trG = createElement(
+              "tr",
+              `gt-group-header-row ${isExp ? "gt-group-expanded" : ""}`,
+            );
+            const tdG = createElement("td", "gt-td", { colspan: totalCols });
+
+            const inner = createElement("div", "gt-group-header-inner");
+            const chev = createElement("span", "gt-group-chevron");
+            chev.textContent = "▶";
+            inner.appendChild(chev);
+
+            const lbl = createElement("span");
+            lbl.textContent = `${groupCols[0].toUpperCase()}: ${gVal}`;
+            inner.appendChild(lbl);
+
+            const cnt = createElement("span", "gt-group-badge-count");
+            cnt.textContent = `${gRows.length} employees`;
+            inner.appendChild(cnt);
+
+            // Render Aggregates in group header
+            const aggs = computeAggregates(gRows, this._columns);
+            const aggWrap = createElement("div", "gt-group-aggregates");
+            if (aggs.salary) {
+              aggWrap.innerHTML = `Total Payroll: <strong>$${aggs.salary.toLocaleString()}</strong>`;
+            }
+            inner.appendChild(aggWrap);
+
+            trG.onclick = () => {
+              this._expanded.set(gVal, !isExp);
+              this.render();
+            };
+
+            tdG.appendChild(inner);
+            trG.appendChild(tdG);
+            this.tbodyEl.appendChild(trG);
+
+            if (isExp) {
+              if (groupCols.length > 1) {
+                // Subgroup by second column
+                const subMap = new Map();
+                gRows.forEach((sr) => {
+                  const sKey = sr[groupCols[1]] || "(Blank)";
+                  if (!subMap.has(sKey)) subMap.set(sKey, []);
+                  subMap.get(sKey).push(sr);
+                });
+
+                subMap.forEach((subRows, subVal) => {
+                  const subKey = `${gVal} > ${subVal}`;
+                  const isSubExp = this._expanded.get(subKey) !== false;
+                  const trSub = createElement(
+                    "tr",
+                    `gt-group-header-row ${isSubExp ? "gt-group-expanded" : ""}`,
+                    { "data-level": "1" },
+                  );
+                  const tdSub = createElement("td", "gt-td", {
+                    colspan: totalCols,
+                  });
+
+                  const subInner = createElement(
+                    "div",
+                    "gt-group-header-inner",
+                  );
+                  subInner.style.paddingLeft = "1.5rem";
+                  const subChev = createElement("span", "gt-group-chevron");
+                  subChev.textContent = "▶";
+                  subInner.appendChild(subChev);
+
+                  const subLbl = createElement("span");
+                  subLbl.textContent = `${groupCols[1].toUpperCase()}: ${subVal}`;
+                  subInner.appendChild(subLbl);
+
+                  const subCnt = createElement("span", "gt-group-badge-count");
+                  subCnt.textContent = `${subRows.length}`;
+                  subInner.appendChild(subCnt);
+
+                  trSub.onclick = (e) => {
+                    e.stopPropagation();
+                    this._expanded.set(subKey, !isSubExp);
+                    this.render();
+                  };
+
+                  tdSub.appendChild(subInner);
+                  trSub.appendChild(tdSub);
+                  this.tbodyEl.appendChild(trSub);
+
+                  if (isSubExp) {
+                    subRows.forEach((row) => {
+                      const tr = createElement("tr", "gt-row");
+                      this._columns.forEach((c, idx) => {
+                        const td = createElement("td", "gt-td");
+                        if (idx === 0) td.style.paddingLeft = "3rem";
+                        td.textContent = c.formatter
+                          ? c.formatter(row[c.field], row)
+                          : row[c.field] || "";
+                        tr.appendChild(td);
+                      });
+                      this.tbodyEl.appendChild(tr);
+                    });
+                  }
+                });
+              } else {
+                gRows.forEach((row) => {
+                  const tr = createElement("tr", "gt-row");
+                  this._columns.forEach((c, idx) => {
+                    const td = createElement("td", "gt-td");
+                    if (idx === 0) td.style.paddingLeft = "2rem";
+                    td.textContent = c.formatter
+                      ? c.formatter(row[c.field], row)
+                      : row[c.field] || "";
+                    tr.appendChild(td);
+                  });
+                  this.tbodyEl.appendChild(tr);
+                });
+              }
+            }
+          });
+        }
+
+        renderFooter() {
+          removeAllChildren(this.footerEl);
+          const groupCols = this._options.groupBy || [];
+          const isGrouped = groupCols.length > 0;
+          const total = isGrouped
+            ? this._totalGroups || 0
+            : this._totalRows || 0;
+          const totalPages = this._totalPages || 1;
+          const currentPage = this._pageIndex + 1;
+          const start = total === 0 ? 0 : this._pageIndex * this._pageSize + 1;
+          const end = Math.min((this._pageIndex + 1) * this._pageSize, total);
+          const unit = isGrouped ? "groups" : "records";
+
+          const left = createElement("div", "gt-pagination-left");
+          left.style.display = "flex";
+          left.style.alignItems = "center";
+          left.style.gap = "0.5rem";
+
+          const sizeLabel = createElement("label");
+          sizeLabel.textContent = isGrouped
+            ? "Groups per page: "
+            : "Rows per page: ";
+          const sizeSel = createElement("select", "gt-page-size-select");
+          sizeSel.style.padding = "0.25rem 0.5rem";
+          sizeSel.style.borderRadius = "0.375rem";
+          sizeSel.style.border = "1px solid var(--gt-border-color)";
+          [3, 5, 10].forEach((sz) => {
+            const opt = createElement("option", "", { value: sz });
+            opt.textContent = String(sz);
+            if (sz === this._pageSize) opt.selected = true;
+            sizeSel.appendChild(opt);
+          });
+          sizeSel.addEventListener("change", () => {
+            this._pageSize = Number(sizeSel.value);
+            this._pageIndex = 0;
+            this.render();
+          });
+          left.appendChild(sizeLabel);
+          left.appendChild(sizeSel);
+
+          const countInfo = createElement("span");
+          countInfo.style.marginLeft = "0.5rem";
+          countInfo.textContent = `Showing ${start}–${end} of ${total} ${unit} (Page ${currentPage} of ${totalPages})`;
+          left.appendChild(countInfo);
+
+          const controls = createElement("div");
+          controls.style.display = "flex";
+          controls.style.alignItems = "center";
+          controls.style.gap = "0.25rem";
+
+          const prev = createElement("button", "btn-group", {
+            type: "button",
+            disabled: this._pageIndex === 0,
+          });
+          prev.textContent = "‹ Prev";
+          prev.onclick = () => {
+            if (this._pageIndex > 0) {
+              this._pageIndex--;
+              this.render();
+            }
+          };
+          controls.appendChild(prev);
+
+          for (let p = 1; p <= totalPages; p++) {
+            const pBtn = createElement(
+              "button",
+              `btn-group ${p === currentPage ? "active" : ""}`,
+              { type: "button" },
+            );
+            pBtn.textContent = String(p);
+            pBtn.onclick = () => {
+              this._pageIndex = p - 1;
+              this.render();
+            };
+            controls.appendChild(pBtn);
+          }
+
+          const next = createElement("button", "btn-group", {
+            type: "button",
+            disabled: this._pageIndex >= this._totalPages - 1,
+          });
+          next.textContent = "Next ›";
+          next.onclick = () => {
+            if (this._pageIndex < this._totalPages - 1) {
+              this._pageIndex++;
+              this.render();
+            }
+          };
+          controls.appendChild(next);
+
+          this.footerEl.appendChild(left);
+          this.footerEl.appendChild(controls);
+        }
+      }
+
+      if (!window.customElements.get("grouped-data-table")) {
+        window.customElements.define("grouped-data-table", GroupedDataTable);
+      }
+
+      // App Initialization
+      const table = document.getElementById("org-table");
+
+      table.columns = [
+        { id: "name", header: "Employee Name", field: "name", width: "220px" },
+        {
+          id: "department",
+          header: "Department",
+          field: "department",
+          width: "180px",
+        },
+        { id: "team", header: "Team Division", field: "team", width: "160px" },
+        {
+          id: "role",
+          header: "Title / Position",
+          field: "role",
+          width: "200px",
+        },
+        {
+          id: "salary",
+          header: "Salary ($)",
+          field: "salary",
+          width: "150px",
+          aggregate: { type: "sum", label: "Payroll" },
+          formatter: (v) => `$${Number(v).toLocaleString()}`,
+        },
+      ];
+
+      table.rows = [
+        {
+          id: "1",
+          name: "Alice Freeman",
+          department: "Engineering",
+          team: "Frontend Core",
+          role: "Staff UI Architect",
+          salary: 185000,
+        },
+        {
+          id: "2",
+          name: "Bob Henderson",
+          department: "Engineering",
+          team: "Cloud Infrastructure",
+          role: "DevOps Lead",
+          salary: 175000,
+        },
+        {
+          id: "3",
+          name: "Clara Oswald",
+          department: "Product Design",
+          team: "Design Systems",
+          role: "Principal Designer",
+          salary: 160000,
+        },
+        {
+          id: "4",
+          name: "David Kim",
+          department: "Engineering",
+          team: "Frontend Core",
+          role: "Senior React Dev",
+          salary: 145000,
+        },
+        {
+          id: "5",
+          name: "Elena Rostova",
+          department: "Product Design",
+          team: "Product UX",
+          role: "UX Researcher",
+          salary: 135000,
+        },
+        {
+          id: "6",
+          name: "Frank Zhang",
+          department: "Sales & Growth",
+          team: "Enterprise Accounts",
+          role: "VP Sales",
+          salary: 210000,
+        },
+        {
+          id: "7",
+          name: "Grace Hopper",
+          department: "Engineering",
+          team: "Cloud Infrastructure",
+          role: "Principal SRE",
+          salary: 195000,
+        },
+        {
+          id: "8",
+          name: "Henry Ford",
+          department: "Operations",
+          team: "Logistics",
+          role: "Operations Director",
+          salary: 155000,
+        },
+        {
+          id: "9",
+          name: "Iris West",
+          department: "Sales & Growth",
+          team: "Customer Success",
+          role: "Account Executive",
+          salary: 125000,
+        },
+        {
+          id: "10",
+          name: "James Wilson",
+          department: "Operations",
+          team: "Facilities",
+          role: "Workplace Manager",
+          salary: 110000,
+        },
+      ];
+
+      table.options = { groupBy: ["department"] };
+
+      // Grouping Toggle Buttons
+      const btnDept = document.getElementById("btn-group-dept");
+      const btnNested = document.getElementById("btn-group-nested");
+      const btnNone = document.getElementById("btn-group-none");
+
+      btnDept.addEventListener("click", () => {
+        [btnDept, btnNested, btnNone].forEach((b) =>
+          b.classList.remove("active"),
+        );
+        btnDept.classList.add("active");
+        table.options = { groupBy: ["department"] };
+      });
+
+      btnNested.addEventListener("click", () => {
+        [btnDept, btnNested, btnNone].forEach((b) =>
+          b.classList.remove("active"),
+        );
+        btnNested.classList.add("active");
+        table.options = { groupBy: ["department", "team"] };
+      });
+
+      btnNone.addEventListener("click", () => {
+        [btnDept, btnNested, btnNone].forEach((b) =>
+          b.classList.remove("active"),
+        );
+        btnNone.classList.add("active");
+        table.options = { groupBy: [] };
+      });
+    </script>
+  </body>
+</html>
