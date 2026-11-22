@@ -2,6 +2,39 @@
 
 A fast, lightweight, and customizable data table library for the modern web.
 
+<p align="center">
+  <a href="https://www.npmjs.com/package/arame-data-grid-pro"><strong>📦 npm Package</strong></a> •
+  <a href="https://htmlpreview.github.io/?https://github.com/arame-admin/arame-data-grid-pro/blob/main/examples/vanilla/index.html"><strong>🚀 Live Demos & Gallery (One-Click)</strong></a> •
+  <a href="https://htmlpreview.github.io/?https://github.com/arame-admin/arame-data-grid-pro/blob/main/examples/vanilla/docs.html"><strong>📖 Interactive Docs</strong></a> •
+  <a href="https://htmlpreview.github.io/?https://github.com/arame-admin/arame-data-grid-pro/blob/main/examples/vanilla/configurable-table-demo.html"><strong>⚙️ Configurable Playground</strong></a>
+</p>
+
+---
+
+### Quick Demo Links
+
+Explore all 15 pre-built standalone HTML demos (open directly with zero build tools required):
+
+| Demo | Description | 🚀 Live Browser Demo | 📄 Source Code |
+| :--- | :--- | :--- | :--- |
+| 🎨 **Navigation Hub** | Visual catalog of all components | [**Open Live Demo**](https://htmlpreview.github.io/?https://github.com/arame-admin/arame-data-grid-pro/blob/main/examples/vanilla/index.html) | [`examples/vanilla/index.html`](examples/vanilla/index.html) |
+| 📖 **Documentation Guide** | Comprehensive beginner & API guide | [**Open Live Demo**](https://htmlpreview.github.io/?https://github.com/arame-admin/arame-data-grid-pro/blob/main/examples/vanilla/docs.html) | [`examples/vanilla/docs.html`](examples/vanilla/docs.html) |
+| ⚙️ **Configurable Studio** | Live feature toggles & playground | [**Open Live Demo**](https://htmlpreview.github.io/?https://github.com/arame-admin/arame-data-grid-pro/blob/main/examples/vanilla/configurable-table-demo.html) | [`examples/vanilla/configurable-table-demo.html`](examples/vanilla/configurable-table-demo.html) |
+| ⚡ **Core Data Grid** | Default search, sort, pagination, drag & drop | [**Open Live Demo**](https://htmlpreview.github.io/?https://github.com/arame-admin/arame-data-grid-pro/blob/main/examples/vanilla/core-grid-demo.html) | [`examples/vanilla/core-grid-demo.html`](examples/vanilla/core-grid-demo.html) |
+| 📌 **Sticky Column Table** | Pinned columns with scroll elevation drop-shadows | [**Open Live Demo**](https://htmlpreview.github.io/?https://github.com/arame-admin/arame-data-grid-pro/blob/main/examples/vanilla/sticky-table-demo.html) | [`examples/vanilla/sticky-table-demo.html`](examples/vanilla/sticky-table-demo.html) |
+| 📂 **Expandable Row Table** | Master-detail expandable nested records | [**Open Live Demo**](https://htmlpreview.github.io/?https://github.com/arame-admin/arame-data-grid-pro/blob/main/examples/vanilla/expandable-table-demo.html) | [`examples/vanilla/expandable-table-demo.html`](examples/vanilla/expandable-table-demo.html) |
+| 👁️ **Column Visibility Table** | Dropdown menu to show/hide columns with persistence | [**Open Live Demo**](https://htmlpreview.github.io/?https://github.com/arame-admin/arame-data-grid-pro/blob/main/examples/vanilla/column-visibility-demo.html) | [`examples/vanilla/column-visibility-demo.html`](examples/vanilla/column-visibility-demo.html) |
+| 🔍 **Filterable Table** | Multi-column client filters (Text, Select, Range, Date) | [**Open Live Demo**](https://htmlpreview.github.io/?https://github.com/arame-admin/arame-data-grid-pro/blob/main/examples/vanilla/filterable-table-demo.html) | [`examples/vanilla/filterable-table-demo.html`](examples/vanilla/filterable-table-demo.html) |
+| ✏️ **Editable Table** | In-place double-click editing with live validation | [**Open Live Demo**](https://htmlpreview.github.io/?https://github.com/arame-admin/arame-data-grid-pro/blob/main/examples/vanilla/editable-table-demo.html) | [`examples/vanilla/editable-table-demo.html`](examples/vanilla/editable-table-demo.html) |
+| 📑 **Row-Grouped Table** | Multi-level collapsible category groupings | [**Open Live Demo**](https://htmlpreview.github.io/?https://github.com/arame-admin/arame-data-grid-pro/blob/main/examples/vanilla/grouped-table-demo.html) | [`examples/vanilla/grouped-table-demo.html`](examples/vanilla/grouped-table-demo.html) |
+| 📋 **Context Menu Table** | Header column menus and row action right-click context menus | [**Open Live Demo**](https://htmlpreview.github.io/?https://github.com/arame-admin/arame-data-grid-pro/blob/main/examples/vanilla/context-menu-table-demo.html) | [`examples/vanilla/context-menu-table-demo.html`](examples/vanilla/context-menu-table-demo.html) |
+| 📜 **Infinite Scrolling** | Virtualized endless scrolling dataset | [**Open Live Demo**](https://htmlpreview.github.io/?https://github.com/arame-admin/arame-data-grid-pro/blob/main/examples/vanilla/infinite-table-demo.html) | [`examples/vanilla/infinite-table-demo.html`](examples/vanilla/infinite-table-demo.html) |
+| 💰 **Calculated Payroll Table** | Reactive formula calculations (Salary, Bonus, Net Pay) | [**Open Live Demo**](https://htmlpreview.github.io/?https://github.com/arame-admin/arame-data-grid-pro/blob/main/examples/vanilla/calculated-table-demo.html) | [`examples/vanilla/calculated-table-demo.html`](examples/vanilla/calculated-table-demo.html) |
+| 🏷️ **Header Filter Table** | Filter controls integrated directly into header cells | [**Open Live Demo**](https://htmlpreview.github.io/?https://github.com/arame-admin/arame-data-grid-pro/blob/main/examples/vanilla/header-filter-table-demo.html) | [`examples/vanilla/header-filter-table-demo.html`](examples/vanilla/header-filter-table-demo.html) |
+| 🌲 **Tree Data Table** | Hierarchical parent-child nested folder structures | [**Open Live Demo**](https://htmlpreview.github.io/?https://github.com/arame-admin/arame-data-grid-pro/blob/main/examples/vanilla/tree-table-demo.html) | [`examples/vanilla/tree-table-demo.html`](examples/vanilla/tree-table-demo.html) |
+| 🎯 **Advanced Filter Table** | Visual rule builder supporting complex AND/OR rules | [**Open Live Demo**](https://htmlpreview.github.io/?https://github.com/arame-admin/arame-data-grid-pro/blob/main/examples/vanilla/advanced-filter-table-demo.html) | [`examples/vanilla/advanced-filter-table-demo.html`](examples/vanilla/advanced-filter-table-demo.html) |
+| 🌐 **Server-Side Data Grid** | Remote server latency simulation with cancelable searches | [**Open Live Demo**](https://htmlpreview.github.io/?https://github.com/arame-admin/arame-data-grid-pro/blob/main/examples/vanilla/server-demo.html) | [`examples/vanilla/server-demo.html`](examples/vanilla/server-demo.html) |
+
 ---
 
 ## Introduction
@@ -458,27 +491,27 @@ All demos and components run natively across both `http://` / `https://` servers
 This repository includes 15 interactive demos you can inspect, test, and adapt for your own apps. All demos are 100% self-contained with inline scripts and styles, meaning you can open them directly with `file:///` by double-clicking them in your file manager—no local HTTP server or build step required.
 
 ### How to use the Demo Gallery:
-Open [`examples/vanilla/index.html`](file:///c:/Users/1836/Music/hari-md/lib/examples/vanilla/index.html) in your browser. It provides a visual hub showcasing every table variation with descriptions and direct links.
+Open [`examples/vanilla/index.html`](examples/vanilla/index.html) in your browser. It provides a visual hub showcasing every table variation with descriptions and direct links.
 
 ### How to use the Configurable Table Demo:
-Open [`examples/vanilla/configurable-table-demo.html`](file:///c:/Users/1836/Music/hari-md/lib/examples/vanilla/configurable-table-demo.html). It includes an interactive settings sidebar where you can toggle search, pagination, row selection, row & column drag and drop, density, and borders in real time to see how the table responds.
+Open [`examples/vanilla/configurable-table-demo.html`](examples/vanilla/configurable-table-demo.html). It includes an interactive settings sidebar where you can toggle search, pagination, row selection, row & column drag and drop, density, and borders in real time to see how the table responds.
 
 ### Pre-Built Table Demos:
-1. **Core Data Grid** ([`core-grid-demo.html`](file:///c:/Users/1836/Music/hari-md/lib/examples/vanilla/core-grid-demo.html)): The standard grid with search, sort, pagination, and multi-row selection.
-2. **Sticky Column Table** ([`sticky-table-demo.html`](file:///c:/Users/1836/Music/hari-md/lib/examples/vanilla/sticky-table-demo.html)): Keeps key columns pinned on the left or right while you scroll horizontally.
-3. **Expandable Row Table** ([`expandable-table-demo.html`](file:///c:/Users/1836/Music/hari-md/lib/examples/vanilla/expandable-table-demo.html)): Click any row to expand and view nested details or sub-records.
-4. **Column Visibility Table** ([`column-visibility-demo.html`](file:///c:/Users/1836/Music/hari-md/lib/examples/vanilla/column-visibility-demo.html)): Includes a dropdown menu to show or hide specific columns.
-5. **Filtering Table** ([`filterable-table-demo.html`](file:///c:/Users/1836/Music/hari-md/lib/examples/vanilla/filterable-table-demo.html)): Filter rows using column criteria like "starts with", "greater than", or "equals".
-6. **Editable Table** ([`editable-table-demo.html`](file:///c:/Users/1836/Music/hari-md/lib/examples/vanilla/editable-table-demo.html)): Direct double-click in-place editing with built-in validation messages.
-7. **Row-Grouped Table** ([`grouped-table-demo.html`](file:///c:/Users/1836/Music/hari-md/lib/examples/vanilla/grouped-table-demo.html)): Groups records together under collapsible category headers.
-8. **Context Menu Table** ([`context-menu-table-demo.html`](file:///c:/Users/1836/Music/hari-md/lib/examples/vanilla/context-menu-table-demo.html)): Right-click rows to display a contextual action menu (edit, duplicate, delete).
-9. **Infinite Scrolling Table** ([`infinite-table-demo.html`](file:///c:/Users/1836/Music/hari-md/lib/examples/vanilla/infinite-table-demo.html)): Automatically loads more rows as you scroll down instead of using page buttons.
-10. **Calculated Payroll Table** ([`calculated-table-demo.html`](file:///c:/Users/1836/Music/hari-md/lib/examples/vanilla/calculated-table-demo.html)): Professional payroll table that recalculates total compensation instantly when salary or bonus inputs change.
-11. **Header Filter Table** ([`header-filter-table-demo.html`](file:///c:/Users/1836/Music/hari-md/lib/examples/vanilla/header-filter-table-demo.html)): Filter inputs embedded directly in each column header.
-12. **Tree Data Table** ([`tree-table-demo.html`](file:///c:/Users/1836/Music/hari-md/lib/examples/vanilla/tree-table-demo.html)): Displays hierarchical folder structures and parent-child records.
-13. **Advanced Filter Table** ([`advanced-filter-table-demo.html`](file:///c:/Users/1836/Music/hari-md/lib/examples/vanilla/advanced-filter-table-demo.html)): Visual filter builder supporting complex `AND`/`OR` logic rules.
-14. **Configurable Playground** ([`configurable-table-demo.html`](file:///c:/Users/1836/Music/hari-md/lib/examples/vanilla/configurable-table-demo.html)): Interactive controls to customize options dynamically.
-15. **Server-Side Data Grid** ([`server-demo.html`](file:///c:/Users/1836/Music/hari-md/lib/examples/vanilla/server-demo.html)): Live server simulation with debounced search and cancelable requests.
+1. **Core Data Grid** ([Live Demo](https://htmlpreview.github.io/?https://github.com/arame-admin/arame-data-grid-pro/blob/main/examples/vanilla/core-grid-demo.html) • [Source](examples/vanilla/core-grid-demo.html)): The standard grid with search, sort, pagination, and multi-row selection.
+2. **Sticky Column Table** ([Live Demo](https://htmlpreview.github.io/?https://github.com/arame-admin/arame-data-grid-pro/blob/main/examples/vanilla/sticky-table-demo.html) • [Source](examples/vanilla/sticky-table-demo.html)): Keeps key columns pinned on the left or right while you scroll horizontally.
+3. **Expandable Row Table** ([Live Demo](https://htmlpreview.github.io/?https://github.com/arame-admin/arame-data-grid-pro/blob/main/examples/vanilla/expandable-table-demo.html) • [Source](examples/vanilla/expandable-table-demo.html)): Click any row to expand and view nested details or sub-records.
+4. **Column Visibility Table** ([Live Demo](https://htmlpreview.github.io/?https://github.com/arame-admin/arame-data-grid-pro/blob/main/examples/vanilla/column-visibility-demo.html) • [Source](examples/vanilla/column-visibility-demo.html)): Includes a dropdown menu to show or hide specific columns.
+5. **Filtering Table** ([Live Demo](https://htmlpreview.github.io/?https://github.com/arame-admin/arame-data-grid-pro/blob/main/examples/vanilla/filterable-table-demo.html) • [Source](examples/vanilla/filterable-table-demo.html)): Filter rows using column criteria like "starts with", "greater than", or "equals".
+6. **Editable Table** ([Live Demo](https://htmlpreview.github.io/?https://github.com/arame-admin/arame-data-grid-pro/blob/main/examples/vanilla/editable-table-demo.html) • [Source](examples/vanilla/editable-table-demo.html)): Direct double-click in-place editing with built-in validation messages.
+7. **Row-Grouped Table** ([Live Demo](https://htmlpreview.github.io/?https://github.com/arame-admin/arame-data-grid-pro/blob/main/examples/vanilla/grouped-table-demo.html) • [Source](examples/vanilla/grouped-table-demo.html)): Groups records together under collapsible category headers.
+8. **Context Menu Table** ([Live Demo](https://htmlpreview.github.io/?https://github.com/arame-admin/arame-data-grid-pro/blob/main/examples/vanilla/context-menu-table-demo.html) • [Source](examples/vanilla/context-menu-table-demo.html)): Right-click rows to display a contextual action menu (edit, duplicate, delete).
+9. **Infinite Scrolling Table** ([Live Demo](https://htmlpreview.github.io/?https://github.com/arame-admin/arame-data-grid-pro/blob/main/examples/vanilla/infinite-table-demo.html) • [Source](examples/vanilla/infinite-table-demo.html)): Automatically loads more rows as you scroll down instead of using page buttons.
+10. **Calculated Payroll Table** ([Live Demo](https://htmlpreview.github.io/?https://github.com/arame-admin/arame-data-grid-pro/blob/main/examples/vanilla/calculated-table-demo.html) • [Source](examples/vanilla/calculated-table-demo.html)): Professional payroll table that recalculates total compensation instantly when salary or bonus inputs change.
+11. **Header Filter Table** ([Live Demo](https://htmlpreview.github.io/?https://github.com/arame-admin/arame-data-grid-pro/blob/main/examples/vanilla/header-filter-table-demo.html) • [Source](examples/vanilla/header-filter-table-demo.html)): Filter inputs embedded directly in each column header.
+12. **Tree Data Table** ([Live Demo](https://htmlpreview.github.io/?https://github.com/arame-admin/arame-data-grid-pro/blob/main/examples/vanilla/tree-table-demo.html) • [Source](examples/vanilla/tree-table-demo.html)): Displays hierarchical folder structures and parent-child records.
+13. **Advanced Filter Table** ([Live Demo](https://htmlpreview.github.io/?https://github.com/arame-admin/arame-data-grid-pro/blob/main/examples/vanilla/advanced-filter-table-demo.html) • [Source](examples/vanilla/advanced-filter-table-demo.html)): Visual filter builder supporting complex `AND`/`OR` logic rules.
+14. **Configurable Playground** ([Live Demo](https://htmlpreview.github.io/?https://github.com/arame-admin/arame-data-grid-pro/blob/main/examples/vanilla/configurable-table-demo.html) • [Source](examples/vanilla/configurable-table-demo.html)): Interactive controls to customize options dynamically.
+15. **Server-Side Data Grid** ([Live Demo](https://htmlpreview.github.io/?https://github.com/arame-admin/arame-data-grid-pro/blob/main/examples/vanilla/server-demo.html) • [Source](examples/vanilla/server-demo.html)): Live server simulation with debounced search and cancelable requests.
 
 ---
 
