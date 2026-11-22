@@ -1,6 +1,6 @@
 {
   "name": "arame-data-grid-pro",
-  "version": "1.0.9",
+  "version": "1.1.0",
   "description": "Enterprise-grade, framework-agnostic Web Component data grid built with TypeScript. Supports virtualization, tree grids, inline editing, multi-column sorting, formula calculations, and advanced filtering.",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -64,6 +64,11 @@
     "./common": {
       "types": "./dist/common/index.d.ts",
       "import": "./dist/common/index.js"
+    },
+    "./react": {
+      "types": "./dist/react/index.d.ts",
+      "import": "./dist/react/index.js",
+      "require": "./dist/react/index.cjs"
     }
   },
   "files": [
@@ -106,7 +111,11 @@
   "author": "Arame Global (https://github.com/arameglobal)",
   "license": "MIT",
   "devDependencies": {
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "happy-dom": "^21.0.4",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
     "typescript": "^5.5.4",
     "vite": "^5.4.0",
     "vite-plugin-dts": "^4.0.0",
@@ -129,5 +138,17 @@
       "email": "harikrishnanrlive@gmail.com",
       "url": "https://github.com/harikrishnanr-arame"
     }
-  ]
+  ],
+  "peerDependencies": {
+    "react": ">=18.0.0 || >=19.0.0",
+    "react-dom": ">=18.0.0 || >=19.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    }
+  }
 }

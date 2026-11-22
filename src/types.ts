@@ -71,7 +71,7 @@ export interface ColumnDef<T = Record<string, unknown>> {
   priority?: number; // 1 (highest - always show on mobile) to 5 (hide on mobile)
   visible?: boolean;
   formatter?: (value: unknown, row: T) => string;
-  renderer?: (value: unknown, row: T, index: number) => HTMLElement | string;
+  renderer?: (value: unknown, row: T, index: number) => HTMLElement | string | any;
   comparator?: (a: unknown, b: unknown, rowA: T, rowB: T) => number;
   calculate?: (row: T) => unknown;
   aggregation?: 'sum' | 'avg' | 'min' | 'max' | 'count' | ((values: unknown[], rows: T[]) => unknown);
@@ -117,11 +117,27 @@ export interface GridOptions<T = Record<string, unknown>> {
   density?: Density;
   mobileLayout?: MobileLayout;
   
-  // Server-side
+  // Server-side & Controlled Mode (ENH-03)
   serverSide?: boolean;
   serverDataLoader?: ServerDataLoader<T>;
   searchDebounceMs?: number; // default: 300
   keepPreviousDataWhileLoading?: boolean; // default: true
+  paginationMode?: 'client' | 'server' | 'controlled'; // ENH-03
+  sortingMode?: 'client' | 'server' | 'controlled';    // ENH-03
+  totalRows?: number;   // External total row count for controlled pagination
+  currentPage?: number; // External 1-based or 0-based page index
+
+  // Toolbar Configuration & Suppression (ENH-04)
+  toolbar?: boolean;    // default: true. Set false to completely suppress internal toolbar
+  exportable?: boolean; // default: true. Set false to suppress Export CSV button
+
+  // Action Column Configuration (ENH-05)
+  actions?: {
+    header?: string;           // default: 'Actions'
+    width?: string;            // default: '100px'
+    pinned?: 'left' | 'right'; // default: 'right'
+    render?: (row: T, index: number) => HTMLElement | string | any;
+  };
 
   // Drag & Drop
   rowReordering?: boolean;
@@ -165,6 +181,9 @@ export interface GridEventPayloads<T = Record<string, unknown>> {
   // Server & Loading Events
   'pdg:loading': { loading: boolean; isInitial: boolean; isRefresh: boolean };
   'pdg:error': { error: Error | unknown; queryParams?: ServerQueryParams };
+
+  // Action Column Events (ENH-05)
+  'pdg:action': { action: string; row: T; rowId: string | number };
 
   // Drag & Drop Events
   'pdg:row-reorder': { fromIndex: number; toIndex: number; row: T; rows: T[] };

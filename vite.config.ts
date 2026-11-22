@@ -17,7 +17,8 @@ const entries = {
   'header-filter-table/index': resolve(__dirname, 'src/header-filter-table/index.ts'),
   'tree-table/index': resolve(__dirname, 'src/tree-table/index.ts'),
   'advanced-filter-table/index': resolve(__dirname, 'src/advanced-filter-table/index.ts'),
-  'common/index': resolve(__dirname, 'src/common/index.ts')
+  'common/index': resolve(__dirname, 'src/common/index.ts'),
+  'react/index': resolve(__dirname, 'src/react/index.ts')
 };
 
 export default defineConfig({
@@ -33,7 +34,9 @@ export default defineConfig({
         `${entryName}.${format === 'es' ? 'js' : 'cjs'}`
     },
     rollupOptions: {
+      external: ['react', 'react-dom', 'react/jsx-runtime'],
       output: {
+        exports: "named",
         assetFileNames: (assetInfo) => {
           if (assetInfo.name && assetInfo.name.endsWith('.css')) {
             // Primary bundle CSS becomes styles.css; others keep hashed/named assets
@@ -53,7 +56,7 @@ export default defineConfig({
   },
   plugins: [
     dts({
-      include: ['src/**/*.ts'],
+      include: ['src/**/*.ts', 'src/**/*.tsx'],
       exclude: ['src/**/*.test.ts', 'tests/**'],
       entryRoot: 'src',
       outDir: 'dist',

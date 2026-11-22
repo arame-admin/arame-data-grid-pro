@@ -592,10 +592,11 @@ export class ProDataGrid<T = Record<string, unknown>> extends HTMLElement {
   }
 
   private getProcessedData(): { processed: T[]; totalFilteredCount: number } {
-    if (this._options.serverSide) {
+    if (this._options.serverSide || this._options.paginationMode === 'server' || this._options.paginationMode === 'controlled') {
+      const totalCount = this._options.totalRows ?? (this._pagination.totalRows || this._rows.length);
       return {
         processed: this._rows,
-        totalFilteredCount: this._pagination.totalRows || this._rows.length
+        totalFilteredCount: totalCount
       };
     }
 
@@ -616,6 +617,12 @@ export class ProDataGrid<T = Record<string, unknown>> extends HTMLElement {
 
   private renderToolbar(): void {
     removeAllChildren(this.toolbarEl);
+
+    if (this._options.toolbar === false) {
+      this.toolbarEl.style.display = 'none';
+      return;
+    }
+    this.toolbarEl.style.display = 'flex';
 
     const left = createElement('div', 'pdg-toolbar-left');
     if (this._options.searchable !== false) {
@@ -651,13 +658,15 @@ export class ProDataGrid<T = Record<string, unknown>> extends HTMLElement {
     }
 
     const right = createElement('div', 'pdg-toolbar-right');
-    const exportBtn = createElement('button', 'pdg-btn', { type: 'button' });
-    exportBtn.textContent = 'Export CSV';
-    exportBtn.addEventListener('click', () => {
-      const { processed } = this.getProcessedData();
-      exportToCSV(processed, this._columns);
-    });
-    right.appendChild(exportBtn);
+    if (this._options.exportable !== false) {
+      const exportBtn = createElement('button', 'pdg-btn', { type: 'button' });
+      exportBtn.textContent = 'Export CSV';
+      exportBtn.addEventListener('click', () => {
+        const { processed } = this.getProcessedData();
+        exportToCSV(processed, this._columns);
+      });
+      right.appendChild(exportBtn);
+    }
 
     this.toolbarEl.appendChild(left);
     this.toolbarEl.appendChild(right);
@@ -878,11 +887,15 @@ export class ProDataGrid<T = Record<string, unknown>> extends HTMLElement {
       tr.appendChild(th);
     });
 
-    // Row Actions Header (Delete / Edit)
-    if (this._options.deletable) {
+    // Row Actions Header (Delete / Edit / Custom Actions ENH-05)
+    if (this._options.deletable || this._options.actions) {
       const thActions = createElement('th', 'pdg-th pdg-th-actions');
-      thActions.style.width = '70px';
-      thActions.textContent = 'Actions';
+      const actionWidth = this._options.actions?.width || (this._options.deletable ? '70px' : '100px');
+      thActions.style.width = actionWidth;
+      thActions.textContent = this._options.actions?.header || 'Actions';
+      if (this._options.stickyActions !== false) {
+        thActions.classList.add('pdg-sticky-actions');
+      }
       tr.appendChild(thActions);
     }
 
@@ -985,6 +998,17 @@ export class ProDataGrid<T = Record<string, unknown>> extends HTMLElement {
       return;
     }
 
+    if (this._options.totalRows !== undefined) {
+      this._pagination.totalRows = this._options.totalRows;
+      this._pagination.totalPages = Math.max(1, Math.ceil(this._options.totalRows / this._pagination.pageSize));
+    }
+    if (this._options.currentPage !== undefined) {
+      const targetPage = this._options.currentPage > 0 && this._options.currentPage <= this._pagination.totalPages
+        ? this._options.currentPage - 1
+        : Math.max(0, this._options.currentPage);
+      this._pagination.pageIndex = targetPage;
+    }
+
     let rowsToRender: T[] = [];
     if (this._options.virtualize) {
       const rowH = this._options.rowHeight || 48;
@@ -1006,8 +1030,12 @@ export class ProDataGrid<T = Record<string, unknown>> extends HTMLElement {
       }
       this.virtualSpacerEl.style.height = `${totalHeight}px`;
       this.tableEl.style.transform = `translateY(${topOffset}px)`;
-    } else if (this._options.serverSide) {
+    } else if (this._options.serverSide || this._options.paginationMode === 'server' || this._options.paginationMode === 'controlled') {
       rowsToRender = processed;
+      if (this._options.totalRows !== undefined) {
+        this._pagination.totalRows = this._options.totalRows;
+        this._pagination.totalPages = Math.max(1, Math.ceil(this._options.totalRows / this._pagination.pageSize));
+      }
     } else if (this._options.pagination === false) {
       rowsToRender = processed;
       this._pagination.totalPages = 1;
@@ -1221,19 +1249,34 @@ export class ProDataGrid<T = Record<string, unknown>> extends HTMLElement {
         tr.appendChild(td);
       }
 
-      // Actions Column (Delete button)
-      if (this._options.deletable) {
+      // Actions Column (Delete button or Custom Action Renderer ENH-05)
+      if (this._options.deletable || this._options.actions) {
         const tdActions = createElement('td', 'pdg-td pdg-td-actions');
-        const deleteBtn = createElement('button', 'pdg-btn pdg-btn-sm pdg-btn-danger', {
-          type: 'button',
-          'aria-label': `Delete row ${rowId}`
-        });
-        deleteBtn.textContent = '✕';
-        deleteBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          this.handleDeleteRow(rowId, row);
-        });
-        tdActions.appendChild(deleteBtn);
+        if (this._options.stickyActions !== false) {
+          tdActions.classList.add('pdg-sticky-actions');
+        }
+
+        if (this._options.actions?.render) {
+          const actResult = this._options.actions.render(row, i);
+          if (actResult instanceof HTMLElement) {
+            tdActions.appendChild(actResult);
+          } else if (actResult != null && typeof actResult === 'object') {
+            tdActions.appendChild(document.createTextNode(String(actResult)));
+          } else {
+            tdActions.innerHTML = actResult == null ? '' : String(actResult);
+          }
+        } else if (this._options.deletable) {
+          const deleteBtn = createElement('button', 'pdg-btn pdg-btn-sm pdg-btn-danger', {
+            type: 'button',
+            'aria-label': `Delete row ${rowId}`
+          });
+          deleteBtn.textContent = '✕';
+          deleteBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.handleDeleteRow(rowId, row);
+          });
+          tdActions.appendChild(deleteBtn);
+        }
         tr.appendChild(tdActions);
       }
 
@@ -1757,4 +1800,9 @@ export function defineProDataGrid(tagName = 'pro-data-grid'): void {
   if (typeof window !== 'undefined' && !window.customElements.get(tagName)) {
     window.customElements.define(tagName, ProDataGrid);
   }
+}
+
+// Auto-register standard tag name if in browser environment
+if (typeof window !== 'undefined' && !window.customElements.get('pro-data-grid')) {
+  window.customElements.define('pro-data-grid', ProDataGrid);
 }
