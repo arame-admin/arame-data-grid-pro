@@ -1,7 +1,7 @@
 {
   "name": "arame-data-grid-pro",
   "version": "1.0.0",
-  "description": "Enterprise-grade, framework-agnostic Web Component data grid built with TypeScript.",
+  "description": "Enterprise-grade, framework-agnostic Web Component data grid built with TypeScript. Supports virtualization, tree grids, inline editing, multi-column sorting, formula calculations, and advanced filtering.",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -76,14 +76,32 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
+  "homepage": "https://github.com/arame-admin/npm-packages/tree/main/data-grid-pro#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arame-admin/npm-packages.git",
+    "directory": "data-grid-pro"
+  },
+  "bugs": {
+    "url": "https://github.com/arame-admin/npm-packages/issues"
+  },
   "keywords": [
     "data-grid",
     "table",
+    "datatable",
     "web-components",
     "custom-elements",
     "typescript",
     "framework-agnostic",
+    "virtualization",
+    "tree-grid",
+    "inline-editing",
+    "calculations",
+    "excel-export",
     "nextjs",
+    "react",
+    "vue",
+    "svelte",
     "tailwind"
   ],
   "author": "Arame Global (https://github.com/arameglobal)",
