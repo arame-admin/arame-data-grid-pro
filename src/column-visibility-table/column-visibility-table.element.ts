@@ -321,7 +321,11 @@ export class ColumnVisibilityTable<T = Record<string, unknown>> extends HTMLElem
       this.toolbarEl.appendChild(searchInput);
     }
 
-    this.menuBtnEl.innerHTML = `⚙ <span>${this._options.menuButtonLabel || 'Columns'}</span> ▾`;
+    this.menuBtnEl.textContent = '⚙ ';
+    const labelSpan = document.createElement('span');
+    labelSpan.textContent = this._options.menuButtonLabel || 'Columns';
+    this.menuBtnEl.appendChild(labelSpan);
+    this.menuBtnEl.appendChild(document.createTextNode(' ▾'));
     this.toolbarEl.appendChild(this.menuWrapperEl);
   }
 

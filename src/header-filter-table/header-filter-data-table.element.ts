@@ -43,6 +43,7 @@ export class HeaderFilterDataTableElement<T = Record<string, unknown>> extends H
 
   // Async request sequence counter to cancel stale responses
   private _requestId = 0;
+  private _windowListeners: Array<[string, EventListener]> = [];
   private _abortController: AbortController | null = null;
 
   // DOM references
@@ -86,6 +87,10 @@ export class HeaderFilterDataTableElement<T = Record<string, unknown>> extends H
   }
 
   disconnectedCallback(): void {
+    for (const [evtName, handler] of this._windowListeners) {
+      window.removeEventListener(evtName, handler);
+    }
+    this._windowListeners = [];
     if (this._abortController) {
       this._abortController.abort();
     }
@@ -497,7 +502,10 @@ export class HeaderFilterDataTableElement<T = Record<string, unknown>> extends H
 
       const titleEl = document.createElement('div');
       titleEl.className = 'hft-th-title';
-      titleEl.innerHTML = `<span>${col.header}</span>`;
+      const titleSpan = document.createElement('span');
+    titleSpan.textContent = col.header;
+    titleEl.textContent = '';
+    titleEl.appendChild(titleSpan);
 
       if (col.sortable !== false && this._options.sorting?.enabled !== false) {
         const sortIcon = document.createElement('span');
@@ -625,7 +633,13 @@ export class HeaderFilterDataTableElement<T = Record<string, unknown>> extends H
         btn.type = 'button';
         btn.className = `hft-multi-select-btn ${isFiltered ? 'active' : ''}`;
         const selectedList = (activeVal as string[]) || [];
-        btn.innerHTML = `<span>${selectedList.length > 0 ? `${selectedList.length} selected` : 'Select...'}</span><span>▾</span>`;
+        btn.textContent = '';
+        const countSpan = document.createElement('span');
+        countSpan.textContent = selectedList.length > 0 ? `${selectedList.length} selected` : 'Select...';
+        const arrowSpan = document.createElement('span');
+        arrowSpan.textContent = '▾';
+        btn.appendChild(countSpan);
+        btn.appendChild(arrowSpan);
 
         const dropdown = document.createElement('div');
         dropdown.className = 'hft-multi-select-dropdown';
@@ -661,9 +675,13 @@ export class HeaderFilterDataTableElement<T = Record<string, unknown>> extends H
         });
 
         // Close on outside click
-        window.addEventListener('click', () => {
-          dropdown.style.display = 'none';
-        });
+        const onOutsideClick = (evt: MouseEvent) => {
+          if (!wrap.contains(evt.target as Node)) {
+            dropdown.style.display = 'none';
+          }
+        };
+        window.addEventListener('click', onOutsideClick);
+        this._windowListeners.push(['click', onOutsideClick as EventListener]);
 
         wrap.appendChild(btn);
         wrap.appendChild(dropdown);

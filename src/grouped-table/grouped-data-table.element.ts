@@ -372,7 +372,10 @@ export class GroupedDataTable<T = Record<string, unknown>> extends HTMLElement {
                 : typeof val === 'number'
                 ? val.toLocaleString(undefined, { maximumFractionDigits: 2 })
                 : val;
-              aggItem.innerHTML = `${col.aggregate.label || col.aggregate.type.toUpperCase()}: <strong>${formattedVal}</strong>`;
+              aggItem.textContent = `${col.aggregate.label || col.aggregate.type.toUpperCase()}: `;
+            const valStrong = document.createElement('strong');
+            valStrong.textContent = String(formattedVal);
+            aggItem.appendChild(valStrong);
               aggContainer.appendChild(aggItem);
             }
           });

@@ -243,7 +243,7 @@ export class AdvancedFilterDataTableElement<T = Record<string, unknown>> extends
     if (!found) return;
 
     this._activePresetId = presetId;
-    this._activeExpression = JSON.parse(JSON.stringify(found.expression));
+    this._activeExpression = typeof structuredClone === 'function' ? structuredClone(found.expression) : JSON.parse(JSON.stringify(found.expression));
     if (found.searchTerm !== undefined) {
       this.setSearchTerm(found.searchTerm);
     }
@@ -265,7 +265,7 @@ export class AdvancedFilterDataTableElement<T = Record<string, unknown>> extends
       id: `preset-${Date.now()}`,
       name,
       isRemovable: true,
-      expression: JSON.parse(JSON.stringify(this._activeExpression)),
+      expression: typeof structuredClone === 'function' ? structuredClone(this._activeExpression) : JSON.parse(JSON.stringify(this._activeExpression)),
       searchTerm: this._searchTerm
     };
 
@@ -531,7 +531,7 @@ export class AdvancedFilterDataTableElement<T = Record<string, unknown>> extends
       pill.className = 'aft-quick-filter-pill';
       pill.textContent = q.label;
       pill.addEventListener('click', () => {
-        this.expression = JSON.parse(JSON.stringify(q.expression));
+        this.expression = typeof structuredClone === 'function' ? structuredClone(q.expression) : JSON.parse(JSON.stringify(q.expression));
       });
       this._quickBar.appendChild(pill);
     });

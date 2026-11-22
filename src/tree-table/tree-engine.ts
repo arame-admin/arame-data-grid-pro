@@ -220,7 +220,7 @@ export function reorderTreeNodes<T = Record<string, unknown>>(
   const getChildren = options.childrenAccessor || defaultChildrenAccessor;
 
   // Deep clone tree
-  const treeClone: T[] = JSON.parse(JSON.stringify(roots));
+  const treeClone: T[] = typeof structuredClone === 'function' ? structuredClone(roots) : JSON.parse(JSON.stringify(roots));
 
   let extractedNode: T | null = null;
 
