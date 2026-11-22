@@ -12,7 +12,7 @@ import {
   resolveValue
 } from '../common/base-table-controller.js';
 
-export class ExpandableDataTable<T = Record<string, any>> extends HTMLElement {
+export class ExpandableDataTable<T = Record<string, unknown>> extends HTMLElement {
   static get observedAttributes() {
     return ['density'];
   }
@@ -234,9 +234,10 @@ export class ExpandableDataTable<T = Record<string, any>> extends HTMLElement {
       if (ctrl.signal.aborted) return;
       this._asyncCache.set(rowId, res);
       this.dispatchGridEvent('expandable-table:async-load-success', { rowId, row });
-    } catch (err: any) {
-      if (err.name === 'AbortError' || ctrl.signal.aborted) return;
-      this._asyncErrors.set(rowId, err);
+    } catch (err: unknown) {
+      const errorObj = err as Error;
+      if (errorObj?.name === 'AbortError' || ctrl.signal.aborted) return;
+      this._asyncErrors.set(rowId, errorObj);
       this.dispatchGridEvent('expandable-table:async-load-error', { rowId, row, error: err });
     } finally {
       this._asyncLoading.delete(rowId);

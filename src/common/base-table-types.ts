@@ -8,7 +8,7 @@ export interface SortCriterion {
 }
 
 /** Single-column sort used by Shadow DOM table variants (key-based columns) */
-export interface SortRule<T = any> {
+export interface SortRule<T = Record<string, unknown>> {
   column: keyof T | string;
   direction: 'asc' | 'desc';
 }
@@ -39,19 +39,19 @@ export interface BaseTableQueryParams {
   globalSearch: string;
   sortCriteria: SortCriterion[];
   signal: AbortSignal;
-  extra?: Record<string, any>;
+  extra?: Record<string, unknown>;
 }
 
-export interface BaseTableQueryResult<T = Record<string, any>> {
+export interface BaseTableQueryResult<T = Record<string, unknown>> {
   rows: T[];
   totalRows: number;
 }
 
-export type BaseTableDataLoader<T = Record<string, any>> = (
+export type BaseTableDataLoader<T = Record<string, unknown>> = (
   params: BaseTableQueryParams
 ) => Promise<BaseTableQueryResult<T>>;
 
-export interface BaseTableOptions<T = Record<string, any>> {
+export interface BaseTableOptions<T = Record<string, unknown>> {
   rowIdKey?: string;
   density?: Density;
   
@@ -71,10 +71,10 @@ export interface BaseTableOptions<T = Record<string, any>> {
   errorMessage?: string;
 }
 
-export interface BaseTableEventPayloads<T = Record<string, any>> {
+export interface BaseTableEventPayloads<T = Record<string, unknown>> {
   'table:page': { pageIndex: number; pageSize: number; totalPages: number; totalRows: number };
   'table:sort': { criteria: SortCriterion[] };
   'table:search': { query: string };
   'table:loading': { loading: boolean };
-  'table:error': { error: Error | any };
+  'table:error': { error: Error | unknown };
 }

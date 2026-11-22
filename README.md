@@ -390,9 +390,9 @@ Each column passed into `grid.columns = [...]` supports the following properties
 | `editable` | `boolean` | Allows in-place cell editing on double-click or <kbd>Enter</kbd>. |
 | `visible` | `boolean` | Determines if the column is displayed (`false` hides the column). |
 | `calculate` | `(row: T) => any` | Reactive formula function recalculated when dependent editable fields change. |
-| `formatter` | `(value: any, row: T) => string` | Formats the raw value for display without altering underlying data. |
-| `renderer` | `(value: any, row: T, idx: number) => HTMLElement \| string` | Custom DOM node renderer for custom badges, status pills, or progress meters. |
-| `comparator` | `(a: any, b: any, rowA: T, rowB: T) => number` | Custom sort comparator function. |
+| `formatter` | `(value: unknown, row: T) => string` | Formats the raw value for display without altering underlying data. |
+| `renderer` | `(value: unknown, row: T, idx: number) => HTMLElement \| string` | Custom DOM node renderer for custom badges, status pills, or progress meters. |
+| `comparator` | `(a: unknown, b: unknown, rowA: T, rowB: T) => number` | Custom sort comparator function. |
 
 ---
 

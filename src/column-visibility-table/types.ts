@@ -2,7 +2,7 @@ import { BaseTableOptions, SortCriterion } from '../common/base-table-types.js';
 
 export type { Density, SortCriterion } from '../common/base-table-types.js';
 
-export interface ColumnVisibilityDef<T = Record<string, any>> {
+export interface ColumnVisibilityDef<T = Record<string, unknown>> {
   id: string;
   header: string;
   field?: keyof T | string;
@@ -11,17 +11,17 @@ export interface ColumnVisibilityDef<T = Record<string, any>> {
   sortable?: boolean;        // default: true
   visible?: boolean;        // default: true
   required?: boolean;       // default: false
-  formatter?: (value: any, row: T) => string;
-  renderer?: (value: any, row: T, index: number) => HTMLElement | string;
-  comparator?: (a: any, b: any, rowA: T, rowB: T) => number;
+  formatter?: (value: unknown, row: T) => string;
+  renderer?: (value: unknown, row: T, index: number) => HTMLElement | string;
+  comparator?: (a: unknown, b: unknown, rowA: T, rowB: T) => number;
 }
 
-export interface ColumnVisibilityTableOptions<T = Record<string, any>> extends BaseTableOptions<T> {
+export interface ColumnVisibilityTableOptions<T = Record<string, unknown>> extends BaseTableOptions<T> {
   storageKey?: string;
   menuButtonLabel?: string; // default: 'Columns'
 }
 
-export interface ColumnVisibilityEventPayloads<T = Record<string, any>> {
+export interface ColumnVisibilityEventPayloads<T = Record<string, unknown>> {
   'column-visibility:change': {
     columnId: string;
     visible: boolean;
@@ -46,6 +46,6 @@ export interface ColumnVisibilityEventPayloads<T = Record<string, any>> {
     loading: boolean;
   };
   'column-visibility:error': {
-    error: Error | any;
+    error: Error | unknown;
   };
 }

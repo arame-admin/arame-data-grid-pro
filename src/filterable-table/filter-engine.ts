@@ -1,6 +1,6 @@
 import { ColumnFilterValue, FilterCriterion, FilterableColumnDef, NumberRangeValue, DateRangeValue } from './types.js';
 
-export function resolveValue<T>(row: T, fieldPath?: keyof T | string): any {
+export function resolveValue<T>(row: T, fieldPath?: keyof T | string): unknown {
   if (!fieldPath || !row || typeof row !== 'object') return undefined;
   const path = String(fieldPath);
   if (!path.includes('.')) {
@@ -8,11 +8,11 @@ export function resolveValue<T>(row: T, fieldPath?: keyof T | string): any {
     return (row as any)[path];
   }
   const parts = path.split('.');
-  let current: any = row;
+  let current: unknown = row;
   for (const part of parts) {
     if (part === '__proto__' || part === 'constructor' || part === 'prototype') return undefined;
     if (current == null || typeof current !== 'object') return undefined;
-    current = current[part];
+    current = (current as Record<string, unknown>)[part];
   }
   return current;
 }
@@ -85,7 +85,7 @@ export function filterRows<T>(
         }
         case 'date-range': {
           if (!rawVal) return false;
-          const rowDate = new Date(rawVal).getTime();
+          const rowDate = new Date(rawVal as string | number | Date).getTime();
           if (isNaN(rowDate)) return false;
           const range = f.value as DateRangeValue;
           if (range.start && rowDate < new Date(range.start).getTime()) return false;

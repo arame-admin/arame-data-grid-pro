@@ -10,7 +10,7 @@ import {
   safeFormatNumber
 } from './calculation-engine.js';
 
-export class CalculatedDataTableElement<T = any> extends HTMLElement {
+export class CalculatedDataTableElement<T = Record<string, unknown>> extends HTMLElement {
   private _columns: CalculatedTableColumn<T>[] = [];
   private _rows: T[] = []; // In-memory dataset
   private _computedRows: T[] = []; // Evaluated rows with calculated columns filled
@@ -175,7 +175,7 @@ export class CalculatedDataTableElement<T = any> extends HTMLElement {
   /**
    * Updates a cell in a row, runs dependencies recalculations, updates the DOM, and dispatches typed event.
    */
-  public updateCellValue(rowIndex: number, columnKey: string, newValue: any): void {
+  public updateCellValue(rowIndex: number, columnKey: string, newValue: unknown): void {
     if (rowIndex < 0 || rowIndex >= this._rows.length) return;
 
     const sourceRow = this._rows[rowIndex];
@@ -403,9 +403,9 @@ export class CalculatedDataTableElement<T = any> extends HTMLElement {
 
   private setupEventListeners(): void {
     // Search input with debounce
-    let debounceTimer: any = null;
+    let debounceTimer: ReturnType<typeof setTimeout> | null = null;
     this._searchInput.addEventListener('input', (e) => {
-      clearTimeout(debounceTimer);
+      if (debounceTimer) clearTimeout(debounceTimer);
       debounceTimer = setTimeout(() => {
         const val = (e.target as HTMLInputElement).value.trim();
         this.setSearchTerm(val);
@@ -662,7 +662,7 @@ export class CalculatedDataTableElement<T = any> extends HTMLElement {
         if (typeof col.calculate === 'function') {
           td.classList.add('calc-calculated-col');
           if (col.formatter) {
-            const formatted = col.formatter(val, row);
+            const formatted = col.formatter(val, row as unknown as Record<string, unknown>);
             if (formatted instanceof HTMLElement) td.appendChild(formatted);
             else td.innerHTML = String(formatted);
           } else if (typeof val === 'number') {

@@ -15,7 +15,7 @@ import {
   serializeExpression
 } from './expression-engine.js';
 
-export class AdvancedFilterDataTableElement<T = any> extends HTMLElement {
+export class AdvancedFilterDataTableElement<T = Record<string, unknown>> extends HTMLElement {
   private _columns: AdvancedFilterColumn<T>[] = [];
   private _allRows: T[] = []; // In-memory dataset
   private _presets: SavedFilterPreset[] = [];
@@ -47,7 +47,7 @@ export class AdvancedFilterDataTableElement<T = any> extends HTMLElement {
   // Request cancellation sequence
   private _requestId = 0;
   private _abortController: AbortController | null = null;
-  private _searchDebounceTimer: any = null;
+  private _searchDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
   // DOM Elements
   private _container!: HTMLDivElement;
@@ -89,7 +89,7 @@ export class AdvancedFilterDataTableElement<T = any> extends HTMLElement {
 
   disconnectedCallback(): void {
     if (this._abortController) this._abortController.abort();
-    if (this._searchDebounceTimer) clearTimeout(this._searchDebounceTimer);
+    if (this._searchDebounceTimer) if (this._searchDebounceTimer) clearTimeout(this._searchDebounceTimer);
   }
 
   attributeChangedCallback(name: string, _oldVal: string | null, newVal: string | null): void {
@@ -215,7 +215,7 @@ export class AdvancedFilterDataTableElement<T = any> extends HTMLElement {
     const flat = extractActiveRules(this._activeExpression);
     const activeChips = flat.map(r => ({
       id: r.id,
-      label: formatRuleChipLabel(r, this._columns),
+      label: formatRuleChipLabel(r, this._columns as any),
       rule: r
     }));
 
@@ -483,7 +483,7 @@ export class AdvancedFilterDataTableElement<T = any> extends HTMLElement {
   private setupEventListeners(): void {
     const debounceMs = this._options.debounceMs ?? 300;
     this._searchInput.addEventListener('input', (e) => {
-      clearTimeout(this._searchDebounceTimer);
+      if (this._searchDebounceTimer) clearTimeout(this._searchDebounceTimer);
       this._searchDebounceTimer = setTimeout(() => {
         this.setSearchTerm((e.target as HTMLInputElement).value.trim());
       }, debounceMs);
@@ -552,7 +552,7 @@ export class AdvancedFilterDataTableElement<T = any> extends HTMLElement {
       chip.className = 'aft-chip';
 
       const label = document.createElement('span');
-      label.textContent = formatRuleChipLabel(rule, this._columns);
+      label.textContent = formatRuleChipLabel(rule, this._columns as any);
       chip.appendChild(label);
 
       const removeBtn = document.createElement('button');
@@ -638,7 +638,7 @@ export class AdvancedFilterDataTableElement<T = any> extends HTMLElement {
       const opSelect = document.createElement('select');
       opSelect.className = 'aft-rule-select';
 
-      const operators = this.getOperatorsForColumn(colDef);
+      const operators = this.getOperatorsForColumn(colDef as any);
       operators.forEach(op => {
         const opt = document.createElement('option');
         opt.value = op.value;
@@ -649,7 +649,7 @@ export class AdvancedFilterDataTableElement<T = any> extends HTMLElement {
 
       // 3. Value Input / Control
       const valContainer = document.createElement('div');
-      this.renderRuleValueControl(rule, colDef, valContainer);
+      this.renderRuleValueControl(rule, colDef as any, valContainer);
 
       // 4. Remove rule button
       const removeBtn = document.createElement('button');
@@ -764,14 +764,14 @@ export class AdvancedFilterDataTableElement<T = any> extends HTMLElement {
       minI.className = 'aft-rule-input';
       minI.placeholder = 'Min';
       minI.style.width = '75px';
-      minI.value = rule.value?.min ?? '';
+      minI.value = (rule.value as { min?: string })?.min ?? '';
 
       const maxI = document.createElement('input');
       maxI.type = 'number';
       maxI.className = 'aft-rule-input';
       maxI.placeholder = 'Max';
       maxI.style.width = '75px';
-      maxI.value = rule.value?.max ?? '';
+      maxI.value = (rule.value as { max?: string })?.max ?? '';
 
       const onRange = () => {
         rule.value = { min: minI.value, max: maxI.value };

@@ -26,11 +26,19 @@ export type FilterOperator =
 
 export type RelativeDatePreset = 'today' | 'yesterday' | 'last7Days' | 'last30Days' | 'thisMonth' | 'lastMonth' | 'thisYear';
 
+export interface FilterRangeValue {
+  min?: number | string;
+  max?: number | string;
+  start?: string | number | Date;
+  end?: string | number | Date;
+  [key: string]: unknown;
+}
+
 export interface FilterRule {
   id: string;
   field: string;
   operator: FilterOperator;
-  value: any;
+  value: FilterRangeValue | string | number | boolean | string[] | unknown;
   customOperatorName?: string;
 }
 
@@ -55,20 +63,20 @@ export interface QuickFilterOption {
   expression: FilterExpressionGroup;
 }
 
-export interface CascadingFilterConfig<T = any> {
+export interface CascadingFilterConfig<T = Record<string, unknown>> {
   parentField: string;
-  getOptions: (parentValue: any, allActiveRules: FilterRule[]) => Array<{ label: string; value: any }>;
+  getOptions: (parentValue: unknown, allActiveRules: FilterRule[]) => Array<{ label: string; value: unknown }>;
 }
 
-export interface CustomFilterOperator<T = any> {
+export interface CustomFilterOperator<T = Record<string, unknown>> {
   name: string;
   label: string;
   applicableTypes: ('string' | 'number' | 'date' | 'boolean' | 'select')[];
-  predicate: (fieldValue: any, ruleValue: any, row: T) => boolean;
-  validate?: (value: any) => string | null; // Returns error message if invalid
+  predicate: (fieldValue: unknown, ruleValue: unknown, row: T) => boolean;
+  validate?: (value: unknown) => string | null; // Returns error message if invalid
 }
 
-export interface AdvancedFilterColumn<T = any> {
+export interface AdvancedFilterColumn<T = Record<string, unknown>> {
   key: keyof T | string;
   header: string;
   type?: 'string' | 'number' | 'date' | 'boolean' | 'select';
@@ -76,15 +84,15 @@ export interface AdvancedFilterColumn<T = any> {
   minWidth?: string;
   sortable?: boolean;
   align?: 'left' | 'center' | 'right';
-  options?: Array<{ label: string; value: any }>; // For select type
+  options?: Array<{ label: string; value: unknown }>; // For select type
   cascading?: CascadingFilterConfig<T>;
   min?: number; // For number sliders
   max?: number;
   step?: number;
-  render?: (value: any, row: T, index: number) => HTMLElement | string;
+  render?: (value: unknown, row: T, index: number) => HTMLElement | string;
 }
 
-export interface AdvancedFilterDataLoaderRequest<T = any> {
+export interface AdvancedFilterDataLoaderRequest<T = Record<string, unknown>> {
   page: number;
   pageSize: number;
   searchTerm?: string;
@@ -94,16 +102,16 @@ export interface AdvancedFilterDataLoaderRequest<T = any> {
   signal: AbortSignal;
 }
 
-export interface AdvancedFilterDataLoaderResult<T = any> {
+export interface AdvancedFilterDataLoaderResult<T = Record<string, unknown>> {
   rows: T[];
   totalRows: number;
 }
 
-export type AdvancedFilterDataLoader<T = any> = (
+export type AdvancedFilterDataLoader<T = Record<string, unknown>> = (
   request: AdvancedFilterDataLoaderRequest<T>
 ) => Promise<AdvancedFilterDataLoaderResult<T>>;
 
-export interface AdvancedFilterTableOptions<T = any> {
+export interface AdvancedFilterTableOptions<T = Record<string, unknown>> {
   presets?: SavedFilterPreset[];
   activePresetId?: string;
   quickFilters?: QuickFilterOption[];

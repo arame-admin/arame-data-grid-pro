@@ -3,7 +3,7 @@ import { SortCriterion } from './base-table-types.js';
 /**
  * Complete, serializable state representation for any data table variant.
  */
-export interface TableState<T = any> {
+export interface TableState<T = Record<string, unknown>> {
   pagination: {
     pageIndex: number;
     pageSize: number;
@@ -16,8 +16,8 @@ export interface TableState<T = any> {
     query: string;
   };
   filters: {
-    columnFilters: Record<string, any>;
-    advancedExpression?: any;
+    columnFilters: Record<string, unknown>;
+    advancedExpression?: unknown;
   };
   selection: {
     selectedRowIds: string[];
@@ -28,7 +28,7 @@ export interface TableState<T = any> {
     visibility: Record<string, boolean>; // columnId -> isVisible
     widths: Record<string, number | string>; // columnId -> width px
   };
-  extra?: Record<string, any>;
+  extra?: Record<string, unknown>;
 }
 
 /**

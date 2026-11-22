@@ -4,16 +4,16 @@ export type { Density, SortCriterion } from '../common/base-table-types.js';
 
 export type AggregateType = 'sum' | 'avg' | 'min' | 'max' | 'count' | 'custom';
 
-export type CustomAggregateFn<T = any> = (rows: T[], field: keyof T | string) => any;
+export type CustomAggregateFn<T = Record<string, unknown>> = (rows: T[], field: keyof T | string) => any;
 
-export interface AggregateConfig<T = any> {
+export interface AggregateConfig<T = Record<string, unknown>> {
   type: AggregateType;
   customFn?: CustomAggregateFn<T>;
-  formatter?: (val: any) => string;
+  formatter?: (val: unknown) => string;
   label?: string; // e.g. "Total" or "Avg"
 }
 
-export interface GroupedTableColumn<T = Record<string, any>> {
+export interface GroupedTableColumn<T = Record<string, unknown>> {
   id: string;
   header: string;
   field?: keyof T | string;
@@ -22,36 +22,36 @@ export interface GroupedTableColumn<T = Record<string, any>> {
   sortable?: boolean;        // default: true
   groupable?: boolean;       // default: true
   aggregate?: AggregateConfig<T>;
-  formatter?: (value: any, row: T) => string;
-  renderer?: (value: any, row: T, index: number) => HTMLElement | string;
-  comparator?: (a: any, b: any, rowA: T, rowB: T) => number;
+  formatter?: (value: unknown, row: T) => string;
+  renderer?: (value: unknown, row: T, index: number) => HTMLElement | string;
+  comparator?: (a: unknown, b: unknown, rowA: T, rowB: T) => number;
 }
 
 export type GroupPaginationMode = 'rows' | 'groups'; // 'rows' paginates raw rows; 'groups' keeps groups intact per page
 
-export interface GroupRecord<T = any> {
+export interface GroupRecord<T = Record<string, unknown>> {
   key: string;              // unique path e.g. "Electronics" or "Electronics > Mobile"
   columnId: string;
-  value: any;
+  value: unknown;
   level: number;            // 0 for top level, 1 for nested
   rows: T[];
   subGroups?: GroupRecord<T>[];
-  aggregates: Record<string, any>;
+  aggregates: Record<string, unknown>;
   expanded: boolean;
 }
 
-export interface GroupingOptions<T = Record<string, any>> {
+export interface GroupingOptions<T = Record<string, unknown>> {
   groupBy?: string[];                  // array of column IDs e.g. ['department', 'team']
   defaultExpanded?: boolean;           // default: true
   paginationMode?: GroupPaginationMode; // default: 'rows'
   showAggregatesInHeader?: boolean;    // default: true
 }
 
-export interface GroupedTableOptions<T = Record<string, any>> extends BaseTableOptions<T> {
+export interface GroupedTableOptions<T = Record<string, unknown>> extends BaseTableOptions<T> {
   grouping?: GroupingOptions<T>;
 }
 
-export interface GroupedTableEventPayloads<T = Record<string, any>> {
+export interface GroupedTableEventPayloads<T = Record<string, unknown>> {
   'grouped-table:group-toggle': { groupKey: string; expanded: boolean; level: number; rowCount: number };
   'grouped-table:expand-all': { expandedCount: number };
   'grouped-table:collapse-all': { collapsedCount: number };

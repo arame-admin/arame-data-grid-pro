@@ -14,7 +14,7 @@ import { exportToCSV } from '../core/csv-exporter.js';
 import { computeVirtualSlice } from '../core/virtualizer.js';
 import { createElement, removeAllChildren } from './dom-utils.js';
 
-export class ProDataGrid<T = Record<string, any>> extends HTMLElement {
+export class ProDataGrid<T = Record<string, unknown>> extends HTMLElement {
   static get observedAttributes() {
     return ['density', 'mobile-layout'];
   }
@@ -68,11 +68,11 @@ export class ProDataGrid<T = Record<string, any>> extends HTMLElement {
   private _isInitialLoad = true;
   private _loadError: Error | null = null;
   private _abortController: AbortController | null = null;
-  private _searchDebounceTimer: any = null;
+  private _searchDebounceTimer: ReturnType<typeof setTimeout> | null = null;
   private _currentRequestId = 0;
 
   // --- In-place Editing State ---
-  private _editingCell: { rowId: string | number; columnId: string; initialValue: any } | null = null;
+  private _editingCell: { rowId: string | number; columnId: string; initialValue: unknown } | null = null;
 
   // --- Drag and Drop State ---
   private _draggedColIndex: number | null = null;
@@ -302,11 +302,12 @@ export class ProDataGrid<T = Record<string, any>> extends HTMLElement {
       this._pagination.totalRows = result.totalRows;
       this._pagination.totalPages = Math.max(1, Math.ceil(result.totalRows / this._pagination.pageSize));
       this._isInitialLoad = false;
-    } catch (err: any) {
-      if (err.name === 'AbortError' || signal.aborted) {
+    } catch (err: unknown) {
+      const errorObj = err as Error;
+      if (errorObj?.name === 'AbortError' || signal.aborted) {
         return; // Normal cancellation, do not treat as failure
       }
-      this._loadError = err;
+      this._loadError = errorObj;
       this.dispatchGridEvent('pdg:error', { error: err, queryParams });
     } finally {
       if (requestId === this._currentRequestId) {
@@ -348,7 +349,7 @@ export class ProDataGrid<T = Record<string, any>> extends HTMLElement {
     if (!this._options.statePersistence?.enabled) return;
     const storageType = this._options.statePersistence.storage || 'localStorage';
     const storageKey = this._options.statePersistence.key || 'arame-grid-state';
-    const state: Record<string, any> = {};
+    const state: Record<string, unknown> = {};
 
     if (this._options.statePersistence.saveColumnWidths !== false) {
       state.columnWidths = this._columns.map(c => ({ id: c.id, width: c.width }));
@@ -386,14 +387,14 @@ export class ProDataGrid<T = Record<string, any>> extends HTMLElement {
       const state = JSON.parse(raw);
 
       if (state.columnWidths && Array.isArray(state.columnWidths)) {
-        const widthMap = new Map<string, string>(state.columnWidths.map((w: any) => [w.id, w.width]));
+        const widthMap = new Map<string, string>(((state.columnWidths as Array<{ id: string; width: string }>) || []).map(w => [w.id, w.width]));
         this._columns.forEach(col => {
           if (widthMap.has(col.id)) col.width = widthMap.get(col.id);
         });
       }
 
       if (state.columnVisibility && Array.isArray(state.columnVisibility)) {
-        const visMap = new Map<string, boolean>(state.columnVisibility.map((v: any) => [v.id, v.visible]));
+        const visMap = new Map<string, boolean>(((state.columnVisibility as Array<{ id: string; visible: boolean }>) || []).map(v => [v.id, v.visible]));
         this._columns.forEach(col => {
           if (visMap.has(col.id)) col.visible = visMap.get(col.id);
         });
@@ -458,12 +459,12 @@ export class ProDataGrid<T = Record<string, any>> extends HTMLElement {
 
       if (col.aggregation) {
         const values = processed.map(r => resolveValue(r, col.field)).filter(v => v != null);
-        let result: any = 0;
+        let result: unknown = 0;
 
         if (col.aggregation === 'sum') {
-          result = values.reduce((acc, v) => acc + (Number(v) || 0), 0);
+          result = (values as unknown[]).reduce<number>((acc, v) => acc + (Number(v) || 0), 0);
         } else if (col.aggregation === 'avg') {
-          const sum = values.reduce((acc, v) => acc + (Number(v) || 0), 0);
+          const sum: number = (values as unknown[]).reduce<number>((acc, v) => acc + (Number(v) || 0), 0);
           result = values.length ? sum / values.length : 0;
         } else if (col.aggregation === 'count') {
           result = values.length;
@@ -1293,7 +1294,7 @@ export class ProDataGrid<T = Record<string, any>> extends HTMLElement {
     rowId: string | number,
     columnId: string,
     row: T,
-    currentValue: any
+    currentValue: unknown
   ): void {
     this._editingCell = { rowId, columnId, initialValue: currentValue };
     this.dispatchGridEvent('pdg:edit-start', {
@@ -1309,7 +1310,7 @@ export class ProDataGrid<T = Record<string, any>> extends HTMLElement {
     td: HTMLElement,
     row: T,
     col: ColumnDef<T>,
-    currentValue: any
+    currentValue: unknown
   ): void {
     const container = createElement('div', 'pdg-edit-container');
 
@@ -1394,7 +1395,7 @@ export class ProDataGrid<T = Record<string, any>> extends HTMLElement {
     this.render();
   }
 
-  private saveCellEdit(row: T, col: ColumnDef<T>, newValue: any): void {
+  private saveCellEdit(row: T, col: ColumnDef<T>, newValue: unknown): void {
     if (!this._editingCell) return;
     const oldValue = this._editingCell.initialValue;
     const rowId = this._editingCell.rowId;
@@ -1407,14 +1408,14 @@ export class ProDataGrid<T = Record<string, any>> extends HTMLElement {
           (row as any)[fieldPath] = newValue;
         } else {
           const parts = fieldPath.split('.');
-          let curr: any = row;
+          let curr: Record<string, unknown> = row as unknown as Record<string, unknown>;
           for (let p = 0; p < parts.length - 1; p++) {
             const part = parts[p];
             if (part === '__proto__' || part === 'constructor' || part === 'prototype') break;
             if (curr[part] == null || typeof curr[part] !== 'object') {
               curr[part] = {};
             }
-            curr = curr[part];
+            curr = curr[part] as Record<string, unknown>;
           }
           const lastPart = parts[parts.length - 1];
           if (lastPart !== '__proto__' && lastPart !== 'constructor' && lastPart !== 'prototype') {

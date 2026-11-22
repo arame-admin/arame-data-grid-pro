@@ -31,29 +31,29 @@ export interface ServerQueryParams {
   signal: AbortSignal;
 }
 
-export interface ServerQueryResult<T = Record<string, any>> {
+export interface ServerQueryResult<T = Record<string, unknown>> {
   rows: T[];
   totalRows: number;
 }
 
-export type ServerDataLoader<T = Record<string, any>> = (
+export type ServerDataLoader<T = Record<string, unknown>> = (
   params: ServerQueryParams
 ) => Promise<ServerQueryResult<T>>;
 
 // --- Editing Types ---
-export interface CellEditValidator<T = any> {
-  (newValue: any, oldValue: any, row: T, column: ColumnDef<T>): string | null | undefined; // null/undefined if valid, error message string if invalid
+export interface CellEditValidator<T = Record<string, unknown>> {
+  (newValue: unknown, oldValue: unknown, row: T, column: ColumnDef<T>): string | null | undefined; // null/undefined if valid, error message string if invalid
 }
 
-export interface CustomEditorParams<T = any> {
-  value: any;
+export interface CustomEditorParams<T = Record<string, unknown>> {
+  value: unknown;
   row: T;
   column: ColumnDef<T>;
-  onCommit: (newValue: any) => void;
+  onCommit: (newValue: unknown) => void;
   onCancel: () => void;
 }
 
-export interface ColumnDef<T = Record<string, any>> {
+export interface ColumnDef<T = Record<string, unknown>> {
   id: string;
   header: string;
   field?: keyof T | string;
@@ -70,12 +70,12 @@ export interface ColumnDef<T = Record<string, any>> {
   pinned?: 'left' | 'right' | null;
   priority?: number; // 1 (highest - always show on mobile) to 5 (hide on mobile)
   visible?: boolean;
-  formatter?: (value: any, row: T) => string;
-  renderer?: (value: any, row: T, index: number) => HTMLElement | string;
-  comparator?: (a: any, b: any, rowA: T, rowB: T) => number;
-  calculate?: (row: T) => any;
-  aggregation?: 'sum' | 'avg' | 'min' | 'max' | 'count' | ((values: any[], rows: T[]) => any);
-  aggregationFormatter?: (value: any) => string;
+  formatter?: (value: unknown, row: T) => string;
+  renderer?: (value: unknown, row: T, index: number) => HTMLElement | string;
+  comparator?: (a: unknown, b: unknown, rowA: T, rowB: T) => number;
+  calculate?: (row: T) => unknown;
+  aggregation?: 'sum' | 'avg' | 'min' | 'max' | 'count' | ((values: unknown[], rows: T[]) => unknown);
+  aggregationFormatter?: (value: unknown) => string;
 }
 
 // --- State Persistence Options ---
@@ -98,7 +98,7 @@ export interface AnimationOptions {
 }
 
 // --- Grid Configuration Options ---
-export interface GridOptions<T = Record<string, any>> {
+export interface GridOptions<T = Record<string, unknown>> {
   rowIdKey?: string;
   /** Enable global search input. Default: true */
   searchable?: boolean;
@@ -154,7 +154,7 @@ export interface GridOptions<T = Record<string, any>> {
 }
 
 // --- Typed Event Payloads ---
-export interface GridEventPayloads<T = Record<string, any>> {
+export interface GridEventPayloads<T = Record<string, unknown>> {
   'pdg:sort': { criteria: SortCriterion[] };
   'pdg:filter': { filters: Record<string, string>; globalSearch: string };
   'pdg:select': { selectedIds: (string | number)[]; selectedRows: T[] };
@@ -164,16 +164,16 @@ export interface GridEventPayloads<T = Record<string, any>> {
 
   // Server & Loading Events
   'pdg:loading': { loading: boolean; isInitial: boolean; isRefresh: boolean };
-  'pdg:error': { error: Error | any; queryParams?: ServerQueryParams };
+  'pdg:error': { error: Error | unknown; queryParams?: ServerQueryParams };
 
   // Drag & Drop Events
   'pdg:row-reorder': { fromIndex: number; toIndex: number; row: T; rows: T[] };
   'pdg:column-reorder': { fromIndex: number; toIndex: number; column: ColumnDef<T>; columns: ColumnDef<T>[] };
 
   // Edit & Delete Events
-  'pdg:edit-start': { rowId: string | number; columnId: string; row: T; value: any };
-  'pdg:edit-save': { rowId: string | number; columnId: string; row: T; oldValue: any; newValue: any };
-  'pdg:edit-cancel': { rowId: string | number; columnId: string; row: T; value: any };
-  'pdg:edit-validation-error': { rowId: string | number; columnId: string; row: T; error: string; invalidValue: any };
+  'pdg:edit-start': { rowId: string | number; columnId: string; row: T; value: unknown };
+  'pdg:edit-save': { rowId: string | number; columnId: string; row: T; oldValue: unknown; newValue: unknown };
+  'pdg:edit-cancel': { rowId: string | number; columnId: string; row: T; value: unknown };
+  'pdg:edit-validation-error': { rowId: string | number; columnId: string; row: T; error: string; invalidValue: unknown };
   'pdg:delete': { rowId: string | number; row: T };
 }

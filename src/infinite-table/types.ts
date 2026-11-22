@@ -17,36 +17,36 @@ export interface OffsetPaginationParams {
 
 export type InfinitePageParams = CursorPaginationParams | OffsetPaginationParams;
 
-export interface InfiniteDataRequest<T = any> {
+export interface InfiniteDataRequest<T = Record<string, unknown>> {
   pagination: InfinitePageParams;
   searchTerm?: string;
   sortRule?: SortRule<T> | null;
-  columnFilters?: Record<string, any>;
+  columnFilters?: Record<string, unknown>;
   signal: AbortSignal;
 }
 
-export interface InfiniteBatchResult<T = any> {
+export interface InfiniteBatchResult<T = Record<string, unknown>> {
   rows: T[];
   totalRows?: number;
   hasMore: boolean;
   nextCursor?: string | null;
 }
 
-export type InfiniteDataLoader<T = any> = (
+export type InfiniteDataLoader<T = Record<string, unknown>> = (
   request: InfiniteDataRequest<T>
 ) => Promise<InfiniteBatchResult<T>>;
 
-export interface InfiniteTableColumn<T = any> {
+export interface InfiniteTableColumn<T = Record<string, unknown>> {
   key: keyof T | string;
   header: string;
   sortable?: boolean;
   filterable?: boolean;
   filterType?: 'text' | 'select' | 'number';
-  filterOptions?: Array<{ label: string; value: any }>;
+  filterOptions?: Array<{ label: string; value: unknown }>;
   width?: string;
   minWidth?: string;
   align?: 'left' | 'center' | 'right';
-  render?: (value: any, row: T, index: number) => HTMLElement | string;
+  render?: (value: unknown, row: T, index: number) => HTMLElement | string;
 }
 
 export interface VirtualizationOptions {
@@ -56,7 +56,7 @@ export interface VirtualizationOptions {
   viewportHeight?: number;// Fixed container height in px (e.g., 400px, 600px)
 }
 
-export interface InfiniteScrollConfig<T = any> {
+export interface InfiniteScrollConfig<T = Record<string, unknown>> {
   enabled?: boolean;                      // Defaults to true
   paginationMode?: InfinitePaginationMode; // 'offset' | 'cursor', default 'offset'
   batchSize?: number;                     // Default 25
@@ -68,7 +68,7 @@ export interface InfiniteScrollConfig<T = any> {
   retryDelayMs?: number;                  // Default 0 (instant user retry)
 }
 
-export interface InfiniteTableLoadBatchDetail<T = any> {
+export interface InfiniteTableLoadBatchDetail<T = Record<string, unknown>> {
   batchIndex: number;
   params: InfinitePageParams;
   loadedCount: number;
@@ -77,13 +77,13 @@ export interface InfiniteTableLoadBatchDetail<T = any> {
   hasMore: boolean;
 }
 
-export interface InfiniteTableCompleteDetail<T = any> {
+export interface InfiniteTableCompleteDetail<T = Record<string, unknown>> {
   totalLoaded: number;
   totalAvailable?: number;
 }
 
 export interface InfiniteTableErrorDetail {
-  error: Error | any;
+  error: Error | unknown;
   params: InfinitePageParams;
   retry: () => void;
 }

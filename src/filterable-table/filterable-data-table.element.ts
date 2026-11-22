@@ -34,7 +34,7 @@ function removeAllChildren(parent: HTMLElement): void {
   while (parent.firstChild) parent.removeChild(parent.firstChild);
 }
 
-export class FilterableDataTable<T = Record<string, any>> extends HTMLElement {
+export class FilterableDataTable<T = Record<string, unknown>> extends HTMLElement {
   static get observedAttributes() {
     return ['density'];
   }
@@ -57,7 +57,7 @@ export class FilterableDataTable<T = Record<string, any>> extends HTMLElement {
   // Async / Server-Side State
   private _isLoading = false;
   private _abortController: AbortController | null = null;
-  private _debounceTimer: any = null;
+  private _debounceTimer: ReturnType<typeof setTimeout> | null = null;
   private _currentRequestId = 0;
 
   // DOM Elements
@@ -171,7 +171,7 @@ export class FilterableDataTable<T = Record<string, any>> extends HTMLElement {
     );
   }
 
-  public setFilter(columnId: string, value: any): void {
+  public setFilter(columnId: string, value: unknown): void {
     const col = this._columns.find((c) => c.id === columnId);
     if (!col || !col.filter) return;
 
@@ -246,8 +246,9 @@ export class FilterableDataTable<T = Record<string, any>> extends HTMLElement {
       const res = await this._options.serverDataLoader(params);
       if (reqId !== this._currentRequestId || signal.aborted) return;
       this._rows = res.rows;
-    } catch (err: any) {
-      if (err.name === 'AbortError' || signal.aborted) return;
+    } catch (err: unknown) {
+      const errorObj = err as Error;
+      if (errorObj?.name === 'AbortError' || signal.aborted) return;
       this.dispatchGridEvent('filter-table:error', { error: err });
     } finally {
       if (reqId === this._currentRequestId) {
@@ -379,7 +380,7 @@ export class FilterableDataTable<T = Record<string, any>> extends HTMLElement {
         const input = createElement('input', 'ft-input', {
           type: 'search',
           placeholder: fConfig.placeholder || `Filter ${col.header}...`,
-          value: curVal || ''
+          value: (curVal as string | number | boolean) || ''
         }) as HTMLInputElement;
         input.addEventListener('input', () => this.setFilter(col.id, input.value));
         container.appendChild(input);
@@ -476,8 +477,10 @@ export class FilterableDataTable<T = Record<string, any>> extends HTMLElement {
           rowsToDisplay = [...rowsToDisplay].sort((a, b) => {
             const valA = resolveValue(a, col.field);
             const valB = resolveValue(b, col.field);
-            if (valA < valB) return crit.direction === 'asc' ? -1 : 1;
-            if (valA > valB) return crit.direction === 'asc' ? 1 : -1;
+            const vA = valA as any;
+            const vB = valB as any;
+            if (vA < vB) return crit.direction === 'asc' ? -1 : 1;
+            if (vA > vB) return crit.direction === 'asc' ? 1 : -1;
             return 0;
           });
         }

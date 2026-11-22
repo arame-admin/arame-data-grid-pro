@@ -11,7 +11,7 @@ import {
   resolveValue
 } from '../common/base-table-controller.js';
 
-export class ColumnVisibilityTable<T = Record<string, any>> extends HTMLElement {
+export class ColumnVisibilityTable<T = Record<string, unknown>> extends HTMLElement {
   static get observedAttributes() {
     return ['density'];
   }

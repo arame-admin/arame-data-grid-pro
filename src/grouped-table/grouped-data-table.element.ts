@@ -16,7 +16,7 @@ import {
   removeAllChildren
 } from '../common/base-table-controller.js';
 
-export class GroupedDataTable<T = Record<string, any>> extends HTMLElement {
+export class GroupedDataTable<T = Record<string, unknown>> extends HTMLElement {
   static get observedAttributes() {
     return ['density'];
   }

@@ -12,7 +12,7 @@ import {
 import { SortRule } from '../common/base-table-types.js';
 import { computeVirtualRange } from './virtual-scroller.js';
 
-export class InfiniteDataTableElement<T = any> extends HTMLElement {
+export class InfiniteDataTableElement<T = Record<string, unknown>> extends HTMLElement {
   private _columns: InfiniteTableColumn<T>[] = [];
   private _allRows: T[] = []; // In-memory accumulated rows
   private _config: InfiniteScrollConfig<T> = {
@@ -303,7 +303,7 @@ export class InfiniteDataTableElement<T = any> extends HTMLElement {
         };
         this.dispatchEvent(new CustomEvent('infinite-table:complete', { detail: completeDetail, bubbles: true, composed: true }));
       }
-    } catch (err: any) {
+    } catch (err) {
       if (signal.aborted || currentReqId !== this._requestId) {
         return;
       }
@@ -380,9 +380,9 @@ export class InfiniteDataTableElement<T = any> extends HTMLElement {
 
   private setupEventListeners(): void {
     // Search input
-    let debounceTimer: any = null;
+    let debounceTimer: ReturnType<typeof setTimeout> | null = null;
     this._searchInput.addEventListener('input', (e) => {
-      clearTimeout(debounceTimer);
+      if (debounceTimer) clearTimeout(debounceTimer);
       debounceTimer = setTimeout(() => {
         const target = e.target as HTMLInputElement;
         this.setSearchTerm(target.value.trim());

@@ -4,7 +4,7 @@ export type TreePaginationMode = 'root-nodes' | 'flattened-rows';
 
 export type SelectionCascadeMode = 'independent' | 'cascade-all' | 'cascade-down';
 
-export interface TreeTableColumn<T = any> {
+export interface TreeTableColumn<T = Record<string, unknown>> {
   key: keyof T | string;
   header: string;
   width?: string;
@@ -12,10 +12,10 @@ export interface TreeTableColumn<T = any> {
   sortable?: boolean; // Default true
   align?: 'left' | 'center' | 'right';
   isTreeColumn?: boolean; // If true, this column hosts indent & expand/collapse toggle
-  render?: (value: any, row: T, index: number, nodeMeta: TreeNodeMeta<T>) => HTMLElement | string;
+  render?: (value: unknown, row: T, index: number, nodeMeta: TreeNodeMeta<T>) => HTMLElement | string;
 }
 
-export interface TreeNodeMeta<T = any> {
+export interface TreeNodeMeta<T = Record<string, unknown>> {
   id: string;
   level: number;
   hasChildren: boolean;
@@ -26,12 +26,12 @@ export interface TreeNodeMeta<T = any> {
   childIds: string[];
 }
 
-export interface FlattenedTreeNode<T = any> {
+export interface FlattenedTreeNode<T = Record<string, unknown>> {
   data: T;
   meta: TreeNodeMeta<T>;
 }
 
-export interface TreeDataOptions<T = any> {
+export interface TreeDataOptions<T = Record<string, unknown>> {
   idAccessor?: (row: T) => string; // Default: row.id
   childrenAccessor?: (row: T) => T[] | undefined; // Default: row.children
   treeColumnKey?: string; // Default: first column
@@ -84,7 +84,7 @@ export interface TreeDataOptions<T = any> {
   theme?: 'light' | 'dark' | 'auto';
 }
 
-export interface TreeDataLoaderRequest<T = any> {
+export interface TreeDataLoaderRequest<T = Record<string, unknown>> {
   page: number;
   pageSize: number;
   searchTerm?: string;
@@ -93,30 +93,30 @@ export interface TreeDataLoaderRequest<T = any> {
   signal: AbortSignal;
 }
 
-export interface TreeDataLoaderResult<T = any> {
+export interface TreeDataLoaderResult<T = Record<string, unknown>> {
   rows: T[];
   totalRootNodes?: number;
   totalFlattenedRows?: number;
 }
 
-export type TreeDataLoader<T = any> = (
+export type TreeDataLoader<T = Record<string, unknown>> = (
   request: TreeDataLoaderRequest<T>
 ) => Promise<TreeDataLoaderResult<T>>;
 
-export interface TreeReorderDetail<T = any> {
+export interface TreeReorderDetail<T = Record<string, unknown>> {
   draggedId: string;
   targetId: string;
   position: 'before' | 'inside' | 'after';
   updatedTree: T[];
 }
 
-export interface TreeSelectionDetail<T = any> {
+export interface TreeSelectionDetail<T = Record<string, unknown>> {
   selectedIds: string[];
   lastToggledId: string;
   isSelected: boolean;
 }
 
-export interface TreeExpansionDetail<T = any> {
+export interface TreeExpansionDetail<T = Record<string, unknown>> {
   nodeId: string;
   isExpanded: boolean;
   expandedIds: string[];

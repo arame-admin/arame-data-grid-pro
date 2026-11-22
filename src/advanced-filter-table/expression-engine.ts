@@ -61,7 +61,7 @@ export function evaluateRelativeDate(preset: RelativeDatePreset, targetDate: Dat
 /**
  * Evaluates a single rule without eval or Function.
  */
-export function evaluateRule<T = any>(
+export function evaluateRule<T = Record<string, unknown>>(
   row: T,
   rule: FilterRule,
   customOperators?: CustomFilterOperator<T>[]
@@ -130,8 +130,8 @@ export function evaluateRule<T = any>(
     case 'between': {
       const n = Number(rawVal);
       if (isNaN(n)) return false;
-      const min = Number(value?.min);
-      const max = Number(value?.max);
+      const min = Number((value as { min?: unknown })?.min);
+      const max = Number((value as { max?: unknown })?.max);
       if (!isNaN(min) && n < min) return false;
       if (!isNaN(max) && n > max) return false;
       return true;
@@ -151,21 +151,21 @@ export function evaluateRule<T = any>(
     case 'dateBefore': {
       if (!rawVal || !value) return false;
       const d1 = new Date(rawVal).getTime();
-      const d2 = new Date(value).getTime();
+      const d2 = new Date(value as string | number | Date).getTime();
       return !isNaN(d1) && !isNaN(d2) && d1 < d2;
     }
 
     case 'dateAfter': {
       if (!rawVal || !value) return false;
       const d1 = new Date(rawVal).getTime();
-      const d2 = new Date(value).getTime();
+      const d2 = new Date(value as string | number | Date).getTime();
       return !isNaN(d1) && !isNaN(d2) && d1 > d2;
     }
 
     case 'dateOn': {
       if (!rawVal || !value) return false;
       const d1 = new Date(rawVal);
-      const d2 = new Date(value);
+      const d2 = new Date(value as string | number | Date);
       return d1.toISOString().split('T')[0] === d2.toISOString().split('T')[0];
     }
 
@@ -173,12 +173,13 @@ export function evaluateRule<T = any>(
       if (!rawVal || !value) return false;
       const d = new Date(rawVal).getTime();
       if (isNaN(d)) return false;
-      if (value.start) {
-        const start = new Date(value.start).getTime();
+      const vRange = value as { start?: string | number | Date; end?: string | number | Date };
+      if (vRange?.start) {
+        const start = new Date(vRange.start).getTime();
         if (d < start) return false;
       }
-      if (value.end) {
-        const end = new Date(value.end).setHours(23, 59, 59, 999);
+      if (vRange?.end) {
+        const end = new Date(vRange.end).setHours(23, 59, 59, 999);
         if (d > end) return false;
       }
       return true;
@@ -199,7 +200,7 @@ export function evaluateRule<T = any>(
 /**
  * Evaluates an entire expression tree (AND / OR groupings) on a single row.
  */
-export function evaluateExpressionGroup<T = any>(
+export function evaluateExpressionGroup<T = Record<string, unknown>>(
   row: T,
   group: FilterExpressionGroup,
   customOperators?: CustomFilterOperator<T>[]
@@ -285,10 +286,11 @@ export function formatRuleChipLabel(rule: FilterRule, columns: AdvancedFilterCol
   const opText = opLabels[rule.operator] || rule.operator;
   let valText = String(rule.value);
   if (typeof rule.value === 'object' && rule.value !== null) {
-    if (rule.value.min !== undefined || rule.value.max !== undefined) {
-      valText = `${rule.value.min ?? 0} .. ${rule.value.max ?? '∞'}`;
-    } else if (rule.value.start || rule.value.end) {
-      valText = `${rule.value.start ?? ''} .. ${rule.value.end ?? ''}`;
+    const rVal = rule.value as { min?: unknown; max?: unknown; start?: unknown; end?: unknown };
+    if (rVal && (rVal.min !== undefined || rVal.max !== undefined)) {
+      valText = `${rVal.min ?? 0} .. ${rVal.max ?? '∞'}`;
+    } else if (rVal && (rVal.start || rVal.end)) {
+      valText = `${rVal.start ?? ''} .. ${rVal.end ?? ''}`;
     } else {
       valText = JSON.stringify(rule.value);
     }

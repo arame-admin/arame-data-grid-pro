@@ -78,7 +78,7 @@ A high-performance, framework-agnostic Web Component built in TypeScript. It pro
 | `width` | `string` | `auto` | Explicit column width (e.g., `'140px'`). |
 | `calculate` | `(row: T, index: number) => any` | `undefined` | Safe calculation callback. Receives the updated row. |
 | `dependencies` | `Array<keyof T \| string>` | `undefined` | Source fields whose change triggers recalculation. If omitted, recalculates on any change. |
-| `formatter` | `(value: any, row: T) => string \| HTMLElement` | `undefined` | Custom cell formatting output. |
+| `formatter` | `(value: unknown, row: T) => string \| HTMLElement` | `undefined` | Custom cell formatting output. |
 | `editable` | `boolean` | `false` | Enables inline editing for source values. |
 | `editorType` | `'text' \| 'number' \| 'select'` | `'text'` | Input editor type. |
 | `sortable` | `boolean` | `true` | Allows sorting by this column. |

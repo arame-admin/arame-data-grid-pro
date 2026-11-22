@@ -1,11 +1,11 @@
-export interface CsvColumnMapping<T = any> {
+export interface CsvColumnMapping<T = Record<string, unknown>> {
   id: string;
   header: string;
   field?: keyof T | string;
-  formatter?: (value: any, row: T) => string;
+  formatter?: (value: unknown, row: T) => string;
 }
 
-export interface UniversalCsvExportOptions<T = any> {
+export interface UniversalCsvExportOptions<T = Record<string, unknown>> {
   filename?: string;
   columns?: CsvColumnMapping<T>[];
   /**
@@ -27,7 +27,7 @@ export interface UniversalCsvExportOptions<T = any> {
   serverFetchAll?: () => Promise<T[]>;
 }
 
-export function escapeCsvValue(val: any, delimiter = ','): string {
+export function escapeCsvValue(val: unknown, delimiter = ','): string {
   if (val === null || val === undefined) return '';
   let str = String(val);
   let forceQuote = false;
@@ -49,7 +49,7 @@ export function escapeCsvValue(val: any, delimiter = ','): string {
   return str;
 }
 
-export function generateCsvString<T = any>(
+export function generateCsvString<T = Record<string, unknown>>(
   rows: T[],
   columns: CsvColumnMapping<T>[],
   options?: { delimiter?: string; lineBreak?: string }
@@ -62,7 +62,7 @@ export function generateCsvString<T = any>(
 
   for (const row of rows) {
     const rowValues = columns.map((col) => {
-      let rawVal: any;
+      let rawVal: unknown;
       if (col.field) {
         const fieldStr = String(col.field);
         if (fieldStr.includes('.')) {
@@ -80,7 +80,7 @@ export function generateCsvString<T = any>(
   return lines.join(lb);
 }
 
-export async function triggerCsvExport<T = any>(
+export async function triggerCsvExport<T = Record<string, unknown>>(
   currentRows: T[],
   columns: CsvColumnMapping<T>[],
   options?: UniversalCsvExportOptions<T>

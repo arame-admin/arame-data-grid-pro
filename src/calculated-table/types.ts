@@ -1,8 +1,8 @@
 import { SortRule } from '../common/base-table-types.js';
 
-export type CalculationFn<T = any, R = any> = (row: T, index: number) => R;
+export type CalculationFn<T = Record<string, unknown>, R = unknown> = (row: T, index: number) => R;
 
-export type FormatterFn<R = any> = (value: R, row: any) => string | HTMLElement;
+export type FormatterFn<R = unknown> = (value: R, row: Record<string, unknown>) => string | HTMLElement;
 
 export interface StickyColumnsConfig {
   stickyFirst?: boolean; // Default true
@@ -19,33 +19,33 @@ export interface CalculatedTableColumn<T = any, R = any> {
   align?: 'left' | 'center' | 'right';
   editable?: boolean; // If source column is editable
   editorType?: 'text' | 'number' | 'select';
-  editorOptions?: Array<{ label: string; value: any }>;
+  editorOptions?: Array<{ label: string; value: unknown }>;
   
   // Calculated column properties
   calculate?: CalculationFn<T, R>; // Strongly-typed calculation function. Safe, non-eval.
   dependencies?: Array<keyof T | string>; // List of row fields that trigger re-calculation
   readOnly?: boolean; // Default true for calculated columns
   formatter?: FormatterFn<R>; // Custom formatting for calculated output
-  render?: (value: any, row: T, index: number) => HTMLElement | string; // Custom cell renderer
+  render?: (value: unknown, row: T, index: number) => HTMLElement | string; // Custom cell renderer
 }
 
-export interface CalculatedDataLoaderRequest<T = any> {
+export interface CalculatedDataLoaderRequest<T = Record<string, unknown>> {
   page: number;
   pageSize: number;
   searchTerm?: string;
   sortRule?: SortRule<T> | null;
 }
 
-export interface CalculatedDataLoaderResult<T = any> {
+export interface CalculatedDataLoaderResult<T = Record<string, unknown>> {
   rows: T[];
   totalRows: number;
 }
 
-export type CalculatedDataLoader<T = any> = (
+export type CalculatedDataLoader<T = Record<string, unknown>> = (
   request: CalculatedDataLoaderRequest<T>
 ) => Promise<CalculatedDataLoaderResult<T>>;
 
-export interface CalculatedTableOptions<T = any> {
+export interface CalculatedTableOptions<T = Record<string, unknown>> {
   sticky?: StickyColumnsConfig; // Sticky first and last config
   pagination?: {
     enabled?: boolean; // Default true
@@ -71,17 +71,17 @@ export interface CalculatedTableOptions<T = any> {
   dir?: 'ltr' | 'rtl'; // RTL support
 }
 
-export interface CellChangeDetail<T = any> {
+export interface CellChangeDetail<T = Record<string, unknown>> {
   rowIndex: number;
-  rowId: any;
+  rowId: string | number;
   columnKey: string;
-  oldValue: any;
-  newValue: any;
+  oldValue: unknown;
+  newValue: unknown;
   updatedRow: T;
   recalculatedFields: string[];
 }
 
-export interface CalculatedTableEventMap<T = any> {
+export interface CalculatedTableEventMap<T = Record<string, unknown>> {
   'calculated-table:cell-change': CustomEvent<CellChangeDetail<T>>;
   'calculated-table:page-change': CustomEvent<{ page: number; pageSize: number }>;
   'calculated-table:sort-change': CustomEvent<SortRule<T> | null>;

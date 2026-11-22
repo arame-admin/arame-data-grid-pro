@@ -8,7 +8,7 @@ import {
 import { SortRule } from '../common/base-table-types.js';
 import { applyClientFilters, isFilterActive } from './filter-engine.js';
 
-export class HeaderFilterDataTableElement<T = any> extends HTMLElement {
+export class HeaderFilterDataTableElement<T = Record<string, unknown>> extends HTMLElement {
   private _columns: HeaderFilterTableColumn<T>[] = [];
   private _allRows: T[] = []; // In-memory data
   private _activeFilters: Record<string, FilterValue> = {};
@@ -252,9 +252,9 @@ export class HeaderFilterDataTableElement<T = any> extends HTMLElement {
 
     // Reset all header filter inputs
     const inputs = this._thead.querySelectorAll('.hft-filter-input, .hft-filter-select');
-    inputs.forEach((inp: any) => { inp.value = ''; });
+    inputs.forEach((inp: Element) => { (inp as HTMLInputElement).value = ''; });
     const rangeInputs = this._thead.querySelectorAll('.hft-range-input');
-    rangeInputs.forEach((inp: any) => { inp.value = ''; });
+    rangeInputs.forEach((inp: Element) => { (inp as HTMLInputElement).value = ''; });
 
     const detail: HeaderFiltersClearEventDetail = {
       activeFilters: {}
@@ -357,9 +357,10 @@ export class HeaderFilterDataTableElement<T = any> extends HTMLElement {
       this.renderBodyRows();
       this.renderPaginationBar();
       this.updateMetaInfo();
-    } catch (err: any) {
+    } catch (err: unknown) {
       if (signal.aborted || currentReqId !== this._requestId) return;
-      this.setError(err.message || 'Error loading records');
+      const errorObj = err as Error;
+      this.setError(errorObj?.message || 'Error loading records');
     } finally {
       if (currentReqId === this._requestId) {
         this.setLoading(false);
@@ -457,9 +458,9 @@ export class HeaderFilterDataTableElement<T = any> extends HTMLElement {
   }
 
   private setupEventListeners(): void {
-    let searchDebounce: any = null;
+    let searchDebounce: ReturnType<typeof setTimeout> | null = null;
     this._searchInput.addEventListener('input', (e) => {
-      clearTimeout(searchDebounce);
+      if (searchDebounce) clearTimeout(searchDebounce);
       searchDebounce = setTimeout(() => {
         const val = (e.target as HTMLInputElement).value.trim();
         this.setSearchTerm(val);

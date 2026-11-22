@@ -6,19 +6,21 @@ import {
 } from './types.js';
 import { SortRule } from '../common/base-table-types.js';
 
-export function defaultIdAccessor(row: any): string {
-  return String(row.id ?? row.key ?? Math.random().toString(36).substring(2, 9));
+export function defaultIdAccessor<T = Record<string, unknown>>(row: T): string {
+  const r = row as Record<string, unknown>;
+  return String(r.id ?? r.key ?? Math.random().toString(36).substring(2, 9));
 }
 
-export function defaultChildrenAccessor(row: any): any[] | undefined {
-  return row.children;
+export function defaultChildrenAccessor<T = Record<string, unknown>>(row: T): T[] | undefined {
+  const r = row as Record<string, unknown>;
+  return r.children as T[] | undefined;
 }
 
 /**
  * Traverses hierarchical nodes, filters matching search term (including ancestors if child matches),
  * sorts siblings, and flattens visible rows considering expansion states.
  */
-export function flattenTree<T = any>(
+export function flattenTree<T = Record<string, unknown>>(
   roots: T[],
   expandedIds: Set<string>,
   selectedIds: Set<string>,
@@ -121,7 +123,7 @@ export function flattenTree<T = any>(
 /**
  * Handles parent/child selection cascade logic
  */
-export function toggleNodeSelection<T = any>(
+export function toggleNodeSelection<T = Record<string, unknown>>(
   roots: T[],
   targetId: string,
   selectedIds: Set<string>,
@@ -205,7 +207,7 @@ export function toggleNodeSelection<T = any>(
 /**
  * Reorders a tree by moving a node relative to a target node.
  */
-export function reorderTreeNodes<T = any>(
+export function reorderTreeNodes<T = Record<string, unknown>>(
   roots: T[],
   draggedId: string,
   targetId: string,
@@ -276,12 +278,12 @@ export function reorderTreeNodes<T = any>(
 /**
  * Exports tree data to CSV format
  */
-export function exportTreeToCsv<T = any>(
+export function exportTreeToCsv<T = Record<string, unknown>>(
   rows: FlattenedTreeNode<T>[],
   columns: TreeTableColumn<T>[],
   includeHierarchyPath: boolean = true
 ): string {
-  const sanitize = (val: any) => {
+  const sanitize = (val: unknown) => {
     if (val === null || val === undefined) return '""';
     let str = String(val);
     if (/^[=+\-@\t\r]/.test(str)) {

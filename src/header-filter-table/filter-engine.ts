@@ -25,7 +25,7 @@ export function isFilterActive(value: FilterValue): boolean {
 /**
  * Evaluates whether a row matches a column's filter.
  */
-export function matchColumnFilter<T = any>(
+export function matchColumnFilter<T = Record<string, unknown>>(
   row: T,
   col: HeaderFilterTableColumn<T>,
   filterValue: FilterValue
@@ -97,7 +97,7 @@ export function matchColumnFilter<T = any>(
 /**
  * Filters a dataset against both global search term and all active column header filters.
  */
-export function applyClientFilters<T = any>(
+export function applyClientFilters<T = Record<string, unknown>>(
   rows: T[],
   columns: HeaderFilterTableColumn<T>[],
   activeFilters: Record<string, FilterValue>,

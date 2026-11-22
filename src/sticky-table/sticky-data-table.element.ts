@@ -11,7 +11,7 @@ import {
   resolveValue
 } from '../common/base-table-controller.js';
 
-export class StickyDataTable<T = Record<string, any>> extends HTMLElement {
+export class StickyDataTable<T = Record<string, unknown>> extends HTMLElement {
   static get observedAttributes() {
     return ['sticky-first-column', 'density', 'dir'];
   }

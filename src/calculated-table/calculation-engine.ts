@@ -1,6 +1,6 @@
 import { CalculatedTableColumn } from './types.js';
 
-export interface EvaluatedRowResult<T = any> {
+export interface EvaluatedRowResult<T = Record<string, unknown>> {
   row: T;
   recalculatedFields: string[];
 }
@@ -9,12 +9,12 @@ export interface EvaluatedRowResult<T = any> {
  * Safely computes calculated columns for a single row without eval or Function.
  * Returns a cloned row with calculated values populated and the list of computed keys.
  */
-export function evaluateRowCalculations<T = any>(
+export function evaluateRowCalculations<T = Record<string, unknown>>(
   row: T,
   rowIndex: number,
   columns: CalculatedTableColumn<T>[]
 ): EvaluatedRowResult<T> {
-  const updatedRow: any = { ...row };
+  const updatedRow = { ...row } as Record<string, unknown> & T;
   const recalculatedFields: string[] = [];
 
   for (const col of columns) {
@@ -26,7 +26,7 @@ export function evaluateRowCalculations<T = any>(
       } catch (err) {
         // Predictable, graceful fallback on error
         console.warn(`[calculated-table] Error evaluating column '${String(col.key)}':`, err);
-        updatedRow[col.key] = NaN;
+        (updatedRow as Record<string, unknown>)[col.key as string] = NaN;
         recalculatedFields.push(String(col.key));
       }
     }
@@ -42,13 +42,13 @@ export function evaluateRowCalculations<T = any>(
  * Re-evaluates columns that depend on modified source fields, cascading through
  * dependent calculated columns (e.g. quantity → subtotal → taxAmount → total).
  */
-export function recalculateOnFieldChange<T = any>(
+export function recalculateOnFieldChange<T = Record<string, unknown>>(
   row: T,
   rowIndex: number,
   changedKey: string,
   columns: CalculatedTableColumn<T>[]
 ): EvaluatedRowResult<T> {
-  const updatedRow: any = { ...row };
+  const updatedRow = { ...row } as Record<string, unknown> & T;
   const recalculatedFields: string[] = [];
   const dirty = new Set<string>([changedKey]);
   const pending = columns.filter((col) => typeof col.calculate === 'function');
@@ -77,7 +77,7 @@ export function recalculateOnFieldChange<T = any>(
         progressed = true;
       } catch (err) {
         console.warn(`[calculated-table] Error re-evaluating column '${key}':`, err);
-        updatedRow[col.key] = NaN;
+        (updatedRow as Record<string, unknown>)[col.key as string] = NaN;
         recalculatedFields.push(key);
         dirty.add(key);
         progressed = true;
@@ -97,7 +97,7 @@ export function recalculateOnFieldChange<T = any>(
  * Helper to safely format numbers (currency, percentage, decimals)
  */
 export function safeFormatNumber(
-  value: any,
+  value: unknown,
   options?: {
     decimals?: number;
     prefix?: string;
@@ -106,7 +106,7 @@ export function safeFormatNumber(
   }
 ): string {
   const fallback = options?.fallback ?? '—';
-  if (value === null || value === undefined || isNaN(value)) {
+  if (value === null || value === undefined || isNaN(Number(value))) {
     return fallback;
   }
   const num = Number(value);

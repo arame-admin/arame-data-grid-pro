@@ -1,6 +1,6 @@
 import { GroupRecord, GroupedTableColumn } from './types.js';
 
-export function resolveValue<T>(row: T, fieldPath?: keyof T | string): any {
+export function resolveValue<T>(row: T, fieldPath?: keyof T | string): unknown {
   if (!fieldPath || !row || typeof row !== 'object') return undefined;
   const path = String(fieldPath);
   if (!path.includes('.')) {
@@ -8,17 +8,17 @@ export function resolveValue<T>(row: T, fieldPath?: keyof T | string): any {
     return (row as any)[path];
   }
   const parts = path.split('.');
-  let current: any = row;
+  let current: unknown = row;
   for (const part of parts) {
     if (part === '__proto__' || part === 'constructor' || part === 'prototype') return undefined;
     if (current == null || typeof current !== 'object') return undefined;
-    current = current[part];
+    current = (current as Record<string, unknown>)[part];
   }
   return current;
 }
 
-export function computeAggregates<T>(rows: T[], columns: GroupedTableColumn<T>[]): Record<string, any> {
-  const aggregates: Record<string, any> = {};
+export function computeAggregates<T>(rows: T[], columns: GroupedTableColumn<T>[]): Record<string, unknown> {
+  const aggregates: Record<string, unknown> = {};
 
   columns.forEach((col) => {
     if (!col.aggregate || !col.field) return;

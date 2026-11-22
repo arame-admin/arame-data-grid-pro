@@ -11,7 +11,7 @@ import {
   resolveValue
 } from '../common/base-table-controller.js';
 
-export class EditableDataTable<T = Record<string, any>> extends HTMLElement {
+export class EditableDataTable<T = Record<string, unknown>> extends HTMLElement {
   static get observedAttributes() {
     return ['density'];
   }
@@ -27,7 +27,7 @@ export class EditableDataTable<T = Record<string, any>> extends HTMLElement {
   };
 
   private _controller!: BaseTableController<T>;
-  private _editingCell: { rowId: string | number; columnId: string; initialValue: any; currentValue: any } | null = null;
+  private _editingCell: { rowId: string | number; columnId: string; initialValue: unknown; currentValue: unknown } | null = null;
   private _validationError: string | null = null;
 
   // DOM Elements
@@ -129,7 +129,7 @@ export class EditableDataTable<T = Record<string, any>> extends HTMLElement {
     );
   }
 
-  public startEditing(rowId: string | number, columnId: string, row: T, currentValue: any): void {
+  public startEditing(rowId: string | number, columnId: string, row: T, currentValue: unknown): void {
     this._editingCell = {
       rowId,
       columnId,
@@ -147,7 +147,7 @@ export class EditableDataTable<T = Record<string, any>> extends HTMLElement {
     this.renderBody();
   }
 
-  public async commitEditing(row: T, col: EditableColumnDef<T>, newValue: any): Promise<void> {
+  public async commitEditing(row: T, col: EditableColumnDef<T>, newValue: unknown): Promise<void> {
     if (!this._editingCell) return;
     const rowId = this._editingCell.rowId;
     const oldValue = this._editingCell.initialValue;
@@ -196,7 +196,7 @@ export class EditableDataTable<T = Record<string, any>> extends HTMLElement {
           newValue,
           row
         });
-      } catch (err: any) {
+      } catch (err: unknown) {
         // Rollback optimistic update
         if (col.field && this._options.optimisticUpdates !== false) {
           (row as any)[col.field] = prevFieldValue;
@@ -366,7 +366,7 @@ export class EditableDataTable<T = Record<string, any>> extends HTMLElement {
     }
   }
 
-  private renderCellEditor(td: HTMLElement, row: T, col: EditableColumnDef<T>, val: any): void {
+  private renderCellEditor(td: HTMLElement, row: T, col: EditableColumnDef<T>, val: unknown): void {
     const wrapper = createElement('div', 'et-editor-wrapper');
     const editorConfig = col.editor || { type: 'text' };
 

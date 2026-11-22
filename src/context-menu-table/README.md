@@ -43,7 +43,7 @@ A framework-agnostic, responsive Web Component data table with **column-header d
     id: string;
     label: string;
     icon?: string;
-    action: (col: ContextMenuColumnDef, table: any) => void;
+    action: (col: ContextMenuColumnDef, table: unknown) => void;
   }[];
 }
 ```
@@ -61,7 +61,7 @@ A framework-agnostic, responsive Web Component data table with **column-header d
     disabled?: boolean | ((row: T) => boolean);
     isDestructive?: boolean;
     confirmMessage?: string | ((row: T) => string);
-    action?: (row: T, table: any) => void;
+    action?: (row: T, table: unknown) => void;
   }[];
 }
 ```

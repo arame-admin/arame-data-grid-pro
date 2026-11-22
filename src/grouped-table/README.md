@@ -31,7 +31,7 @@ A framework-agnostic, responsive Web Component data table with **multi-level row
 {
   type: 'sum' | 'avg' | 'min' | 'max' | 'count' | 'custom';
   label?: string;                      // Label shown in header e.g. "Total Payroll"
-  formatter?: (val: any) => string;
+  formatter?: (val: unknown) => string;
   customFn?: (rows: T[], field: string) => any;
 }
 ```

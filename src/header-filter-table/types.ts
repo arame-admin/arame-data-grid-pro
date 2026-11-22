@@ -4,7 +4,7 @@ export type HeaderFilterType = 'text' | 'select' | 'multi-select' | 'number-rang
 
 export interface SelectOption {
   label: string;
-  value: any;
+  value: unknown;
 }
 
 export interface NumberRangeValue {
@@ -17,15 +17,15 @@ export interface DateRangeValue {
   end?: string;   // ISO date string YYYY-MM-DD
 }
 
-export type FilterValue = string | number | string[] | NumberRangeValue | DateRangeValue | any;
+export type FilterValue = string | number | string[] | NumberRangeValue | DateRangeValue | unknown;
 
-export type CustomFilterPredicate<T = any> = (
-  rowValue: any,
+export type CustomFilterPredicate<T = Record<string, unknown>> = (
+  rowValue: unknown,
   filterValue: FilterValue,
   row: T
 ) => boolean;
 
-export interface ColumnFilterConfig<T = any> {
+export interface ColumnFilterConfig<T = Record<string, unknown>> {
   type: HeaderFilterType;
   placeholder?: string;
   options?: SelectOption[]; // For select & multi-select
@@ -38,7 +38,7 @@ export interface ColumnFilterConfig<T = any> {
   ) => HTMLElement; // Custom filter input renderer
 }
 
-export interface HeaderFilterTableColumn<T = any> {
+export interface HeaderFilterTableColumn<T = Record<string, unknown>> {
   key: keyof T | string;
   header: string;
   width?: string;
@@ -46,10 +46,10 @@ export interface HeaderFilterTableColumn<T = any> {
   sortable?: boolean; // Default true
   align?: 'left' | 'center' | 'right';
   filter?: ColumnFilterConfig<T> | false; // Direct in-header filter configuration
-  render?: (value: any, row: T, index: number) => HTMLElement | string;
+  render?: (value: unknown, row: T, index: number) => HTMLElement | string;
 }
 
-export interface HeaderFilterDataLoaderRequest<T = any> {
+export interface HeaderFilterDataLoaderRequest<T = Record<string, unknown>> {
   page: number;
   pageSize: number;
   searchTerm?: string;
@@ -58,16 +58,16 @@ export interface HeaderFilterDataLoaderRequest<T = any> {
   signal: AbortSignal;
 }
 
-export interface HeaderFilterDataLoaderResult<T = any> {
+export interface HeaderFilterDataLoaderResult<T = Record<string, unknown>> {
   rows: T[];
   totalRows: number;
 }
 
-export type HeaderFilterDataLoader<T = any> = (
+export type HeaderFilterDataLoader<T = Record<string, unknown>> = (
   request: HeaderFilterDataLoaderRequest<T>
 ) => Promise<HeaderFilterDataLoaderResult<T>>;
 
-export interface HeaderFilterTableOptions<T = any> {
+export interface HeaderFilterTableOptions<T = Record<string, unknown>> {
   pagination?: {
     enabled?: boolean; // Default true
     pageSize?: number; // Default 10

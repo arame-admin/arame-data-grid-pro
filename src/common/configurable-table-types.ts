@@ -64,9 +64,9 @@ export const defaultUnifiedSettings: UnifiedFeatureSettings = {
 /**
  * Maps unified feature settings to `GridOptions` for `<pro-data-grid>`.
  */
-export function buildGridOptionsFromSettings<T = any>(
+export function buildGridOptionsFromSettings<T = Record<string, unknown>>(
   settings: UnifiedFeatureSettings,
-  serverDataLoader?: any,
+  serverDataLoader?: import('../types.js').ServerDataLoader<T>,
   rowDetailRenderer?: (row: T) => HTMLElement | string
 ): GridOptions<T> {
   return {

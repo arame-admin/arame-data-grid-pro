@@ -85,7 +85,7 @@ A reusable, framework-agnostic data table Web Component in TypeScript providing 
 | :--- | :--- | :--- | :--- |
 | `type` | `'text' \| 'select' \| 'multi-select' \| 'number-range' \| 'date-range' \| 'custom'` | **Required** | Filter input widget type. |
 | `placeholder` | `string` | `'Filter...'` | Placeholder label for inputs. |
-| `options` | `Array<{ label: string, value: any }>` | `[]` | Options for `select` and `multi-select`. |
+| `options` | `Array<{ label: string, value: unknown }>` | `[]` | Options for `select` and `multi-select`. |
 | `debounceMs` | `number` | `300` (text), `0` (others) | Debounce delay in milliseconds before filter executes. |
 | `predicate` | `(rowVal, filterVal, row) => boolean` | `undefined` | Custom client-side filter function. |
 | `renderControl` | `(val, onChange) => HTMLElement` | `undefined` | Custom filter input DOM builder. |

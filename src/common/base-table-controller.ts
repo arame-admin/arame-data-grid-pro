@@ -2,7 +2,7 @@ import { BaseTableOptions, BaseTableQueryParams, SortCriterion } from './base-ta
 import { LiveRegionAnnouncer } from './accessibility-helpers.js';
 import { TableLocale, defaultEnglishLocale } from './table-localization.js';
 
-export function resolveValue<T>(row: T, fieldPath?: keyof T | string): any {
+export function resolveValue<T>(row: T, fieldPath?: keyof T | string): unknown {
   if (!fieldPath || !row || typeof row !== 'object') return undefined;
   const path = String(fieldPath);
   if (!path.includes('.')) {
@@ -10,11 +10,11 @@ export function resolveValue<T>(row: T, fieldPath?: keyof T | string): any {
     return (row as any)[path];
   }
   const parts = path.split('.');
-  let current: any = row;
+  let current: unknown = row;
   for (const part of parts) {
     if (part === '__proto__' || part === 'constructor' || part === 'prototype') return undefined;
     if (current == null || typeof current !== 'object') return undefined;
-    current = current[part];
+    current = (current as Record<string, unknown>)[part];
   }
   return current;
 }
@@ -43,15 +43,15 @@ export function removeAllChildren(parent: HTMLElement): void {
   while (parent.firstChild) parent.removeChild(parent.firstChild);
 }
 
-export interface BaseTableColumn<T = any> {
+export interface BaseTableColumn<T = Record<string, unknown>> {
   id: string;
   header: string;
   field?: keyof T | string;
   sortable?: boolean;
-  comparator?: (a: any, b: any, rowA: T, rowB: T) => number;
+  comparator?: (a: unknown, b: unknown, rowA: T, rowB: T) => number;
 }
 
-export class BaseTableController<T = Record<string, any>> {
+export class BaseTableController<T = Record<string, unknown>> {
   public pageIndex = 0;
   public pageSize = 10;
   public pageSizes = [10, 25, 50, 100];
@@ -62,14 +62,14 @@ export class BaseTableController<T = Record<string, any>> {
   public isLoading = false;
 
   private _abortController: AbortController | null = null;
-  private _debounceTimer: any = null;
+  private _debounceTimer: ReturnType<typeof setTimeout> | null = null;
   private _reqId = 0;
   private _announcer: LiveRegionAnnouncer | null = null;
 
   constructor(
     private getOptions: () => BaseTableOptions<T>,
     private onStateChange: () => void,
-    private dispatchEvent: (name: string, detail: any) => void,
+    private dispatchEvent: (name: string, detail: unknown) => void,
     announcerHost?: HTMLElement | ShadowRoot
   ) {
     const opts = this.getOptions();
@@ -261,8 +261,9 @@ export class BaseTableController<T = Record<string, any>> {
       this.totalRows = res.totalRows;
       this.totalPages = Math.max(1, Math.ceil(res.totalRows / this.pageSize));
       return res.rows;
-    } catch (err: any) {
-      if (err.name === 'AbortError' || signal.aborted) return undefined;
+    } catch (err: unknown) {
+      const errorObj = err as Error;
+      if (errorObj?.name === 'AbortError' || signal.aborted) return undefined;
       this.dispatchEvent('table:error', { error: err });
       return undefined;
     } finally {

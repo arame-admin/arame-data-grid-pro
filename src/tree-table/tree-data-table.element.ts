@@ -17,7 +17,7 @@ import {
   defaultChildrenAccessor
 } from './tree-engine.js';
 
-export class TreeDataTableElement<T = any> extends HTMLElement {
+export class TreeDataTableElement<T = Record<string, unknown>> extends HTMLElement {
   private _columns: TreeTableColumn<T>[] = [];
   private _roots: T[] = []; // Hierarchical root nodes
   private _expandedIds: Set<string> = new Set();
@@ -388,9 +388,9 @@ export class TreeDataTableElement<T = any> extends HTMLElement {
   }
 
   private setupEventListeners(): void {
-    let timer: any = null;
+    let timer: ReturnType<typeof setTimeout> | null = null;
     this._searchInput.addEventListener('input', (e) => {
-      clearTimeout(timer);
+      if (timer) clearTimeout(timer);
       timer = setTimeout(() => {
         this.setSearchTerm((e.target as HTMLInputElement).value.trim());
       }, 250);

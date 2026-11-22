@@ -19,7 +19,7 @@ export interface DateRangeValue {
   end?: string;
 }
 
-export type ColumnFilterValue = string | (string | number)[] | NumberRangeValue | DateRangeValue | any;
+export type ColumnFilterValue = string | (string | number)[] | NumberRangeValue | DateRangeValue | unknown;
 
 export interface FilterCriterion {
   columnId: string;
@@ -27,21 +27,21 @@ export interface FilterCriterion {
   value: ColumnFilterValue;
 }
 
-export interface CustomFilterControlParams<T = any> {
+export interface CustomFilterControlParams<T = Record<string, unknown>> {
   column: FilterableColumnDef<T>;
-  currentValue: any;
-  onChange: (val: any) => void;
+  currentValue: unknown;
+  onChange: (val: unknown) => void;
   onClear: () => void;
 }
 
-export interface FilterConfig<T = any> {
+export interface FilterConfig<T = Record<string, unknown>> {
   type: FilterType;
   placeholder?: string;
   options?: SelectFilterOption[];
   customControl?: (params: CustomFilterControlParams<T>) => HTMLElement;
 }
 
-export interface FilterableColumnDef<T = Record<string, any>> {
+export interface FilterableColumnDef<T = Record<string, unknown>> {
   id: string;
   header: string;
   field?: keyof T | string;
@@ -49,12 +49,12 @@ export interface FilterableColumnDef<T = Record<string, any>> {
   minWidth?: number;
   sortable?: boolean;        // default: true
   filter?: FilterConfig<T>;
-  formatter?: (value: any, row: T) => string;
-  renderer?: (value: any, row: T, index: number) => HTMLElement | string;
-  comparator?: (a: any, b: any, rowA: T, rowB: T) => number;
+  formatter?: (value: unknown, row: T) => string;
+  renderer?: (value: unknown, row: T, index: number) => HTMLElement | string;
+  comparator?: (a: unknown, b: unknown, rowA: T, rowB: T) => number;
 }
 
-export interface FilterableTableOptions<T = Record<string, any>> extends BaseTableOptions<T> {
+export interface FilterableTableOptions<T = Record<string, unknown>> extends BaseTableOptions<T> {
   /** @deprecated Prefer search.enabled — kept for backward compatibility */
   showGlobalSearch?: boolean;
   /** @deprecated Prefer search.placeholder */
@@ -68,7 +68,7 @@ export interface ServerFilterQueryParams extends BaseTableQueryParams {
   filters: FilterCriterion[];
 }
 
-export interface FilterableTableEventPayloads<T = Record<string, any>> {
+export interface FilterableTableEventPayloads<T = Record<string, unknown>> {
   'filter-table:filter-change': {
     filters: FilterCriterion[];
     globalSearch: string;
@@ -79,7 +79,7 @@ export interface FilterableTableEventPayloads<T = Record<string, any>> {
     remainingFilters: FilterCriterion[];
   };
   'filter-table:loading': { loading: boolean };
-  'filter-table:error': { error: Error | any };
+  'filter-table:error': { error: Error | unknown };
   'filter-table:sort': { criteria: SortCriterion[] };
   'filter-table:page': { pageIndex: number; pageSize: number; totalPages: number; totalRows: number };
   'filter-table:search': { query: string };

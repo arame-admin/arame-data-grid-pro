@@ -2,16 +2,16 @@ import { BaseTableOptions, SortCriterion } from '../common/base-table-types.js';
 
 export type { Density, SortCriterion } from '../common/base-table-types.js';
 
-export interface ExpandableTableColumn<T = Record<string, any>> {
+export interface ExpandableTableColumn<T = Record<string, unknown>> {
   id: string;
   header: string;
   field?: keyof T | string;
   width?: string;
   minWidth?: number;
   sortable?: boolean;        // default: true
-  formatter?: (value: any, row: T) => string;
-  renderer?: (value: any, row: T, index: number) => HTMLElement | string;
-  comparator?: (a: any, b: any, rowA: T, rowB: T) => number;
+  formatter?: (value: unknown, row: T) => string;
+  renderer?: (value: unknown, row: T, index: number) => HTMLElement | string;
+  comparator?: (a: unknown, b: unknown, rowA: T, rowB: T) => number;
 }
 
 export type DetailRendererResult = HTMLElement | string;
@@ -24,7 +24,7 @@ export interface ExpandAnimationOptions {
   easing?: string;
 }
 
-export interface ExpandableTableOptions<T = Record<string, any>> extends BaseTableOptions<T> {
+export interface ExpandableTableOptions<T = Record<string, unknown>> extends BaseTableOptions<T> {
   multiExpand?: boolean;                     // default: true
   expandOnRowClick?: boolean;                // default: true
   ignoreClickSelectors?: string[];          // default: ['button', 'input', 'a', 'select', 'textarea', '[data-no-expand]']
@@ -34,16 +34,16 @@ export interface ExpandableTableOptions<T = Record<string, any>> extends BaseTab
   loadingMessage?: string;
 }
 
-export interface ExpandableTableEventPayloads<T = Record<string, any>> {
+export interface ExpandableTableEventPayloads<T = Record<string, unknown>> {
   'expandable-table:expand': { rowId: string | number; row: T };
   'expandable-table:collapse': { rowId: string | number; row: T };
   'expandable-table:toggle': { rowId: string | number; expanded: boolean; row: T };
   'expandable-table:async-load-start': { rowId: string | number; row: T };
   'expandable-table:async-load-success': { rowId: string | number; row: T };
-  'expandable-table:async-load-error': { rowId: string | number; row: T; error: Error | any };
+  'expandable-table:async-load-error': { rowId: string | number; row: T; error: Error | unknown };
   'expandable-table:sort': { criteria: SortCriterion[] };
   'expandable-table:page': { pageIndex: number; pageSize: number; totalPages: number; totalRows: number };
   'expandable-table:search': { query: string };
   'expandable-table:loading': { loading: boolean };
-  'expandable-table:error': { error: Error | any };
+  'expandable-table:error': { error: Error | unknown };
 }
