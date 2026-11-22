@@ -1,6 +1,6 @@
 {
   "name": "arame-data-grid-pro",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Enterprise-grade, framework-agnostic Web Component data grid built with TypeScript. Supports virtualization, tree grids, inline editing, multi-column sorting, formula calculations, and advanced filtering.",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -111,5 +111,23 @@
     "vite": "^5.4.0",
     "vite-plugin-dts": "^4.0.0",
     "vitest": "^2.0.5"
-  }
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/arame-admin"
+  },
+  "contributors": [
+    {
+      "name": "Harikrishnan R",
+      "email": "harikrishnanrlive@gmail.com",
+      "url": "https://github.com/harikrishnanr-arame"
+    }
+  ]
 }
