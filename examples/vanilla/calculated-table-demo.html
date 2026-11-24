@@ -748,8 +748,16 @@
 
               inp.addEventListener('change', (e) => {
                 const nv = col.editorType === 'number' ? Number(e.target.value) : e.target.value;
+                const activeCol = col.key;
+                const activeRow = globalIdx;
                 this.updateCellValue(globalIdx, col.key, nv);
+                requestAnimationFrame(() => {
+                  const restored = this._tbody.querySelector(`input[data-row-index="${activeRow}"][data-col-key="${activeCol}"]`);
+                  if (restored) restored.focus({ preventScroll: true });
+                });
               });
+              inp.setAttribute('data-row-index', String(globalIdx));
+              inp.setAttribute('data-col-key', String(col.key));
               group.appendChild(inp);
 
               if (col.editorSuffix) {

@@ -677,11 +677,19 @@ export class CalculatedDataTableElement<T = Record<string, unknown>> extends HTM
           input.className = 'calc-cell-editor';
           input.type = col.editorType === 'number' ? 'number' : 'text';
           input.value = val !== undefined && val !== null ? String(val) : '';
+          input.setAttribute('data-row-index', String(globalRowIndex));
+          input.setAttribute('data-col-key', String(col.key));
 
           input.addEventListener('change', (e) => {
             const raw = (e.target as HTMLInputElement).value;
             const parsed = col.editorType === 'number' ? (raw === '' ? 0 : Number(raw)) : raw;
-            this.updateCellValue(globalRowIndex, String(col.key), parsed);
+            const activeCol = String(col.key);
+            const activeRow = globalRowIndex;
+            this.updateCellValue(globalRowIndex, activeCol, parsed);
+            requestAnimationFrame(() => {
+              const restored = this._tbody.querySelector<HTMLInputElement>(`input[data-row-index="${activeRow}"][data-col-key="${activeCol}"]`);
+              if (restored) restored.focus({ preventScroll: true });
+            });
           });
 
           input.addEventListener('keydown', (e) => {
